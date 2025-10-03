@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="クリエイターのポートフォリオサイト" />
+    <title>ポートフォリオ | 渡辺雄大</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">メインコンテンツへ移動</a>
+
+    <header class="site-header" role="banner">
+      <div class="container header-inner">
+        <a class="brand" href="#">渡辺雄大</a>
+
+        <nav class="site-nav" aria-label="メインナビゲーション">
+          <button
+            class="menu-toggle"
+            aria-expanded="false"
+            aria-controls="nav-list"
+            aria-label="メニューを開閉"
+          >
+            <span class="menu-icon" aria-hidden="true"></span>
+          </button>
+          <ul id="nav-list" class="nav-list">
+            <li><a href="#about">About</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
+          aria-label="テーマを切り替え"
+        >
+          🌓
+        </button>
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section id="hero" class="section hero" aria-label="ヒーロー">
+        <div class="container hero-inner">
+          <div class="hero-text">
+            <h1>こんにちは、<span class="accent">渡辺雄大</span>です。</h1>
+            <p class="lead">
+              Web×デザインで事業成長を支援するフロントエンドエンジニア。
+            </p>
+            <div class="actions">
+              <a class="btn primary" href="#projects">制作実績を見る</a>
+              <a class="btn" href="#contact">お問い合わせ</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="section" aria-label="自己紹介">
+        <div class="container">
+          <h2 class="section-title">About</h2>
+          <p>
+            Web×デザインを軸に、フロントエンド実装まで一気通貫で対応します。BtoC/BtoBのプロダクトやコーポレートサイトで、情報設計・UI設計・実装を行い、KPIに直結する改善を支援してきました。ユーザー視点と事業目標の両立を重視し、素早い検証と改善で成果に繋げます。
+          </p>
+        </div>
+      </section>
+
+      <section id="skills" class="section" aria-label="スキル">
+        <div class="container">
+          <h2 class="section-title">Skills</h2>
+          <ul class="chip-list" role="list">
+            <li class="chip">Figma</li>
+            <li class="chip">Illustrator</li>
+            <li class="chip">Photoshop</li>
+            <li class="chip">HTML/CSS</li>
+            <li class="chip">JavaScript</li>
+            <li class="chip">TypeScript</li>
+            <li class="chip">React</li>
+            <li class="chip">Next.js</li>
+            <li class="chip">Node.js</li>
+            <li class="chip">Git/GitHub</li>
+          </ul>
+      </section>
+
+      <section id="projects" class="section" aria-label="制作実績">
+        <div class="container">
+          <h2 class="section-title">Projects</h2>
+          <div class="grid projects-grid" id="projects-grid"></div>
+          <script id="projects-data" type="application/json">
+            {
+              "items": [
+                {
+                  "title": "ポロモードタイマー",
+                  "description": "集中力を高める25分間の作業タイマー。",
+                  "image": "https://source.unsplash.com/800x600/?timer,clock,neon",
+                  "tags": ["WebApp", "Vanilla JS"],
+                  "order": 2,
+                  "links": [
+                    { "label": "Website", "url": "https://example.com/pomodoro", "variant": "default" },
+                    { "label": "GitHub", "url": "https://github.com/dxiongda441-maker/pomodorotimer.git", "variant": "ghost" }
+                  ]
+                },
+                {
+                  "title": "クリエイター向けLP",
+                  "description": "シアン×ライム基調のネオンUIで設計したランディングページ。",
+                  "image": "https://source.unsplash.com/800x600/?neon,web,design",
+                  "tags": ["Design", "HTML/CSS", "UI"],
+                  "order": 1,
+                  "links": [
+                    { "label": "Website", "url": "https://example.com/lp", "variant": "default" }
+                  ]
+                }
+              ]
+            }
+          </script>
+        </div>
+      </section>
+
+      <section id="contact" class="section" aria-label="お問い合わせ">
+        <div class="container">
+          <h2 class="section-title">Contact</h2>
+          <form class="contact-form" name="contact" netlify>
+            <input type="hidden" name="form-name" value="contact" />
+            <div class="form-row">
+              <label for="name">お名前</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="山田 太郎"
+                required
+              />
+            </div>
+            <div class="form-row">
+              <label for="email">メール</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            <div class="form-row">
+              <label for="message">メッセージ</label>
+              <textarea
+                id="message"
+                name="message"
+                rows="6"
+                placeholder="ご依頼内容やご質問をご記入ください"
+                required
+              ></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn primary" type="submit">送信</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+      <div class="container footer-inner">
+        <p>© <span id="year"></span> 渡辺雄大. All rights reserved.</p>
+        <ul class="social-list" role="list">
+          <!-- Replace '#' with your URL. Add more by duplicating the template below.
+          <li><a href="https://example.com" aria-label="ServiceName">ServiceName</a></li>
+          Examples: LinkedIn, Zenn, Qiita, Note, YouTube, Dribbble ... -->
+          <li><a href="#" aria-label="X(Twitter)">X</a></li>
+          <li><a href="#" aria-label="Instagram">Instagram</a></li>
+          <li><a href="#" aria-label="GitHub">GitHub</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <button id="to-top" class="to-top" aria-label="ページ上部へ戻る">↑</button>
+
+    <script src="./main.js"></script>
+  </body>
+</html>

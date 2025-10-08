@@ -8,8 +8,8 @@
   if (saved === "dark" || saved === "light") {
     document.documentElement.setAttribute("data-theme", saved);
   } else {
-    // Default to dark for neon theme
-    document.documentElement.setAttribute("data-theme", "dark");
+    // Default to light to highlight the brighter palette
+    document.documentElement.setAttribute("data-theme", "light");
   }
 
   const themeBtn = $("#theme-toggle");

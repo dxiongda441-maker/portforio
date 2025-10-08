@@ -1,31 +1,36 @@
 /* Base */
 :root {
   /* Base (light theme defaults) */
-  --bg: #0b1220;
-  --text: #e6f6ff;
-  --muted: #93a3b8;
+  --bg: #f5f8ff;
+  --text: #10203d;
+  --muted: #5f6f87;
   --primary: #22d3ee; /* neon cyan */
-  --primary-contrast: #06121a;
-  --surface: #0f172a;
-  --border: #1e2a3a;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --primary-contrast: #041016;
+  --surface: #ffffff;
+  --border: #cad7f1;
+  --shadow: 0 12px 30px rgba(15, 35, 90, 0.12);
 
   /* Neon palette */
   --neon-cyan: #22d3ee;
   --neon-lime: #a3e635;
   --neon-pulse: 0 0 24px color-mix(in lab, var(--neon-cyan) 45%, transparent),
                  0 0 48px color-mix(in lab, var(--neon-lime) 30%, transparent);
+  --bg-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=80");
+  --bg-overlay-top: rgba(245, 248, 255, 0.88);
+  --bg-overlay-bottom: rgba(245, 248, 255, 0.94);
 }
 
 html[data-theme="dark"] {
-  --bg: #050a14;
-  --text: #e6f6ff;
-  --muted: #9cb2c8;
+  --bg: #111d33;
+  --text: #eaf6ff;
+  --muted: #9fb4c8;
   --primary: #22d3ee; /* neon cyan */
-  --primary-contrast: #041016;
-  --surface: #0b1424;
-  --border: #142033;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --primary-contrast: #071423;
+  --surface: #182844;
+  --border: #233857;
+  --shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+  --bg-overlay-top: rgba(17, 29, 51, 0.78);
+  --bg-overlay-bottom: rgba(17, 29, 51, 0.88);
 }
 
 * {
@@ -41,7 +46,12 @@ body {
     "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "メイリオ", Meiryo,
     "Noto Sans JP", sans-serif;
   color: var(--text);
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: linear-gradient(135deg, var(--bg-overlay-top), var(--bg-overlay-bottom)), var(--bg-image);
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: center;
   line-height: 1.6;
 }
 

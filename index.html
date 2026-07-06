@@ -1,198 +1,105 @@
-<!DOCTYPE html>
-<html lang="ja" data-theme="light">
+<!doctype html>
+<html lang="ja">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="クリエイターのポートフォリオサイト" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="�|�[�g�t�H���I | �n�ӗY��" />
-    <meta property="og:description" content="クリエイターのポートフォリオサイト" />
-    <meta property="og:url" content="https://example.com/" />
-    <meta property="og:image" content="https://example.com/og-image.jpg" />
-    <meta property="og:site_name" content="�n�ӗY��" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="�|�[�g�t�H���I | �n�ӗY��" />
-    <meta name="twitter:description" content="クリエイターのポートフォリオサイト" />
-    <meta name="twitter:image" content="https://example.com/og-image.jpg" />
-    <title>ポートフォリオ | 渡辺雄大</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./style.css" />
+    <title>オルタ | Portfolio Preview</title>
+    <style>
+      :root {
+        --ink: #211812;
+        --soft-ink: #5f4a3d;
+        --paper: #fffaf1;
+        --line: rgba(33, 24, 18, 0.16);
+        --moss: #506341;
+        --leaf: #7d8a43;
+        --persimmon: #c66b32;
+        --gold: #d8aa4d;
+      }
+
+      @keyframes slow-drift {
+        0% { transform: scale(1.03) translate3d(0, 0, 0); }
+        50% { transform: scale(1.09) translate3d(-1.4%, -1%, 0); }
+        100% { transform: scale(1.03) translate3d(0, 0, 0); }
+      }
+
+      @keyframes contact-drift {
+        0% { background-position: center center; background-size: 106%; }
+        50% { background-position: 48% 46%; background-size: 114%; }
+        100% { background-position: center center; background-size: 106%; }
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; background: var(--paper); color: var(--ink); font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif; }
+      a { color: inherit; text-decoration: none; }
+      .site-header { align-items: center; color: #fffaf1; display: flex; justify-content: space-between; left: 0; padding: 24px 42px; position: fixed; right: 0; top: 0; z-index: 10; }
+      .brand { font-size: 15px; font-weight: 800; text-transform: uppercase; }
+      nav { display: flex; gap: 24px; }
+      nav a { font-size: 13px; font-weight: 700; text-transform: uppercase; }
+      .hero { min-height: 100svh; overflow: hidden; position: relative; }
+      .hero-media { animation: slow-drift 28s ease-in-out infinite; background-image: url("https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=2400&q=90"); background-position: center; background-size: cover; inset: 0; position: absolute; transform: scale(1.03); }
+      .hero-shade { background: linear-gradient(90deg, rgba(28, 18, 11, 0.78), rgba(69, 54, 31, 0.22) 58%, rgba(28, 18, 11, 0.28)), linear-gradient(0deg, rgba(33, 24, 18, 0.7), transparent 38%); inset: 0; position: absolute; }
+      .hero-content { color: #fffaf1; left: clamp(24px, 7vw, 96px); max-width: 720px; position: absolute; top: 52%; transform: translateY(-50%); }
+      .kicker, .section-label { color: var(--gold); font-size: 13px; font-weight: 800; margin: 0 0 16px; text-transform: uppercase; }
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { font-size: clamp(56px, 10vw, 132px); line-height: 0.92; margin-bottom: 20px; }
+      h2 { font-size: clamp(34px, 5vw, 72px); line-height: 1.04; margin-bottom: 0; }
+      .role { font-size: clamp(18px, 3vw, 32px); font-weight: 800; margin-bottom: 14px; }
+      .lead { font-size: clamp(16px, 2vw, 21px); line-height: 1.8; max-width: 620px; }
+      .actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+      .button { align-items: center; border: 1px solid rgba(255, 250, 241, 0.8); display: inline-flex; font-size: 14px; font-weight: 800; justify-content: center; min-height: 48px; min-width: 154px; padding: 0 22px; }
+      .button.primary { background: #fffaf1; color: var(--ink); }
+      .section { padding: clamp(72px, 11vw, 140px) clamp(24px, 7vw, 96px); }
+      .split { display: grid; gap: clamp(36px, 6vw, 90px); grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+      .copy { color: rgba(255, 250, 241, 0.88); font-size: clamp(16px, 1.7vw, 20px); line-height: 2; }
+      .season-section { color: #fffaf1; min-height: 88svh; overflow: hidden; position: relative; }
+      .season-section::before { animation: slow-drift 32s ease-in-out infinite; background-position: center; background-size: cover; content: ""; inset: 0; position: absolute; transform: scale(1.02); }
+      .season-section.spring::before { background-image: url("https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2200&q=90"); }
+      .season-section.summer::before { background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=90"); }
+      .season-section.autumn::before { background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90"); }
+      .season-section.winter::before { background-image: url("https://images.unsplash.com/photo-1483664852095-d6cc6870702d?auto=format&fit=crop&w=2200&q=90"); }
+      .season-overlay { background: linear-gradient(90deg, rgba(28, 18, 11, 0.72), rgba(55, 42, 25, 0.24) 62%), linear-gradient(0deg, rgba(33, 24, 18, 0.72), rgba(33, 24, 18, 0.18) 52%, rgba(33, 24, 18, 0.35)); inset: 0; position: absolute; z-index: 1; }
+      .season-inner { padding: clamp(72px, 11vw, 140px) clamp(24px, 7vw, 96px); position: relative; z-index: 2; }
+      .section-heading { margin-bottom: 38px; }
+      .works-grid { display: grid; gap: 18px; grid-template-columns: repeat(4, 1fr); }
+      .work-card { min-height: 260px; padding: 26px; }
+      .glass { background: rgba(255, 250, 241, 0.12); backdrop-filter: blur(16px); border: 1px solid rgba(255, 250, 241, 0.24); border-radius: 8px; }
+      .work-card p { color: var(--gold); font-size: 13px; font-weight: 900; text-transform: uppercase; }
+      .work-card h3 { font-size: 28px; line-height: 1.1; margin-bottom: 24px; }
+      .work-card span { color: rgba(255, 250, 241, 0.82); line-height: 1.75; }
+      .skill-panel { padding: 28px; }
+      .skill-row + .skill-row { margin-top: 24px; }
+      .skill-row div { display: flex; justify-content: space-between; margin-bottom: 10px; }
+      meter { background: rgba(80, 99, 65, 0.14); border: 0; display: block; height: 12px; width: 100%; }
+      meter::-webkit-meter-bar { background: rgba(80, 99, 65, 0.14); border: 0; }
+      meter::-webkit-meter-optimum-value { background: linear-gradient(90deg, var(--moss), var(--leaf), var(--persimmon)); }
+      .winter-layout { align-items: end; display: grid; gap: clamp(36px, 6vw, 88px); grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr); min-height: 88svh; }
+      .story-copy { max-width: 760px; }
+      .story-copy p:last-child { font-size: clamp(16px, 1.8vw, 21px); line-height: 1.9; }
+      .video-placeholder { align-content: center; aspect-ratio: 16 / 9; background: rgba(255, 250, 241, 0.1); backdrop-filter: blur(14px); border: 1px solid rgba(255, 250, 241, 0.28); border-radius: 8px; display: grid; min-height: 220px; padding: 28px; }
+      .video-placeholder span { color: var(--gold); font-size: 13px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; }
+      .video-placeholder strong { font-size: clamp(24px, 3vw, 42px); line-height: 1.08; }
+      .contact { animation: contact-drift 34s ease-in-out infinite; background: linear-gradient(90deg, rgba(28, 18, 11, 0.78), rgba(28, 18, 11, 0.28) 62%), linear-gradient(0deg, rgba(28, 18, 11, 0.74), rgba(28, 18, 11, 0.16) 54%), url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90"); background-position: center; background-size: cover; color: #fffaf1; display: grid; gap: 48px; grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr); }
+      .contact-card { align-self: end; border: 1px solid rgba(255, 250, 241, 0.22); border-radius: 8px; padding: 28px; }
+      .email { display: block; font-size: clamp(22px, 3vw, 38px); font-weight: 900; overflow-wrap: anywhere; }
+      .socials { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+      .socials a { border: 1px solid rgba(255, 250, 241, 0.3); border-radius: 999px; font-size: 13px; font-weight: 800; padding: 10px 14px; }
+      @media (max-width: 980px) { .split, .contact { grid-template-columns: 1fr; } .works-grid { grid-template-columns: repeat(2, 1fr); } .winter-layout { grid-template-columns: 1fr; } }
+      @media (max-width: 640px) { .site-header { background: rgba(33, 24, 18, 0.48); backdrop-filter: blur(14px); display: block; padding: 20px 24px; } nav { flex-wrap: wrap; gap: 12px 18px; margin-top: 12px; } nav a { font-size: 12px; } .hero-content { left: 24px; right: 24px; top: 58%; } .button { width: 100%; } .works-grid { grid-template-columns: 1fr; } }
+    </style>
   </head>
   <body>
-    <a class="skip-link" href="#main">メインコンテンツへ移動</a>
-
-    <header class="site-header" role="banner">
-      <div class="container header-inner">
-        <a class="brand" href="#">渡辺雄大</a>
-
-        <nav class="site-nav" aria-label="メインナビゲーション">
-          <button
-            class="menu-toggle"
-            aria-expanded="false"
-            aria-controls="nav-list"
-            aria-label="メニューを開閉"
-          >
-            <span class="menu-icon" aria-hidden="true"></span>
-          </button>
-          <ul id="nav-list" class="nav-list">
-            <li><a href="#about">About</a></li>
-            <li><a href="#skills">Skills</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </nav>
-
-        <button
-          id="theme-toggle"
-          class="theme-toggle"
-          aria-label="テーマを切り替え"
-        >
-          🌓
-        </button>
-      </div>
+    <header class="site-header">
+      <a class="brand" href="#home">Seasonal Portfolio</a>
+      <nav><a href="#about">About</a><a href="#works">Works</a><a href="#skills">Skills</a><a href="#story">Story</a><a href="#contact">Contact</a></nav>
     </header>
-
-    <main id="main" tabindex="-1">
-      <section id="hero" class="section hero" aria-label="ヒーロー">
-        <div class="container hero-inner">
-          <div class="hero-text">
-            <h1>こんにちは、<span class="accent">渡辺雄大</span>です。</h1>
-            <p class="lead">
-              Web×デザインで事業成長を支援するフロントエンドエンジニア。
-            </p>
-            <div class="actions">
-              <a class="btn primary" href="#projects">制作実績を見る</a>
-              <a class="btn" href="#contact">お問い合わせ</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="about" class="section" aria-label="自己紹介">
-        <div class="container">
-          <h2 class="section-title">About</h2>
-          <p>
-            Web×デザインを軸に、フロントエンド実装まで一気通貫で対応します。BtoC/BtoBのプロダクトやコーポレートサイトで、情報設計・UI設計・実装を行い、KPIに直結する改善を支援してきました。ユーザー視点と事業目標の両立を重視し、素早い検証と改善で成果に繋げます。
-          </p>
-        </div>
-      </section>
-
-      <section id="skills" class="section" aria-label="スキル">
-        <div class="container">
-          <h2 class="section-title">Skills</h2>
-          <ul class="chip-list" role="list">
-            <li class="chip">Figma</li>
-            <li class="chip">Illustrator</li>
-            <li class="chip">Photoshop</li>
-            <li class="chip">HTML/CSS</li>
-            <li class="chip">JavaScript</li>
-            <li class="chip">TypeScript</li>
-            <li class="chip">React</li>
-            <li class="chip">Next.js</li>
-            <li class="chip">Node.js</li>
-            <li class="chip">Git/GitHub</li>
-          </ul>
-      </section>
-
-      <section id="projects" class="section" aria-label="制作実績">
-        <div class="container">
-          <h2 class="section-title">Projects</h2>
-          <div class="grid projects-grid" id="projects-grid"></div>
-          <script id="projects-data" type="application/json">
-            {
-              "items": [
-                {
-                  "title": "ポロモードタイマー",
-                  "description": "集中力を高める25分間の作業タイマー。",
-                  "image": "https://source.unsplash.com/800x600/?timer,clock,neon",
-                  "tags": ["WebApp", "Vanilla JS"],
-                  "order": 2,
-                  "links": [
-                    { "label": "Website", "url": "https://example.com/pomodoro", "variant": "default" },
-                    { "label": "GitHub", "url": "https://github.com/dxiongda441-maker/pomodorotimer.git", "variant": "ghost" }
-                  ]
-                },
-                {
-                  "title": "クリエイター向けLP",
-                  "description": "シアン×ライム基調のネオンUIで設計したランディングページ。",
-                  "image": "https://source.unsplash.com/800x600/?neon,web,design",
-                  "tags": ["Design", "HTML/CSS", "UI"],
-                  "order": 1,
-                  "links": [
-                    { "label": "Website", "url": "https://example.com/lp", "variant": "default" }
-                  ]
-                }
-              ]
-            }
-          </script>
-        </div>
-      </section>
-
-      <section id="contact" class="section" aria-label="お問い合わせ">
-        <div class="container">
-          <h2 class="section-title">Contact</h2>
-          <form class="contact-form" name="contact" netlify>
-            <input type="hidden" name="form-name" value="contact" />
-            <div class="form-row">
-              <label for="name">お名前</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="山田 太郎"
-                required
-              />
-            </div>
-            <div class="form-row">
-              <label for="email">メール</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-            <div class="form-row">
-              <label for="message">メッセージ</label>
-              <textarea
-                id="message"
-                name="message"
-                rows="6"
-                placeholder="ご依頼内容やご質問をご記入ください"
-                required
-              ></textarea>
-            </div>
-            <div class="form-actions">
-              <button class="btn primary" type="submit">送信</button>
-            </div>
-          </form>
-        </div>
-      </section>
+    <main>
+      <section id="home" class="hero"><div class="hero-media"></div><div class="hero-shade"></div><div class="hero-content"><p class="kicker">Nature / Seasons / Craft</p><h1>オルタ</h1><p class="role">Creative Developer / Artist</p><p class="lead">日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくっています。</p><div class="actions"><a class="button primary" href="#works">作品を見る</a><a class="button secondary" href="#contact">問い合わせ</a></div></div></section>
+      <section id="about" class="season-section spring"><div class="season-overlay"></div><div class="season-inner split"><div><p class="section-label">About / Spring</p><h2>自然の景色と、手触りのある表現をつなぐ。</h2></div><div class="copy"><p>山、海、森、雪、桜、紅葉。日本の季節が持つ移ろいを、デジタル表現の中に落とし込むことを大切にしています。</p><p>このサイトは、迫力あるビジュアルを前面に出しながら、作品や考え方を静かに深く見せるポートフォリオとして設計しています。</p></div></div></section>
+      <section id="works" class="season-section summer"><div class="season-overlay"></div><div class="season-inner"><div class="section-heading"><p class="section-label">Works / Summer</p><h2>制作物と実績</h2></div><div class="works-grid"><article class="work-card glass"><p>AI Music</p><h3>AI音楽</h3><span>AIを使った作曲、サウンドデザイン、自然や映像に合わせた音の制作。</span></article><article class="work-card glass"><p>AI Anime</p><h3>AIアニメ</h3><span>生成AIを活用したキャラクター表現、短編アニメ、映像演出の制作。</span></article><article class="work-card glass"><p>AI Game</p><h3>AIゲーム</h3><span>AI要素を取り入れたゲーム企画、世界観設計、インタラクティブ体験の開発。</span></article><article class="work-card glass"><p>App</p><h3>アプリ開発</h3><span>Webアプリ、スマホ向けUI、便利なツールやサービスの設計と開発。</span></article></div></div></section>
+      <section id="skills" class="season-section autumn"><div class="season-overlay"></div><div class="season-inner split"><div><p class="section-label">Skills / Autumn</p><h2>つくる力を、視覚的に整理する。</h2></div><div class="skill-panel glass"><div class="skill-row"><div><span>Frontend</span><strong>92%</strong></div><meter min="0" max="100" value="92">92%</meter></div><div class="skill-row"><div><span>Game Design</span><strong>78%</strong></div><meter min="0" max="100" value="78">78%</meter></div><div class="skill-row"><div><span>Video</span><strong>72%</strong></div><meter min="0" max="100" value="72">72%</meter></div><div class="skill-row"><div><span>Music</span><strong>68%</strong></div><meter min="0" max="100" value="68">68%</meter></div><div class="skill-row"><div><span>Direction</span><strong>84%</strong></div><meter min="0" max="100" value="84">84%</meter></div></div></div></section>
+      <section id="story" class="season-section winter"><div class="season-overlay"></div><div class="season-inner winter-layout"><div class="story-copy"><p class="section-label">Story / Philosophy / Winter</p><h2>速さよりも、長く残る余韻を。</h2><p>日本の伝統文化が持つ余白、静けさ、素材への敬意。その感覚を、Web、ゲーム、映像、音楽の体験に取り入れます。</p></div><div class="video-placeholder"><span>Introduction Video</span><strong>紹介動画をここに配置予定</strong></div></div></section>
+      <section id="contact" class="section contact"><div><p class="section-label">Contact</p><h2>制作の相談、コラボレーション、出演・発表の連絡はこちらへ。</h2></div><div class="contact-card"><a class="email" href="mailto:hello@example.com">hello@example.com</a><div class="socials"><a href="https://x.com/">X</a><a href="https://www.instagram.com/">Instagram</a><a href="https://www.youtube.com/">YouTube</a><a href="https://github.com/">GitHub</a></div></div></section>
     </main>
-
-    <footer class="site-footer" role="contentinfo">
-      <div class="container footer-inner">
-        <p>© <span id="year"></span> 渡辺雄大. All rights reserved.</p>
-        <ul class="social-list" role="list">
-          <!-- Replace '#' with your URL. Add more by duplicating the template below.
-          <li><a href="https://example.com" aria-label="ServiceName">ServiceName</a></li>
-          Examples: LinkedIn, Zenn, Qiita, Note, YouTube, Dribbble ... -->
-          <li><a href="#" aria-label="X(Twitter)">X</a></li>
-          <li><a href="#" aria-label="Instagram">Instagram</a></li>
-          <li><a href="#" aria-label="GitHub">GitHub</a></li>
-        </ul>
-      </div>
-    </footer>
-
-    <button id="to-top" class="to-top" aria-label="ページ上部へ戻る">↑</button>
-
-    <script src="./main.js"></script>
   </body>
 </html>
-

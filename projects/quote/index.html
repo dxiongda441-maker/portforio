@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f1e8" />
+    <meta name="description" content="1日1名言。成功者の言葉を毎朝確認し、今日の行動に変えるスマホ向け習慣アプリ。" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>1日1名言</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Daily Quote Practice</p>
+          <h1>1日1名言</h1>
+        </div>
+        <button class="icon-button" id="settingsButton" type="button" aria-label="設定を開く">
+          <span></span><span></span><span></span>
+        </button>
+      </header>
+
+      <main>
+        <section class="hero-card" aria-labelledby="todayTitle">
+          <div class="date-row">
+            <span id="todayDate">今日</span>
+            <button id="favoriteButton" class="ghost-button" type="button">保存</button>
+          </div>
+          <div class="person-block">
+            <div class="portrait" id="portraitInitials" aria-hidden="true">SJ</div>
+            <div>
+              <p class="role" id="personRole">Entrepreneur</p>
+              <h2 id="todayTitle">Steve Jobs</h2>
+            </div>
+          </div>
+          <blockquote id="quoteText"></blockquote>
+          <p class="translation" id="quoteTranslation"></p>
+          <div class="source-line">
+            <span id="sourceLabel"></span>
+            <a id="sourceLink" href="#" target="_blank" rel="noreferrer">出典を見る</a>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="profileTitle">
+          <h3 id="profileTitle">この人物から学ぶこと</h3>
+          <p id="personBio"></p>
+        </section>
+
+        <section class="section action-section" aria-labelledby="actionTitle">
+          <div>
+            <h3 id="actionTitle">今日の行動</h3>
+            <p id="dailyAction"></p>
+          </div>
+          <button id="doneButton" class="primary-button" type="button">実行した</button>
+        </section>
+
+        <section class="section" aria-labelledby="memoTitle">
+          <h3 id="memoTitle">今日の振り返り</h3>
+          <textarea id="memoInput" rows="5" placeholder="今日の言葉から感じたこと、実際にやったことを書く"></textarea>
+          <p class="save-state" id="saveState">自動保存されます</p>
+        </section>
+
+        <section class="section" aria-labelledby="feedbackTitle">
+          <div class="section-header">
+            <h3 id="feedbackTitle">改善メモ</h3>
+            <button id="clearFeedbackButton" class="text-button" type="button">消去</button>
+          </div>
+          <textarea id="feedbackInput" rows="4" placeholder="使っていて気になった点、直したい文章、通知の違和感などを書く"></textarea>
+          <p class="save-state" id="feedbackSaveState">自動保存されます</p>
+        </section>
+
+        <section class="stats-grid" aria-label="記録">
+          <div>
+            <span id="streakCount">0</span>
+            <p>継続日数</p>
+          </div>
+          <div>
+            <span id="doneCount">0</span>
+            <p>実行数</p>
+          </div>
+          <div>
+            <span id="favoriteCount">0</span>
+            <p>保存数</p>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="archiveTitle">
+          <div class="section-header">
+            <h3 id="archiveTitle">これまでの名言</h3>
+            <select id="categoryFilter" aria-label="カテゴリで絞り込む">
+              <option value="all">すべて</option>
+              <option value="startup">起業</option>
+              <option value="business">経営</option>
+              <option value="craft">創作</option>
+              <option value="resilience">挑戦</option>
+            </select>
+          </div>
+          <div class="quote-list" id="quoteList"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="settingsDialog">
+      <form method="dialog" class="settings-panel">
+        <div class="dialog-header">
+          <h2>設定</h2>
+          <button class="icon-close" value="close" aria-label="閉じる">×</button>
+        </div>
+        <label class="field">
+          <span>毎日の通知時間</span>
+          <input id="notifyTime" type="time" value="07:00" />
+        </label>
+        <div class="button-stack">
+          <button id="notificationButton" class="primary-button" type="button">通知を許可する</button>
+          <button id="testNotificationButton" class="secondary-button" type="button">今すぐ通知テスト</button>
+        </div>
+        <p class="hint" id="notificationStatus">
+          HTTPS公開後、ブラウザが通知に対応している場合に使えます。
+        </p>
+        <div class="diagnostics" aria-label="通知診断">
+          <div>
+            <span>HTTPS</span>
+            <strong id="secureStatus">確認中</strong>
+          </div>
+          <div>
+            <span>通知許可</span>
+            <strong id="permissionStatus">確認中</strong>
+          </div>
+          <div>
+            <span>オフライン対応</span>
+            <strong id="workerStatus">確認中</strong>
+          </div>
+        </div>
+        <div class="setup-guide">
+          <h3>スマホで使う手順</h3>
+          <ol>
+            <li>NetlifyのHTTPS URLをスマホで開く</li>
+            <li>ブラウザの共有メニューからホーム画面に追加する</li>
+            <li>この設定画面で通知を許可する</li>
+            <li>今すぐ通知テストで表示を確認する</li>
+          </ol>
+        </div>
+        <label class="toggle-row">
+          <input id="showTranslation" type="checkbox" checked />
+          <span>日本語の意味も表示する</span>
+        </label>
+        <label class="toggle-row">
+          <input id="useSequential" type="checkbox" checked />
+          <span>日替わりで順番に表示する</span>
+        </label>
+      </form>
+    </dialog>
+
+    <script src="./data.js?v=8"></script>
+    <script src="./app.js?v=8"></script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "1日1名言",
+  "short_name": "1日1名言",
+  "description": "毎日1つ、成功者の言葉を確認して今日の行動に変えるアプリ。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f6f1e8",
+  "theme_color": "#17665d",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

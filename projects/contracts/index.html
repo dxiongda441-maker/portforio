@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ビジネス契約ラーニング</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Startup / Career / Freelance</p>
+        <h1>ビジネス契約ラーニング</h1>
+      </div>
+      <nav class="top-nav" aria-label="主要メニュー">
+        <a href="#contracts">契約一覧</a>
+        <a href="#quiz">クイズ</a>
+        <a href="#sources">情報源</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro-band">
+        <div class="intro-copy">
+          <div class="intro-badge">契約を選ぶ → 詳細を読む → クイズで確認</div>
+          <h2>起業・転職・副業で出会う契約を、判断できる知識に変える。</h2>
+          <p>
+            公的機関や信頼性の高い支援機関の情報をもとに、契約の目的、注意点、交渉で確認したい項目を整理しました。
+            各ページで学んだあと、実務に近いクイズで理解度を確認できます。
+          </p>
+          <div class="intro-actions">
+            <a class="primary-link" href="#contracts">契約を確認する</a>
+            <a class="secondary-link" href="#quiz">クイズを始める</a>
+          </div>
+        </div>
+        <div class="quick-stats" aria-label="収録内容">
+          <div><strong id="contractCount">0</strong><span>契約タイプ</span></div>
+          <div><strong id="questionCount">0</strong><span>確認問題</span></div>
+          <div><strong>公的</strong><span>情報源中心</span></div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="contract-list-panel" id="contracts">
+          <div class="section-heading">
+            <p class="eyebrow">Library</p>
+            <h2>契約一覧</h2>
+          </div>
+          <label class="search-box">
+            <span>検索</span>
+            <input id="searchInput" type="search" placeholder="例：秘密保持、業務委託、雇用" />
+          </label>
+          <div class="filter-row" id="categoryFilters" aria-label="カテゴリ"></div>
+          <div class="contract-list" id="contractList"></div>
+        </aside>
+
+        <section class="detail-panel" id="contractDetail" aria-live="polite">
+          <div class="detail-header">
+            <div>
+              <p class="eyebrow" id="detailCategory">Category</p>
+              <h2 id="detailTitle">契約を選択してください</h2>
+              <p class="detail-lead" id="detailLead"></p>
+            </div>
+            <button id="startSelectedQuiz" class="primary-action" type="button">この契約で出題</button>
+          </div>
+          <div class="detail-overview">
+            <div>
+              <span>重要度</span>
+              <strong id="detailImportance">-</strong>
+            </div>
+            <div>
+              <span>主な当事者</span>
+              <strong id="detailParties">-</strong>
+            </div>
+            <div>
+              <span>確認タイミング</span>
+              <strong id="detailTiming">-</strong>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <article>
+              <h3>どんな契約か</h3>
+              <p id="detailSummary"></p>
+            </article>
+            <article>
+              <h3>使われる場面</h3>
+              <p id="detailScene"></p>
+            </article>
+            <article>
+              <h3>確認ポイント</h3>
+              <ul id="detailChecklist"></ul>
+            </article>
+            <article>
+              <h3>よくあるリスク</h3>
+              <ul id="detailRisks"></ul>
+            </article>
+            <article>
+              <h3>主要な条項</h3>
+              <ul id="detailTerms"></ul>
+            </article>
+            <article>
+              <h3>交渉で見るところ</h3>
+              <ul id="detailNegotiation"></ul>
+            </article>
+            <article class="wide-card">
+              <h3>実務での読み方</h3>
+              <p id="detailPractical"></p>
+            </article>
+            <article class="wide-card warning-card">
+              <h3>注意したい表現</h3>
+              <ul id="detailRedFlags"></ul>
+            </article>
+          </div>
+          <div class="source-strip" id="detailSources"></div>
+        </section>
+      </section>
+
+      <section class="quiz-band" id="quiz">
+        <div class="section-heading">
+          <p class="eyebrow">Quiz</p>
+          <h2>契約クイズ</h2>
+        </div>
+        <div class="quiz-layout">
+          <aside class="quiz-settings">
+            <label>
+              出題範囲
+              <select id="quizScope"></select>
+            </label>
+            <label>
+              問題数
+              <input id="quizSize" type="number" min="3" max="12" value="6" />
+            </label>
+            <button id="startQuiz" class="primary-action" type="button">開始</button>
+            <button id="resetQuiz" class="secondary-action" type="button">リセット</button>
+          </aside>
+          <div class="quiz-card">
+            <div class="quiz-progress">
+              <span id="quizStatus">未開始</span>
+              <span id="quizScore">0 / 0</span>
+            </div>
+            <h3 id="quizQuestion">出題範囲と問題数を選んで開始してください。</h3>
+            <div id="quizOptions" class="quiz-options"></div>
+            <p id="quizFeedback" class="quiz-feedback"></p>
+            <button id="nextQuestion" class="secondary-action" type="button">次へ</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="sources-band" id="sources">
+        <div class="section-heading">
+          <p class="eyebrow">Sources</p>
+          <h2>主な参照元</h2>
+        </div>
+        <div class="source-list" id="sourceList"></div>
+        <p class="notice">
+          このページは学習用です。実際の契約締結・解除・交渉では、契約書全文と個別事情を確認し、必要に応じて弁護士・社労士などの専門家へ相談してください。
+        </p>
+      </section>
+    </main>
+
+    <script src="./data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

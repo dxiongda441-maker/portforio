@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>世界ねこ図鑑クイズ</title>
+    <link rel="preconnect" href="https://en.wikipedia.org" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="topbar" aria-label="主要ナビゲーション">
+        <a class="brand" href="#top" aria-label="世界ねこ図鑑クイズ">
+          <span class="brand-mark">CAT</span>
+          <span>世界ねこ図鑑クイズ</span>
+        </a>
+        <div class="nav-links">
+          <a href="#encyclopedia">図鑑</a>
+          <a href="#regions">地域</a>
+          <a href="#habits">習性</a>
+          <a href="#quiz">クイズ</a>
+          <a href="#sources">出典</a>
+        </div>
+      </nav>
+
+      <section id="top" class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Cat ecology, breeds, history and quiz</p>
+          <h1>世界の猫を、写真とファクトでめぐる図鑑。</h1>
+          <p>
+            人気のペット猫から地域に根ざした猫、野生の小型ネコ科まで。
+            特徴・歴史・暮らす地域・雑学をクイズつきで確認できます。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#encyclopedia">図鑑を見る</a>
+            <a class="button secondary" href="#quiz">クイズに挑戦</a>
+          </div>
+        </div>
+        <div class="hero-panel" aria-label="概要">
+          <div>
+            <strong id="breed-count">24</strong>
+            <span>掲載猫種・近縁種</span>
+          </div>
+          <div>
+            <strong>5</strong>
+            <span>地域カテゴリ</span>
+          </div>
+          <div>
+            <strong>12</strong>
+            <span>確認クイズ</span>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <main>
+      <section class="section intro">
+        <div class="section-heading">
+          <p class="eyebrow">Fact checked scope</p>
+          <h2>アプリ実装前の情報整理</h2>
+        </div>
+        <div class="intro-grid">
+          <article>
+            <h3>猫種</h3>
+            <p>CFA/TICA/GCCF などの登録団体で広く扱われる代表的なペット猫を中心に整理。</p>
+          </article>
+          <article>
+            <h3>地域</h3>
+            <p>発祥地・よく知られる分布・野生近縁種の地域を分け、地理で探せる構成。</p>
+          </article>
+          <article>
+            <h3>生態</h3>
+            <p>狩り、爪とぎ、睡眠、グルーミング、社会性など飼育にも役立つ習性を収録。</p>
+          </article>
+          <article>
+            <h3>クイズ</h3>
+            <p>図鑑で読んだ内容をすぐ確認できる三択クイズ。解説つきで学習に使えます。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="encyclopedia" class="section">
+        <div class="section-heading split">
+          <div>
+            <p class="eyebrow">Encyclopedia</p>
+            <h2>猫図鑑</h2>
+          </div>
+          <div class="filters" role="group" aria-label="猫図鑑フィルター">
+            <button class="filter active" type="button" data-filter="all">すべて</button>
+            <button class="filter" type="button" data-filter="popular">人気</button>
+            <button class="filter" type="button" data-filter="longhair">長毛</button>
+            <button class="filter" type="button" data-filter="shortHair">短毛</button>
+            <button class="filter" type="button" data-filter="wild">野生</button>
+          </div>
+        </div>
+        <div id="cat-grid" class="cat-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="regions" class="section region-section">
+        <div class="section-heading">
+          <p class="eyebrow">World regions</p>
+          <h2>地域で見る猫</h2>
+        </div>
+        <div id="region-grid" class="region-grid"></div>
+      </section>
+
+      <section id="habits" class="section habits-section">
+        <div class="section-heading">
+          <p class="eyebrow">Behavior and trivia</p>
+          <h2>猫の習性と雑学</h2>
+        </div>
+        <div id="habit-grid" class="habit-grid"></div>
+      </section>
+
+      <section id="quiz" class="section quiz-section">
+        <div class="section-heading split">
+          <div>
+            <p class="eyebrow">Quiz</p>
+            <h2>猫クイズ</h2>
+          </div>
+          <button id="reset-quiz" class="button secondary" type="button">最初から</button>
+        </div>
+        <div class="quiz-shell">
+          <div class="quiz-status">
+            <span id="quiz-progress">1 / 12</span>
+            <span id="quiz-score">正解 0</span>
+          </div>
+          <div class="progress-track"><span id="progress-bar"></span></div>
+          <h3 id="quiz-question"></h3>
+          <div id="quiz-options" class="quiz-options"></div>
+          <p id="quiz-feedback" class="quiz-feedback"></p>
+          <button id="next-question" class="button primary" type="button">次の問題</button>
+        </div>
+      </section>
+
+      <section id="sources" class="section source-section">
+        <div class="section-heading">
+          <p class="eyebrow">Sources</p>
+          <h2>ファクトチェック用リンク</h2>
+        </div>
+        <ul class="source-list">
+          <li><a href="https://cfa.org/breeds/" target="_blank" rel="noreferrer">Cat Fanciers' Association: Breeds</a></li>
+          <li><a href="https://tica.org/breeds/" target="_blank" rel="noreferrer">The International Cat Association: Breeds</a></li>
+          <li><a href="https://www.gccfcats.org/getting-a-cat/choosing/cat-breeds/" target="_blank" rel="noreferrer">GCCF: Cat breeds</a></li>
+          <li><a href="https://icatcare.org/advice/thinking-of-getting-a-cat/" target="_blank" rel="noreferrer">International Cat Care: Cat care guidance</a></li>
+          <li><a href="https://www.cornell.edu/video/cat-behavior-scratching-grooming-sleeping-hunting" target="_blank" rel="noreferrer">Cornell: Cat behavior topics</a></li>
+          <li><a href="https://www.iucnredlist.org/" target="_blank" rel="noreferrer">IUCN Red List: Wild cat distribution references</a></li>
+          <li><a href="https://en.wikipedia.org/wiki/Cat" target="_blank" rel="noreferrer">Wikipedia/Wikimedia: 写真サムネイルと各猫種ページ</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>写真は各 Wikimedia/Wikipedia ページの公開サムネイルを読み込みます。詳しいライセンスはカード内リンク先で確認してください。</p>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

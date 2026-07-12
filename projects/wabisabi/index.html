@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>三分録 - 音声アウトプット習慣</title>
+    <meta name="theme-color" content="#102018" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="三分録" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">毎日ひとつ、声に残す</p>
+        <h1>三分録</h1>
+      </div>
+      <nav class="tabs" aria-label="画面切り替え">
+        <button class="tab active" data-view="recordView">録る</button>
+        <button class="tab" data-view="libraryView">記録</button>
+        <button class="tab" data-view="studioView">発信化</button>
+        <button class="tab" data-view="settingsView">テーマ</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="recordView" class="view active">
+        <div class="hero">
+          <div class="today-panel">
+            <p class="label">今日のテーマ</p>
+            <select id="themeSelect" class="field"></select>
+            <p class="label">今日の問い</p>
+            <div id="dailyPrompt" class="prompt"></div>
+            <p class="label">話す型</p>
+            <ol id="talkTemplate" class="template"></ol>
+          </div>
+          <div class="recorder">
+            <div id="timer" class="timer">03:00</div>
+            <div class="record-actions">
+              <button id="recordButton" class="primary">録音開始</button>
+              <button id="stopButton" class="secondary" disabled>停止して保存</button>
+            </div>
+            <audio id="previewAudio" controls hidden></audio>
+            <input id="recordTitle" class="field" placeholder="タイトル 例: 朝の散歩と健康寿命" />
+            <textarea id="recordMemo" class="field memo" placeholder="一言メモ 例: 明日から朝に光を浴びる"></textarea>
+            <p id="recordStatus" class="status">うまく話す必要はありません。3分だけ残せば十分です。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="libraryView" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">保存した日付とテーマで整理</p>
+            <h2>音声記録</h2>
+          </div>
+          <div class="controls">
+            <select id="sortSelect" class="field compact">
+              <option value="newest">新しい順</option>
+              <option value="oldest">古い順</option>
+            </select>
+            <select id="filterTheme" class="field compact"></select>
+          </div>
+        </div>
+        <div id="recordList" class="record-list"></div>
+      </section>
+
+      <section id="studioView" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">選んだ音声だけ発信用に整える</p>
+            <h2>発信化スタジオ</h2>
+          </div>
+        </div>
+        <div class="studio-grid">
+          <aside class="chooser">
+            <p class="label">変換する音声</p>
+            <select id="studioRecordSelect" class="field"></select>
+            <div id="studioMeta" class="meta"></div>
+            <audio id="studioAudio" controls></audio>
+          </aside>
+          <section class="transformer">
+            <p class="label">音声の文字起こし・要点</p>
+            <textarea id="sourceText" class="field transcript" placeholder="録音を聞きながら、話した内容の要点や文字起こしをここに入れてください。"></textarea>
+            <div class="record-actions">
+              <button id="makeXButton" class="primary">X投稿に変換</button>
+              <button id="makeSubstackButton" class="secondary">記事に変換</button>
+            </div>
+            <div class="outputs">
+              <div>
+                <p class="label">X投稿案</p>
+                <textarea id="xOutput" class="field output"></textarea>
+              </div>
+              <div>
+                <p class="label">Substack記事案</p>
+                <textarea id="substackOutput" class="field output tall"></textarea>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="settingsView" class="view">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">後から増やせる学びの箱</p>
+            <h2>テーマ管理</h2>
+          </div>
+        </div>
+        <form id="themeForm" class="theme-form">
+          <input id="newThemeName" class="field" placeholder="テーマ名 例: 文章術" required />
+          <input id="newThemePrompt" class="field" placeholder="問い 例: 今日学んだ文章術をどこで使う？" required />
+          <button class="primary" type="submit">テーマを追加</button>
+        </form>
+        <div id="themeList" class="theme-list"></div>
+      </section>
+    </main>
+
+    <template id="recordItemTemplate">
+      <article class="record-item">
+        <div>
+          <p class="record-date"></p>
+          <h3 class="record-title"></h3>
+          <p class="record-theme"></p>
+          <p class="record-memo"></p>
+        </div>
+        <div class="record-side">
+          <audio controls></audio>
+          <button class="secondary use-in-studio">発信化へ</button>
+          <button class="danger delete-record">削除</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

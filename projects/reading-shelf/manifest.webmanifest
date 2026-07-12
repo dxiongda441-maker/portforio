@@ -1,0 +1,19 @@
+{
+  "name": "Reading Shelf",
+  "short_name": "Reading Shelf",
+  "description": "読んだ本、読む前の期待、メモ、ToDo、読書ログを残す読書記録アプリ。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f7ea",
+  "theme_color": "#17341f",
+  "icons": [
+    {
+      "src": "./assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

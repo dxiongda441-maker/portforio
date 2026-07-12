@@ -1,0 +1,19 @@
+{
+  "name": "三分録 - 音声アウトプット習慣",
+  "short_name": "三分録",
+  "description": "毎日3分だけ学びを声に残すアウトプット習慣アプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#102018",
+  "theme_color": "#102018",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

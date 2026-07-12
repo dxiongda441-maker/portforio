@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>世界の国クイズ</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">World Country Quiz</p>
+          <h1>世界の国クイズ</h1>
+        </div>
+        <nav class="mode-tabs" aria-label="モード切り替え">
+          <button class="tab active" type="button" data-view="mapView">地球儀マップ</button>
+          <button class="tab" type="button" data-view="flagView">国旗クイズ</button>
+        </nav>
+      </header>
+
+      <section id="mapView" class="view active" aria-labelledby="mapTitle">
+        <div class="map-layout">
+          <section class="globe-panel" aria-labelledby="mapTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Explore</p>
+                <h2 id="mapTitle">世界地図から国を押して調べる</h2>
+              </div>
+              <div class="map-controls" aria-label="地図の拡大縮小">
+                <button id="zoomOut" class="icon-button" type="button" title="縮小" aria-label="縮小">−</button>
+                <button id="zoomReset" class="icon-button" type="button" title="リセット" aria-label="リセット">⌂</button>
+                <button id="zoomIn" class="icon-button" type="button" title="拡大" aria-label="拡大">＋</button>
+              </div>
+            </div>
+
+            <div class="globe-stage">
+              <svg class="world-map" viewBox="0 0 1000 520" role="img" aria-label="クリックできる二次元の世界地図">
+                <defs>
+                  <linearGradient id="ocean" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#7fd3ff" />
+                    <stop offset="55%" stop-color="#1b88bb" />
+                    <stop offset="100%" stop-color="#0c5d85" />
+                  </linearGradient>
+                  <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#071a2b" flood-opacity=".35" />
+                  </filter>
+                  <clipPath id="mapClip">
+                    <rect x="20" y="24" width="960" height="472" rx="18" />
+                  </clipPath>
+                </defs>
+                <rect class="map-ocean" x="20" y="24" width="960" height="472" rx="18" fill="url(#ocean)" filter="url(#softShadow)" />
+                <path class="graticule" d="M20 142H980M20 260H980M20 378H980M180 24V496M340 24V496M500 24V496M660 24V496M820 24V496" />
+                <g class="continent-layer" clip-path="url(#mapClip)" aria-hidden="true">
+                  <path class="continent-base" d="M70 95l78-34 96 9 73 48-18 78-70 59-98-20-84-70z" />
+                  <path class="continent-base" d="M144 242l80 35 42 85-43 104-70-46-35-92z" />
+                  <path class="continent-base" d="M400 115l95-38 135 16 110 58-30 80-109 48-132-24-91-68z" />
+                  <path class="continent-base" d="M482 230l108 18 80 70-18 110-85 54-76-66-41-109z" />
+                  <path class="continent-base" d="M704 122l127-13 106 51-45 96-112 38-106-46z" />
+                  <path class="continent-base" d="M760 330l116-28 73 56-30 76-120 25-69-58z" />
+                  <path class="coastline" d="M70 95l78-34 96 9 73 48m-173 124l80 35 42 85m135-247l95-38 135 16 110 58m-258 78l108 19 80 70m34-196l127-13 106 51m-177 171l116-28 73 56" />
+                </g>
+                <g id="countryLayer" clip-path="url(#mapClip)"></g>
+              </svg>
+            </div>
+          </section>
+
+          <aside class="country-card" id="countryCard" aria-live="polite">
+            <p class="eyebrow">Selected Country</p>
+            <div class="flag-large" id="countryFlag" aria-hidden="true"></div>
+            <h2 id="countryName">日本</h2>
+            <p id="countryRegion">アジア</p>
+            <dl class="country-facts">
+              <div>
+                <dt>首都</dt>
+                <dd id="countryCapital">東京</dd>
+              </div>
+              <div>
+                <dt>特徴</dt>
+                <dd id="countryFeature">島国で、伝統文化と先端技術の両方で知られています。</dd>
+              </div>
+            </dl>
+            <button id="startFromCountry" class="primary-button" type="button">この国をクイズに出す</button>
+          </aside>
+        </div>
+      </section>
+
+      <section id="flagView" class="view" aria-labelledby="flagTitle">
+        <div class="quiz-layout">
+          <section class="quiz-card">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Flag Quiz</p>
+                <h2 id="flagTitle">この国旗はどこの国？</h2>
+              </div>
+              <div class="score" aria-label="スコア">
+                <span id="scoreText">0 / 0</span>
+              </div>
+            </div>
+            <div class="quiz-flag" id="quizFlag" aria-label="出題中の国旗"></div>
+            <div id="choices" class="choices"></div>
+            <p id="feedback" class="feedback" aria-live="polite"></p>
+            <div class="quiz-actions">
+              <button id="nextQuestion" class="primary-button" type="button">次の問題</button>
+              <button id="resetQuiz" class="secondary-button" type="button">リセット</button>
+            </div>
+          </section>
+
+          <aside class="learning-panel">
+            <p class="eyebrow">Hint</p>
+            <h2 id="hintTitle">ヒント</h2>
+            <p id="hintText">国旗の色や形、地域の特徴を見て考えてみましょう。</p>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

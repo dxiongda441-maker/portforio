@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#17341f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Reading Shelf" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Reading Shelf</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./assets/app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./assets/app-icon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span class="book-icon">
+              <span></span>
+            </span>
+          </div>
+          <div>
+            <p class="brand-name">Reading Shelf</p>
+            <p class="brand-sub">自分だけの読書棚</p>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="メインメニュー">
+          <button class="nav-item active" data-view="dashboard" type="button">本棚</button>
+          <button class="nav-item" data-view="add" type="button">本を登録</button>
+          <button class="nav-item" data-view="stats" type="button">読書ログ</button>
+        </nav>
+
+        <div class="sidebar-panel">
+          <p class="panel-label">今週の読書</p>
+          <strong id="sidebarPages">0 pages</strong>
+          <span id="sidebarTime">0時間</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Book journal</p>
+            <h1>読んだ本と、読む前の期待を一緒に残す</h1>
+          </div>
+          <button class="primary-action" id="openAdd" type="button">本を追加</button>
+        </header>
+
+        <section class="view active" id="dashboardView">
+          <div class="summary-grid">
+            <article class="metric">
+              <span>登録冊数</span>
+              <strong id="totalBooks">0</strong>
+            </article>
+            <article class="metric">
+              <span>読了冊数</span>
+              <strong id="finishedBooks">0</strong>
+            </article>
+            <article class="metric">
+              <span>今週のページ</span>
+              <strong id="weeklyPages">0</strong>
+            </article>
+            <article class="metric">
+              <span>平均評価</span>
+              <strong id="averageRating">-</strong>
+            </article>
+          </div>
+
+          <div class="section-heading">
+            <h2>My Bookshelf</h2>
+            <div class="filters" role="group" aria-label="表示切り替え">
+              <button class="filter active" data-filter="all" type="button">すべて</button>
+              <button class="filter" data-filter="reading" type="button">読書中</button>
+              <button class="filter" data-filter="finished" type="button">読了</button>
+            </div>
+          </div>
+          <div class="bookshelf" id="bookList"></div>
+        </section>
+
+        <section class="view" id="addView">
+          <form class="book-form" id="bookForm">
+            <div class="form-layout">
+              <section class="cover-uploader">
+                <label class="cover-drop" for="coverInput">
+                  <img id="coverPreview" alt="" />
+                  <span id="coverText">表紙写真を登録</span>
+                </label>
+                <input id="coverInput" name="cover" type="file" accept="image/*" capture="environment" />
+                <p>スマホならカメラで撮影、PCなら画像を選べます。</p>
+              </section>
+
+              <section class="form-fields">
+                <div class="field-row">
+                  <label>
+                    タイトル
+                    <input id="titleInput" name="title" required placeholder="本のタイトル" />
+                  </label>
+                  <label>
+                    著者
+                    <input id="authorInput" name="author" placeholder="著者名" />
+                  </label>
+                </div>
+
+                <div class="field-row">
+                  <label>
+                    状態
+                    <select id="statusInput" name="status">
+                      <option value="reading">読書中</option>
+                      <option value="finished">読了</option>
+                    </select>
+                  </label>
+                </div>
+
+                <section class="reading-block">
+                  <div class="block-title">
+                    <h2>読書した日</h2>
+                    <button id="addSession" class="ghost-button" type="button">追加</button>
+                  </div>
+                  <div id="sessionList" class="session-list"></div>
+                </section>
+
+                <section class="prompt-block">
+                  <div class="block-title">
+                    <h2>読む前に学べそうなこと</h2>
+                    <button id="addLearning" class="ghost-button" type="button">追加</button>
+                  </div>
+                  <div id="learningList" class="stack-list"></div>
+                </section>
+
+                <section class="todo-block">
+                  <div class="block-title">
+                    <h2>本から作るToDo</h2>
+                    <button id="addTodo" class="ghost-button" type="button">追加</button>
+                  </div>
+                  <div id="todoList" class="stack-list"></div>
+                </section>
+
+                <section class="notes-grid">
+                  <label>
+                    メモ
+                    <textarea id="memoInput" rows="7" placeholder="印象に残った内容、引用、気づき"></textarea>
+                  </label>
+                  <label>
+                    後から追記
+                    <textarea id="reflectionInput" rows="7" placeholder="時間を置いてからの考え、実践した結果"></textarea>
+                  </label>
+                </section>
+
+                <div class="field-row rating-row">
+                  <label>
+                    自分の採点（5点満点）
+                    <input id="ratingInput" name="rating" type="range" min="0" max="5" step="0.5" value="4" />
+                  </label>
+                  <output id="ratingOutput">4.0</output>
+                </div>
+
+                <div class="form-actions">
+                  <button class="secondary-action" id="resetForm" type="button">入力をクリア</button>
+                  <button class="primary-action" type="submit">本棚に保存</button>
+                </div>
+              </section>
+            </div>
+          </form>
+        </section>
+
+        <section class="view" id="statsView">
+          <div class="section-heading">
+            <h2>読書ログ</h2>
+            <p>直近7日間の冊数、ページ、読書時間を集計します。</p>
+          </div>
+          <div class="log-grid">
+            <article class="log-card">
+              <span>今週読んだ本</span>
+              <strong id="weekBooks">0冊</strong>
+            </article>
+            <article class="log-card">
+              <span>今週読んだページ</span>
+              <strong id="weekPages">0ページ</strong>
+            </article>
+            <article class="log-card">
+              <span>今週の読書時間</span>
+              <strong id="weekMinutes">0時間</strong>
+            </article>
+          </div>
+          <div class="timeline" id="timeline"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="entryTemplate">
+      <div class="input-line">
+        <input type="text" />
+        <button type="button" aria-label="削除">×</button>
+      </div>
+    </template>
+
+    <template id="sessionTemplate">
+      <div class="session-line">
+        <label>
+          日付
+          <input type="date" class="session-date" />
+        </label>
+        <label>
+          ページ
+          <input type="number" min="0" class="session-pages" placeholder="60" />
+        </label>
+        <label>
+          分
+          <input type="number" min="0" class="session-minutes" placeholder="45" />
+        </label>
+        <button type="button" aria-label="読書日を削除">×</button>
+      </div>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

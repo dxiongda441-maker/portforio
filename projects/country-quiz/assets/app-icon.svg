@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="世界の国クイズ">
+  <rect width="512" height="512" rx="72" fill="#0b5f7a"/>
+  <circle cx="256" cy="244" r="154" fill="#eff7f4" stroke="#ffffff" stroke-width="18"/>
+  <path d="M102 244h308M256 90c55 50 82 101 82 154s-27 104-82 154c-55-50-82-101-82-154s27-104 82-154z" fill="none" stroke="#1d7798" stroke-width="18"/>
+  <path d="M129 158c32 28 76 42 127 42s95-14 127-42M129 330c32-28 76-42 127-42s95 14 127 42" fill="none" stroke="#75a96b" stroke-width="16"/>
+  <path d="M350 80v146l38-24 38 24V80z" fill="#d8a03e"/>
+</svg>

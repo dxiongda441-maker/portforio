@@ -2,119 +2,191 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b5f7a" />
+    <meta name="description" content="国旗と世界地図を見ながら195か国を学び、世界パスポートに記録できるオフライン対応クイズ。" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="世界の国クイズ" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>世界の国クイズ</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./assets/app-icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="./assets/app-icon-192.png" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="app-shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">World Country Quiz</p>
-          <h1>世界の国クイズ</h1>
+    <a class="skip-link" href="#mainContent">本文へ移動</a>
+    <header class="app-header">
+      <div class="brand">
+        <img src="./assets/app-icon.svg" alt="" width="44" height="44" />
+        <div><strong>世界の国クイズ</strong><span>World Atlas Quiz</span></div>
+      </div>
+      <nav class="main-nav" aria-label="メインメニュー">
+        <button class="nav-item active" data-view="explore" type="button"><span class="nav-icon" aria-hidden="true">◎</span><span class="nav-label" data-adult="地図" data-kids="ちず">地図</span></button>
+        <button class="nav-item" data-view="quiz" type="button"><span class="nav-icon" aria-hidden="true">?</span><span class="nav-label" data-adult="クイズ" data-kids="クイズ">クイズ</span></button>
+        <button class="nav-item" data-view="progress" type="button"><span class="nav-icon" aria-hidden="true">↗</span><span class="nav-label" data-adult="記録" data-kids="パスポート">記録</span></button>
+        <button class="nav-item" data-view="settings" type="button"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label" data-adult="設定" data-kids="設定">設定</span></button>
+      </nav>
+      <button class="install-button" id="installApp" type="button" hidden>インストール</button>
+    </header>
+
+    <main class="app-main" id="mainContent">
+      <section class="experience-switcher" aria-label="表示モード">
+        <div class="experience-copy"><span>あそびかた</span><strong id="experienceModeLabel">こどもモード</strong></div>
+        <div class="experience-control" role="group" aria-label="表示モードを選ぶ">
+          <button class="experience-option active" id="enableKidsMode" type="button" aria-pressed="true">こども</button>
+          <button class="experience-option" id="enableDetailedMode" type="button" aria-pressed="false">くわしく</button>
         </div>
-        <nav class="mode-tabs" aria-label="モード切り替え">
-          <button class="tab active" type="button" data-view="mapView">地球儀マップ</button>
-          <button class="tab" type="button" data-view="flagView">国旗クイズ</button>
-        </nav>
-      </header>
+      </section>
 
-      <section id="mapView" class="view active" aria-labelledby="mapTitle">
-        <div class="map-layout">
-          <section class="globe-panel" aria-labelledby="mapTitle">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Explore</p>
-                <h2 id="mapTitle">世界地図から国を押して調べる</h2>
-              </div>
-              <div class="map-controls" aria-label="地図の拡大縮小">
-                <button id="zoomOut" class="icon-button" type="button" title="縮小" aria-label="縮小">−</button>
-                <button id="zoomReset" class="icon-button" type="button" title="リセット" aria-label="リセット">⌂</button>
-                <button id="zoomIn" class="icon-button" type="button" title="拡大" aria-label="拡大">＋</button>
-              </div>
-            </div>
+      <section class="view active" id="exploreView" aria-labelledby="exploreTitle">
+        <div class="view-heading">
+          <div><p class="eyebrow">Explore 195 countries</p><h1 id="exploreTitle">世界地図から国を知る</h1></div>
+          <span class="data-count" id="countryCount">195か国</span>
+        </div>
 
-            <div class="globe-stage">
-              <svg class="world-map" viewBox="0 0 1000 520" role="img" aria-label="クリックできる二次元の世界地図">
-                <defs>
-                  <linearGradient id="ocean" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#7fd3ff" />
-                    <stop offset="55%" stop-color="#1b88bb" />
-                    <stop offset="100%" stop-color="#0c5d85" />
-                  </linearGradient>
-                  <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#071a2b" flood-opacity=".35" />
-                  </filter>
-                  <clipPath id="mapClip">
-                    <rect x="20" y="24" width="960" height="472" rx="18" />
-                  </clipPath>
-                </defs>
-                <rect class="map-ocean" x="20" y="24" width="960" height="472" rx="18" fill="url(#ocean)" filter="url(#softShadow)" />
-                <path class="graticule" d="M20 142H980M20 260H980M20 378H980M180 24V496M340 24V496M500 24V496M660 24V496M820 24V496" />
-                <g class="continent-layer" clip-path="url(#mapClip)" aria-hidden="true">
-                  <path class="continent-base" d="M70 95l78-34 96 9 73 48-18 78-70 59-98-20-84-70z" />
-                  <path class="continent-base" d="M144 242l80 35 42 85-43 104-70-46-35-92z" />
-                  <path class="continent-base" d="M400 115l95-38 135 16 110 58-30 80-109 48-132-24-91-68z" />
-                  <path class="continent-base" d="M482 230l108 18 80 70-18 110-85 54-76-66-41-109z" />
-                  <path class="continent-base" d="M704 122l127-13 106 51-45 96-112 38-106-46z" />
-                  <path class="continent-base" d="M760 330l116-28 73 56-30 76-120 25-69-58z" />
-                  <path class="coastline" d="M70 95l78-34 96 9 73 48m-173 124l80 35 42 85m135-247l95-38 135 16 110 58m-258 78l108 19 80 70m34-196l127-13 106 51m-177 171l116-28 73 56" />
-                </g>
+        <section class="explore-quiz-launch" aria-labelledby="exploreQuizTitle">
+          <div class="explore-quiz-copy"><span>FLAG + WORLD MAP</span><h2 id="exploreQuizTitle">クイズ</h2><p><ruby>国旗<rt>こっき</rt></ruby>と<ruby>世界地図<rt>せかいちず</rt></ruby>から国を見つけよう</p></div>
+          <div class="quick-quiz-options">
+            <button class="quick-quiz-button" data-quick-length="5" type="button"><span aria-hidden="true">▶</span><strong>5問クイズ</strong><small>さくっと挑戦</small></button>
+            <button class="quick-quiz-button" data-quick-length="10" type="button"><span aria-hidden="true">▶</span><strong>10問クイズ</strong><small>しっかり挑戦</small></button>
+          </div>
+        </section>
+
+        <div class="explore-toolbar">
+          <label class="search-control">
+            <span class="visually-hidden">国を検索</span>
+            <input id="countrySearch" type="search" placeholder="国名・首都・国コードを検索" autocomplete="off" />
+            <div class="search-results" id="searchResults" hidden></div>
+          </label>
+          <label class="region-control">地域<select id="mapRegionFilter"><option value="all">すべての地域</option><option value="Asia">アジア</option><option value="Europe">ヨーロッパ</option><option value="Africa">アフリカ</option><option value="Americas">南北アメリカ</option><option value="Oceania">オセアニア</option></select></label>
+          <div class="map-controls" aria-label="地図操作">
+            <button class="icon-button" id="zoomOut" type="button" aria-label="縮小" title="縮小">−</button>
+            <button class="icon-button" id="zoomReset" type="button" aria-label="全体表示" title="全体表示">⌂</button>
+            <button class="icon-button" id="zoomIn" type="button" aria-label="拡大" title="拡大">＋</button>
+          </div>
+        </div>
+
+        <div class="explore-layout">
+          <section class="map-panel" aria-label="クリックできる世界地図">
+            <div class="map-status"><span id="mapStatus">地図を準備しています</span><button class="text-button" id="focusSelected" type="button">選択中の国へ</button></div>
+            <div class="world-stage">
+              <svg class="world-map" id="worldMap" viewBox="0 0 1000 520" role="img" aria-label="国を選択できる世界地図">
+                <defs><clipPath id="mapClip"><rect x="10" y="10" width="980" height="500" rx="8" /></clipPath></defs>
+                <rect class="map-ocean" x="10" y="10" width="980" height="500" rx="8" />
+                <path class="graticule" d="M10 135H990M10 260H990M10 385H990M173 10V510M337 10V510M500 10V510M663 10V510M827 10V510" />
                 <g id="countryLayer" clip-path="url(#mapClip)"></g>
+                <g id="markerLayer" clip-path="url(#mapClip)"></g>
+                <g id="selectedLabel" aria-hidden="true"></g>
               </svg>
             </div>
           </section>
 
-          <aside class="country-card" id="countryCard" aria-live="polite">
-            <p class="eyebrow">Selected Country</p>
-            <div class="flag-large" id="countryFlag" aria-hidden="true"></div>
-            <h2 id="countryName">日本</h2>
-            <p id="countryRegion">アジア</p>
+          <aside class="country-detail" id="countryDetail" aria-live="polite">
+            <div class="country-head">
+              <div class="flag-frame"><img id="countryFlag" alt="" /></div>
+              <div><p class="eyebrow" id="countryIso">JPN</p><h2 id="countryName">日本</h2><p id="countryNameEn">Japan</p></div>
+            </div>
+            <div class="country-region"><span id="countryRegion">アジア</span><span id="countrySubregion">Eastern Asia</span></div>
+            <figure class="country-postcard">
+              <div class="country-illustration" id="countryIllustration" aria-hidden="true"></div>
+              <figcaption id="countryIllustrationCaption">日本の図鑑イラスト</figcaption>
+            </figure>
             <dl class="country-facts">
-              <div>
-                <dt>首都</dt>
-                <dd id="countryCapital">東京</dd>
-              </div>
-              <div>
-                <dt>特徴</dt>
-                <dd id="countryFeature">島国で、伝統文化と先端技術の両方で知られています。</dd>
-              </div>
+              <div><dt>首都<span class="kid-reading" aria-hidden="true">しゅと</span></dt><dd id="countryCapital">東京</dd></div>
+              <div><dt>面積<span class="kid-reading" aria-hidden="true">めんせき</span></dt><dd id="countryArea">377,930 km²</dd></div>
+              <div><dt>言語<span class="kid-reading" aria-hidden="true">げんご</span></dt><dd id="countryLanguages">Japanese</dd></div>
+              <div><dt>通貨<span class="kid-reading" aria-hidden="true">つうか</span></dt><dd id="countryCurrencies">JPY</dd></div>
             </dl>
-            <button id="startFromCountry" class="primary-button" type="button">この国をクイズに出す</button>
+            <p class="country-feature" id="countryFeature"></p>
+            <section class="country-insights" aria-labelledby="countryInsightsTitle"><h3 id="countryInsightsTitle">この国をもっと知る</h3><ul id="countryInsights"></ul></section>
+            <div class="country-actions"><button class="primary-button" id="quizSelected" type="button">この国から出題</button><button class="secondary-button" id="toggleReview" type="button">復習に追加</button></div>
           </aside>
         </div>
       </section>
 
-      <section id="flagView" class="view" aria-labelledby="flagTitle">
-        <div class="quiz-layout">
-          <section class="quiz-card">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Flag Quiz</p>
-                <h2 id="flagTitle">この国旗はどこの国？</h2>
-              </div>
-              <div class="score" aria-label="スコア">
-                <span id="scoreText">0 / 0</span>
-              </div>
-            </div>
-            <div class="quiz-flag" id="quizFlag" aria-label="出題中の国旗"></div>
-            <div id="choices" class="choices"></div>
-            <p id="feedback" class="feedback" aria-live="polite"></p>
-            <div class="quiz-actions">
-              <button id="nextQuestion" class="primary-button" type="button">次の問題</button>
-              <button id="resetQuiz" class="secondary-button" type="button">リセット</button>
+      <section class="view" id="quizView" aria-labelledby="quizTitle">
+        <div class="view-heading"><div><p class="eyebrow">Quiz session</p><h1 id="quizTitle">国旗・地図・首都クイズ</h1></div><span class="data-count" id="quizMasterCount">195か国収録</span></div>
+
+        <section class="quiz-setup" id="quizSetup">
+          <div class="kids-quiz-intro kids-only">
+            <div class="kids-quiz-symbols" aria-hidden="true"><span>⚑</span><b>＋</b><span>◎</span></div>
+            <div><strong><ruby>国旗<rt>こっき</rt></ruby>と<ruby>世界地図<rt>せかいちず</rt></ruby>をいっしょに見よう</strong><span>見つけた国はパスポートにのこります</span></div>
+          </div>
+          <div class="setup-group" id="quizTypeGroup"><h2>出題形式</h2><div class="segmented" id="quizTypeControl" role="group" aria-label="出題形式"><button class="segment active" data-value="flag" type="button">国旗</button><button class="segment" data-value="map" type="button">地図</button><button class="segment" data-value="capital" type="button">首都</button></div></div>
+          <div class="setup-grid">
+            <label>地域<select id="quizRegion"><option value="all">世界すべて</option><option value="Asia">アジア</option><option value="Europe">ヨーロッパ</option><option value="Africa">アフリカ</option><option value="Americas">南北アメリカ</option><option value="Oceania">オセアニア</option></select></label>
+            <label>難易度<select id="quizDifficulty"><option value="beginner">入門・3択</option><option value="standard" selected>標準・4択</option><option value="challenge">挑戦・6択</option></select></label>
+            <label>問題数<select id="quizLength"><option value="5">5問</option><option value="10">10問</option></select></label>
+          </div>
+          <div class="setup-summary"><div><span>今日の回答</span><strong id="todayAnswers">0問</strong></div><div><span>今日の正答率</span><strong id="todayAccuracy">-</strong></div><div><span>復習対象</span><strong id="reviewCount">0か国</strong></div></div>
+          <div class="setup-actions"><button class="secondary-button" id="startReviewQuiz" type="button">復習クイズ</button><button class="primary-button" id="startQuiz" type="button">クイズを始める</button></div>
+        </section>
+
+        <section class="quiz-session" id="quizSession" hidden>
+          <div class="session-topline"><button class="text-button" id="quitQuiz" type="button">終了</button><div class="session-progress"><span id="questionNumber">1 / 10</span><div class="progress-track"><span id="progressBar"></span></div></div><div class="session-score"><span>正解 <strong id="sessionScore">0</strong></span><span>連続 <strong id="sessionStreak">0</strong></span></div></div>
+          <div class="question-layout">
+            <section class="question-panel">
+              <p class="eyebrow" id="questionTypeLabel">Flag quiz</p>
+              <h2 id="questionPrompt">この国旗はどこの国？</h2>
+              <div class="question-visual" id="questionVisual"></div>
+              <div class="choices" id="choices"></div>
+              <div class="feedback" id="feedback" aria-live="polite"></div>
+              <div class="question-actions"><button class="secondary-button" id="showHint" type="button">ヒント</button><button class="primary-button" id="nextQuestion" type="button" hidden>次の問題</button></div>
+            </section>
+            <aside class="hint-panel"><p class="eyebrow">Learning note</p><h2 id="hintTitle">ヒント</h2><p id="hintText">地域や首都から考えてみましょう。</p><dl><div><dt>地域</dt><dd id="hintRegion">-</dd></div><div><dt>首都</dt><dd id="hintCapital">-</dd></div></dl></aside>
+          </div>
+        </section>
+
+        <section class="quiz-result" id="quizResult" hidden>
+          <p class="eyebrow">Session complete</p><h2>今回の結果</h2>
+          <div class="result-score"><strong id="resultPercent">0%</strong><span id="resultDetail">0 / 10 正解</span></div>
+          <div class="result-grid"><div><span>最高連続</span><strong id="resultStreak">0問</strong></div><div><span>ヒント使用</span><strong id="resultHints">0回</strong></div><div><span>復習へ追加</span><strong id="resultReview">0か国</strong></div></div>
+          <div class="result-actions"><button class="secondary-button" id="backToSetup" type="button">クイズを選ぶ</button><button class="secondary-button" id="retryQuiz" type="button">もう一度</button><button class="primary-button" id="viewPassport" type="button">パスポートで地図を見る</button></div>
+        </section>
+      </section>
+
+      <section class="view" id="progressView" aria-labelledby="progressTitle">
+        <div class="view-heading"><div><p class="eyebrow">Learning progress</p><h1 id="progressTitle">学習記録</h1></div><button class="primary-button" id="progressReviewQuiz" type="button">復習を始める</button></div>
+        <section class="passport-section" aria-labelledby="passportTitle">
+          <div class="passport-summary">
+            <div><span class="passport-kicker">WORLD PASSPORT</span><h2 id="passportTitle"><ruby>世界<rt>せかい</rt></ruby>パスポート</h2><p>クイズで正解した国のスタンプ</p></div>
+            <div class="passport-total" aria-live="polite"><strong id="passportCount">0</strong><span id="passportTotal">/ 195か国</span></div>
+          </div>
+          <div class="passport-progress" aria-label="パスポートの進み具合"><span id="passportProgressBar"></span></div>
+          <section class="passport-map-panel" aria-labelledby="passportMapTitle">
+            <div class="passport-map-heading"><h3 id="passportMapTitle">正解した国の世界地図</h3><div class="passport-map-legend" aria-label="地図の凡例"><span class="is-stamped">正解した国</span><span>未正解</span></div></div>
+            <div class="passport-world-stage">
+              <svg id="passportWorldMap" viewBox="0 0 1000 520" role="img" aria-label="正解した国に色が付く世界地図">
+                <defs><clipPath id="passportMapClip"><rect x="10" y="10" width="980" height="500" rx="8" /></clipPath></defs>
+                <rect class="passport-map-ocean" x="10" y="10" width="980" height="500" rx="8" />
+                <path class="passport-map-graticule" d="M10 135H990M10 260H990M10 385H990M173 10V510M337 10V510M500 10V510M663 10V510M827 10V510" />
+                <g id="passportCountryLayer" clip-path="url(#passportMapClip)"></g>
+                <g id="passportMarkerLayer" clip-path="url(#passportMapClip)"></g>
+              </svg>
             </div>
           </section>
-
-          <aside class="learning-panel">
-            <p class="eyebrow">Hint</p>
-            <h2 id="hintTitle">ヒント</h2>
-            <p id="hintText">国旗の色や形、地域の特徴を見て考えてみましょう。</p>
-          </aside>
+          <div class="passport-grid" id="passportGrid"><div class="empty-state"><strong>スタンプはまだありません</strong><span>クイズに正解すると国がここに記録されます。</span></div></div>
+        </section>
+        <div class="metrics-grid"><article><span>回答数</span><strong id="totalAnswers">0</strong></article><article><span>正答率</span><strong id="overallAccuracy">-</strong></article><article><span>習得した国</span><strong id="masteredCountries">0</strong></article><article><span>最高連続</span><strong id="bestStreak">0</strong></article></div>
+        <div class="progress-layout">
+          <section class="region-progress"><div class="section-heading"><h2>地域別の進み具合</h2><span>回答済みの国</span></div><div id="regionProgressList"></div></section>
+          <section class="review-list"><div class="section-heading"><h2>復習する国</h2><span id="weakCount">0か国</span></div><div id="weakCountryList"></div></section>
         </div>
+        <section class="history-section"><div class="section-heading"><h2>最近のクイズ</h2><span>直近20回</span></div><div class="history-list" id="historyList"></div></section>
+      </section>
+
+      <section class="view" id="settingsView" aria-labelledby="settingsTitle">
+        <div class="view-heading"><div><p class="eyebrow">Local data</p><h1 id="settingsTitle">データと設定</h1></div><span class="storage-badge" id="storageBadge">確認中</span></div>
+        <section class="settings-band"><div><h2>バックアップ</h2><dl><div><dt>回答数</dt><dd id="backupAnswerCount">0問</dd></div><div><dt>最終保存</dt><dd id="lastSavedAt">-</dd></div></dl></div><div class="settings-actions"><button class="primary-button" id="exportBackup" type="button">JSONを書き出す</button><button class="secondary-button" id="openRestore" type="button">JSONから復元</button><input id="restoreInput" type="file" accept="application/json,.json" hidden /></div></section>
+        <section class="settings-band"><div><h2>国マスター</h2><dl><div><dt>利用可能</dt><dd id="masterCountryCount">195か国</dd></div><div><dt>マスター版</dt><dd id="masterVersion">-</dd></div></dl></div><div class="settings-actions"><button class="primary-button" id="importMaster" type="button">マスターを追加</button><button class="secondary-button" id="exportMasterTemplate" type="button">テンプレート</button><input id="masterInput" type="file" accept="application/json,.json" hidden /></div></section>
+        <section class="settings-band"><div><h2>学習記録</h2><dl><div><dt>保存先</dt><dd>この端末</dd></div><div><dt>アプリ版</dt><dd>1.2.1</dd></div></dl></div><div class="settings-actions"><button class="danger-button" id="resetProgress" type="button">記録をリセット</button></div></section>
+        <section class="settings-band"><div><h2>データ出典</h2><p>国名・国旗・国境データ</p></div><div class="settings-actions"><a class="secondary-button link-button" href="https://github.com/mledoze/countries" target="_blank" rel="noreferrer">mledoze/countries・ODbL</a></div></section>
       </section>
     </main>
 
+    <dialog id="restoreDialog" class="restore-dialog"><form method="dialog"><p class="eyebrow">Restore</p><h2>復元方法を選択</h2><p id="restoreSummary"></p><div class="dialog-actions"><button class="secondary-button" value="cancel">キャンセル</button><button class="secondary-button" id="mergeRestore" value="merge">現在の記録に追加</button><button class="danger-button" id="replaceRestore" value="replace">すべて置き換える</button></div></form></dialog>
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
     <script src="./app.js"></script>
   </body>
 </html>

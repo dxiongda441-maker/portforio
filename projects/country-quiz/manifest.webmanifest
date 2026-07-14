@@ -1,0 +1,24 @@
+{
+  "id": "world-country-quiz",
+  "name": "世界の国クイズ - World Atlas Quiz",
+  "short_name": "国クイズ",
+  "description": "国旗と世界地図で195か国を学び、再出題と色付き世界パスポートで復習できるオフライン対応クイズ。",
+  "lang": "ja",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#eef3f1",
+  "theme_color": "#0b5f7a",
+  "categories": ["education", "games"],
+  "icons": [
+    { "src": "./assets/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/app-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "クイズを始める", "short_name": "クイズ", "url": "./index.html?view=quiz", "icons": [{ "src": "./assets/app-icon-192.png", "sizes": "192x192" }] },
+    { "name": "世界パスポートを見る", "short_name": "パスポート", "url": "./index.html?view=progress", "icons": [{ "src": "./assets/app-icon-192.png", "sizes": "192x192" }] }
+  ]
+}

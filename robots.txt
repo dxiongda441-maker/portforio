@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dxiongda441-maker.github.io/portforio/sitemap.xml

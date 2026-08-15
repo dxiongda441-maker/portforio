@@ -9,6 +9,8 @@
       content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくるオルタのポートフォリオ。実際に操作できるPWAと学習アプリ、AIアニメの制作ケーススタディを公開しています。"
     />
     <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <meta name="theme-color" content="#211812" />
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
@@ -42,6 +44,16 @@
         --leaf: #7d8a43;
         --persimmon: #c66b32;
         --gold: #d8aa4d;
+
+        /* 背景写真は外部(Unsplash)を参照している。ローカルに置き換えるときは
+           tools/fetch-backgrounds.sh を実行すると、この6行が自動で書き換わる。
+           各セクションには読み込み失敗時に備えた下地色を別途指定している。 */
+        --bg-hero: url("https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=2400&q=90");
+        --bg-spring: url("https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2200&q=90");
+        --bg-summer: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=90");
+        --bg-autumn: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90");
+        --bg-winter: url("https://images.unsplash.com/photo-1483664852095-d6cc6870702d?auto=format&fit=crop&w=2200&q=90");
+        --bg-contact: url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90");
       }
 
       @keyframes slow-drift {
@@ -133,7 +145,8 @@
 
       .hero-media {
         animation: slow-drift 28s ease-in-out infinite;
-        background-image: url("https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=2400&q=90");
+        background-color: #241a11;
+        background-image: var(--bg-hero);
         background-position: center;
         background-size: cover;
         inset: 0;
@@ -263,19 +276,23 @@
       }
 
       .season-section.spring::before {
-        background-image: url("https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2200&q=90");
+        background-color: #3a2a2e;
+        background-image: var(--bg-spring);
       }
 
       .season-section.summer::before {
-        background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=90");
+        background-color: #1f2e22;
+        background-image: var(--bg-summer);
       }
 
       .season-section.autumn::before {
-        background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90");
+        background-color: #33241a;
+        background-image: var(--bg-autumn);
       }
 
       .season-section.winter::before {
-        background-image: url("https://images.unsplash.com/photo-1483664852095-d6cc6870702d?auto=format&fit=crop&w=2200&q=90");
+        background-color: #22303a;
+        background-image: var(--bg-winter);
       }
 
       .season-overlay {
@@ -506,10 +523,11 @@
 
       .contact {
         animation: contact-drift 34s ease-in-out infinite;
-        background:
+        background-color: #241a11;
+        background-image:
           linear-gradient(90deg, rgba(28, 18, 11, 0.78), rgba(28, 18, 11, 0.28) 62%),
           linear-gradient(0deg, rgba(28, 18, 11, 0.74), rgba(28, 18, 11, 0.16) 54%),
-          url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90");
+          var(--bg-contact);
         background-position: center;
         background-size: cover;
         color: #fffaf1;

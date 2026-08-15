@@ -30,14 +30,31 @@ python3 -m http.server 3000
 
 ```
 index.html          トップページ（HTML・CSSを1ファイルに同梱）
+404.html            存在しないURLに来たときのページ
+robots.txt          クローラ向け設定
+sitemap.xml         トップと全作品ページのURL一覧
 assets/
   favicon.svg       サイトのファビコン
   apple-touch-icon.png
   og-cover.jpg      SNSシェア用のOGP画像（1200×630）
   portfolio/        作品カードのサムネイル
 projects/           各作品の実体。1ディレクトリ＝1作品で完結
+tools/              メンテナンス用スクリプト
 .github/workflows/  main へのpushでGitHub Pagesへ自動デプロイ
 ```
+
+## 背景写真をローカルに置き換える
+
+トップページの背景写真6枚は、現在Unsplashを直接参照しています。表示速度を安定させたい、
+オフラインでも背景を出したい場合は、次のコマンドでローカルに取り込めます。
+
+```bash
+bash tools/fetch-backgrounds.sh
+```
+
+6枚を `assets/backgrounds/` にダウンロードし（`cwebp` があればWebPに変換）、
+`index.html` の `--bg-*` 変数をローカルパスへ自動で書き換えます。何度実行しても結果は同じです。
+取り込んだ画像はコミットしてください。
 
 ## 差し替える場所
 

@@ -68,8 +68,20 @@ bash tools/fetch-backgrounds.sh
 | 連絡先 | `#contact` セクション |
 | SNSシェア時のタイトル・説明・画像 | `<head>` 内の `og:` / `twitter:` メタタグ |
 
-作品を追加するときは `projects/` に新しいディレクトリを作り、`index.html` の
-`.works-grid` にカードを1枚追加し、サムネイルを `assets/portfolio/` に置きます。
+## 作品を追加するとき
+
+1. `projects/` に新しいディレクトリを作る
+2. サムネイルを `assets/portfolio/` に置く。表示用のWebPと、OGP・フォールバック用の
+   JPEGを1枚ずつ、どちらも 1280×800 で用意する
+3. `index.html` の `.works-grid` にカードを追加する。画像は `<picture>` で
+   WebPを先に、JPEGをフォールバックとして指定する
+4. 作品ページ側に次を入れる（既存の作品ページが参考になる）
+   - `<a class="portfolio-back" href="../../">` の戻り導線
+   - `description` / `canonical` / OGP / Twitter Card / `rel="icon"`
+
+Service Worker を持たせる場合、キャッシュ名は必ず作品ごとのプレフィックスにして、
+`activate` での削除も自分のプレフィックスに限定してください。GitHub Pages では
+全作品が同一オリジンで動くため、Cache Storage を共有しています。
 
 ## デプロイ
 

@@ -358,6 +358,11 @@
         position: relative;
       }
 
+      .project-media picture {
+        display: block;
+        height: 100%;
+      }
+
       .project-media img {
         height: 100%;
         object-fit: cover;
@@ -682,56 +687,80 @@
           <div class="works-grid">
             <article class="project-card">
               <a class="project-media" href="./projects/reading-shelf/" target="_blank" rel="noreferrer" aria-label="Reading Shelfを開く">
-                <img src="./assets/portfolio/reading-shelf.jpg" alt="Reading Shelfの読書棚画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/reading-shelf.webp" type="image/webp" />
+                  <img src="./assets/portfolio/reading-shelf.jpg" alt="Reading Shelfの読書棚画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">01</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Reading</span><span>2026</span></div><h3>Reading Shelf</h3><p class="project-description">読んだ本、読む前の期待、進捗を一つの本棚に整理する読書記録PWA。</p><div class="project-tags"><span>PWA</span><span>Local Storage</span><span>Responsive</span></div><a class="project-link" href="./projects/reading-shelf/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/wabisabi/" target="_blank" rel="noreferrer" aria-label="三分録を開く">
-                <img src="./assets/portfolio/wabisabi.jpg" alt="三分録の録音画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/wabisabi.webp" type="image/webp" />
+                  <img src="./assets/portfolio/wabisabi.jpg" alt="三分録の録音画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">02</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Voice</span><span>2026</span></div><h3>三分録</h3><p class="project-description">毎日3分の録音を習慣化し、記録からX・Substack向けの発信案までつなぐ。</p><div class="project-tags"><span>Audio</span><span>Speech</span><span>PWA</span></div><a class="project-link" href="./projects/wabisabi/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/levellog/" target="_blank" rel="noreferrer" aria-label="LevelLogを開く">
-                <img src="./assets/portfolio/levellog.jpg" alt="LevelLogのクエスト管理画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/levellog.webp" type="image/webp" />
+                  <img src="./assets/portfolio/levellog.jpg" alt="LevelLogのクエスト管理画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">03</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Productivity</span><span>2026</span></div><h3>LevelLog</h3><p class="project-description">行動をEXPに変換し、レベル、時間価値、週次レビューを可視化する習慣アプリ。</p><div class="project-tags"><span>Gamification</span><span>Local Storage</span><span>PWA</span></div><a class="project-link" href="./projects/levellog/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/quote/" target="_blank" rel="noreferrer" aria-label="1日1名言を開く">
-                <img src="./assets/portfolio/one-day-one-quote.jpg" alt="1日1名言の日替わり画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/one-day-one-quote.webp" type="image/webp" />
+                  <img src="./assets/portfolio/one-day-one-quote.jpg" alt="1日1名言の日替わり画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">04</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Daily</span><span>2026</span></div><h3>1日1名言</h3><p class="project-description">日替わりの名言、今日の行動、振り返りを一画面で続けるモバイルPWA。</p><div class="project-tags"><span>Daily Content</span><span>Notifications</span><span>PWA</span></div><a class="project-link" href="./projects/quote/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/country-quiz/" target="_blank" rel="noreferrer" aria-label="世界の国クイズを開く">
-                <img src="./assets/portfolio/world-country-quiz-cover.jpg" alt="地球と国旗を描いた世界の国クイズの表紙" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/world-country-quiz-cover.webp" type="image/webp" />
+                  <img src="./assets/portfolio/world-country-quiz-cover.jpg" alt="地球と国旗を描いた世界の国クイズの表紙" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">05</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>Game / Learning</span><span>2026</span></div><h3>世界の国クイズ</h3><p class="project-description">地図で国を探索し、国旗クイズで知識を確かめるインタラクティブ学習ゲーム。</p><div class="project-tags"><span>Quiz</span><span>SVG Map</span><span>Interactive</span></div><a class="project-link" href="./projects/country-quiz/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/cat-quiz/" target="_blank" rel="noreferrer" aria-label="世界ねこ図鑑クイズを開く">
-                <img src="./assets/portfolio/cat-quiz.jpg" alt="世界ねこ図鑑クイズのトップ画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/cat-quiz.webp" type="image/webp" />
+                  <img src="./assets/portfolio/cat-quiz.jpg" alt="世界ねこ図鑑クイズのトップ画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">06</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>Game / Encyclopedia</span><span>2026</span></div><h3>世界ねこ図鑑クイズ</h3><p class="project-description">36種の猫を写真、生態、地域から学べる図鑑と確認クイズの学習体験。</p><div class="project-tags"><span>Data UI</span><span>Quiz</span><span>Responsive</span></div><a class="project-link" href="./projects/cat-quiz/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/contracts/" target="_blank" rel="noreferrer" aria-label="ビジネス契約ラーニングを開く">
-                <img src="./assets/portfolio/business-contracts.jpg" alt="ビジネス契約ラーニングの契約一覧画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/business-contracts.webp" type="image/webp" />
+                  <img src="./assets/portfolio/business-contracts.jpg" alt="ビジネス契約ラーニングの契約一覧画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">07</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Learning</span><span>2026</span></div><h3>ビジネス契約ラーニング</h3><p class="project-description">起業、転職、副業で出会う8種類の契約を学び、16問で確認できる学習アプリ。</p><div class="project-tags"><span>Research</span><span>Quiz</span><span>Information Design</span></div><a class="project-link" href="./projects/contracts/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/money-anime/" target="_blank" rel="noreferrer" aria-label="AIアニメ制作ケーススタディを開く">
-                <img src="./assets/portfolio/money-anime.jpg" alt="100円玉が日本の山里から冒険へ出発するAIアニメのキービジュアル" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/money-anime.webp" type="image/webp" />
+                  <img src="./assets/portfolio/money-anime.jpg" alt="100円玉が日本の山里から冒険へ出発するAIアニメのキービジュアル" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">08</span><span class="project-status">Case Study</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>AI Anime / Production</span><span>2026</span></div><h3>100円が冒険に出た!?</h3><p class="project-description">投資の仕組みを子どもに伝える60秒縦型AIアニメの企画・演出・生成設計。</p><div class="project-tags"><span>Script</span><span>Prompt Design</span><span>Storyboarding</span></div><a class="project-link" href="./projects/money-anime/" target="_blank" rel="noreferrer">ケースを見る <span>↗</span></a></div>

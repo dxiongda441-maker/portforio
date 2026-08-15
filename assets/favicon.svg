@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="オルタ Portfolio">
+  <defs>
+    <clipPath id="rounded">
+      <rect width="64" height="64" rx="14" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#rounded)">
+    <rect width="64" height="64" fill="#211812" />
+    <circle cx="41" cy="23" r="10.5" fill="#d8aa4d" />
+    <path d="M0 44 C 12 34, 24 43, 34 39 C 44 35, 55 41, 64 36 L 64 64 L 0 64 Z" fill="#506341" />
+    <path d="M0 51 C 14 43, 26 51, 38 47 C 48 44, 57 49, 64 46 L 64 64 L 0 64 Z" fill="#7d8a43" />
+  </g>
+</svg>

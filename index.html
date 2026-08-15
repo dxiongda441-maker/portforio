@@ -3,7 +3,35 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>オルタ | Portfolio Preview</title>
+    <title>オルタ | Creative Developer / Artist</title>
+    <meta
+      name="description"
+      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくるオルタのポートフォリオ。実際に操作できるPWAと学習アプリ、AIアニメの制作ケーススタディを公開しています。"
+    />
+    <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/" />
+    <meta name="theme-color" content="#211812" />
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="オルタ Portfolio" />
+    <meta property="og:title" content="オルタ | Creative Developer / Artist" />
+    <meta
+      property="og:description"
+      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくっています。操作できるPWA・学習アプリとAIアニメの制作ケーススタディを公開中。"
+    />
+    <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/" />
+    <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/og-cover.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="オルタ - Creative Developer / Artist のポートフォリオ表紙" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="オルタ | Creative Developer / Artist" />
+    <meta
+      name="twitter:description"
+      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくっています。操作できるPWA・学習アプリとAIアニメの制作ケーススタディを公開中。"
+    />
+    <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/og-cover.jpg" />
     <style>
       :root {
         --ink: #211812;
@@ -464,8 +492,6 @@
       .winter-layout {
         align-items: end;
         display: grid;
-        gap: clamp(36px, 6vw, 88px);
-        grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
         min-height: 88svh;
       }
 
@@ -476,31 +502,6 @@
       .story-copy p:last-child {
         font-size: clamp(16px, 1.8vw, 21px);
         line-height: 1.9;
-      }
-
-      .video-placeholder {
-        align-content: center;
-        aspect-ratio: 16 / 9;
-        background: rgba(255, 250, 241, 0.1);
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(255, 250, 241, 0.28);
-        border-radius: 8px;
-        display: grid;
-        min-height: 220px;
-        padding: 28px;
-      }
-
-      .video-placeholder span {
-        color: var(--gold);
-        font-size: 13px;
-        font-weight: 900;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-      }
-
-      .video-placeholder strong {
-        font-size: clamp(24px, 3vw, 42px);
-        line-height: 1.08;
       }
 
       .contact {
@@ -524,26 +525,32 @@
         padding: 28px;
       }
 
-      .email {
-        display: block;
-        font-size: clamp(22px, 3vw, 38px);
+      .contact-note {
+        color: rgba(255, 250, 241, 0.82);
+        line-height: 1.9;
+        margin-bottom: 22px;
+      }
+
+      .primary-contact {
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 250, 241, 0.62);
+        display: inline-flex;
+        font-size: clamp(17px, 2vw, 26px);
         font-weight: 900;
-        overflow-wrap: anywhere;
-      }
-
-      .socials {
-        display: flex;
-        flex-wrap: wrap;
         gap: 12px;
-        margin-top: 28px;
+        overflow-wrap: anywhere;
+        padding-bottom: 8px;
       }
 
-      .socials a {
-        border: 1px solid rgba(255, 250, 241, 0.3);
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 800;
-        padding: 10px 14px;
+      .primary-contact:hover,
+      .primary-contact:focus-visible {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+
+      .primary-contact:focus-visible {
+        outline: 2px solid #fffaf1;
+        outline-offset: 4px;
       }
 
       @media (max-width: 980px) {
@@ -562,9 +569,6 @@
           gap: 18px;
         }
 
-        .winter-layout {
-          grid-template-columns: 1fr;
-        }
       }
 
       @media (max-width: 640px) {
@@ -743,26 +747,26 @@
             <h2>速さよりも、長く残る余韻を。</h2>
             <p>日本の伝統文化が持つ余白、静けさ、素材への敬意。その感覚を、Web、ゲーム、映像、音楽の体験に取り入れます。</p>
           </div>
-          <div class="video-placeholder">
-            <span>Introduction Video</span>
-            <strong>紹介動画をここに配置予定</strong>
-          </div>
         </div>
       </section>
 
       <section id="contact" class="section contact">
         <div>
           <p class="section-label">Contact</p>
-          <h2>制作の相談、コラボレーション、出演・発表の連絡はこちらへ。</h2>
+          <h2>制作の相談やコラボレーションは、GitHubからご連絡ください。</h2>
         </div>
         <div class="contact-card">
-          <a class="email" href="mailto:hello@example.com">hello@example.com</a>
-          <div class="socials">
-            <a href="https://x.com/">X</a>
-            <a href="https://www.instagram.com/">Instagram</a>
-            <a href="https://www.youtube.com/">YouTube</a>
-            <a href="https://github.com/">GitHub</a>
-          </div>
+          <p class="contact-note">掲載している作品のソースコードと最新の更新は、すべてGitHubで公開しています。</p>
+          <p class="section-label">GitHub</p>
+          <a
+            class="primary-contact"
+            href="https://github.com/dxiongda441-maker"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="GitHubプロフィール dxiongda441-maker を開く"
+          >
+            dxiongda441-maker <span aria-hidden="true">↗</span>
+          </a>
         </div>
       </section>
     </main>

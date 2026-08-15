@@ -1,4 +1,7 @@
-const CACHE_NAME = "world-country-quiz-v8";
+// GitHub Pages では全アプリが同一オリジンのため Cache Storage を共有する。
+// 後片付けは自分のプレフィックスを持つものだけに限定する。
+const CACHE_PREFIX = "world-country-quiz-";
+const CACHE_NAME = `${CACHE_PREFIX}v8`;
 const CORE_SHELL = [
   "./",
   "./index.html",
@@ -50,7 +53,7 @@ self.addEventListener("message", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))));
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map((key) => caches.delete(key)))));
   self.clients.claim();
 });
 

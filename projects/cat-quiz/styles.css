@@ -301,6 +301,12 @@ h3 {
   object-fit: cover;
 }
 
+/* display:block が hidden 属性を打ち消してしまうため、
+   読み込み前後の img が壊れた画像として見えないようにする。 */
+.cat-media img[hidden] {
+  display: none;
+}
+
 .cat-media .loading {
   position: absolute;
   inset: 0;
@@ -310,6 +316,23 @@ h3 {
   color: #4f5f59;
   font-weight: 800;
   text-align: center;
+}
+
+.cat-media .loading.is-fallback {
+  align-content: center;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.cat-media .fallback-mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 2px solid rgba(79, 95, 89, 0.45);
+  border-radius: 50%;
+  font-size: 20px;
 }
 
 .cat-body {

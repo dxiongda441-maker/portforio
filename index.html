@@ -3,7 +3,37 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>オルタ | Portfolio Preview</title>
+    <title>オルタ | Creative Developer / Artist</title>
+    <meta
+      name="description"
+      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくるオルタのポートフォリオ。実際に操作できるPWAと学習アプリ、AIアニメの制作ケーススタディを公開しています。"
+    />
+    <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <meta name="theme-color" content="#211812" />
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="オルタ Portfolio" />
+    <meta property="og:title" content="オルタ | Creative Developer / Artist" />
+    <meta
+      property="og:description"
+      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくっています。操作できるPWA・学習アプリとAIアニメの制作ケーススタディを公開中。"
+    />
+    <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/" />
+    <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/og-cover.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="オルタ - Creative Developer / Artist のポートフォリオ表紙" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="オルタ | Creative Developer / Artist" />
+    <meta
+      name="twitter:description"
+      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくっています。操作できるPWA・学習アプリとAIアニメの制作ケーススタディを公開中。"
+    />
+    <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/og-cover.jpg" />
     <style>
       :root {
         --ink: #211812;
@@ -14,6 +44,16 @@
         --leaf: #7d8a43;
         --persimmon: #c66b32;
         --gold: #d8aa4d;
+
+        /* 背景写真は外部(Unsplash)を参照している。ローカルに置き換えるときは
+           tools/fetch-backgrounds.sh を実行すると、この6行が自動で書き換わる。
+           各セクションには読み込み失敗時に備えた下地色を別途指定している。 */
+        --bg-hero: url("https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=2400&q=90");
+        --bg-spring: url("https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2200&q=90");
+        --bg-summer: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=90");
+        --bg-autumn: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90");
+        --bg-winter: url("https://images.unsplash.com/photo-1483664852095-d6cc6870702d?auto=format&fit=crop&w=2200&q=90");
+        --bg-contact: url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90");
       }
 
       @keyframes slow-drift {
@@ -105,7 +145,8 @@
 
       .hero-media {
         animation: slow-drift 28s ease-in-out infinite;
-        background-image: url("https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=2400&q=90");
+        background-color: #241a11;
+        background-image: var(--bg-hero);
         background-position: center;
         background-size: cover;
         inset: 0;
@@ -235,19 +276,23 @@
       }
 
       .season-section.spring::before {
-        background-image: url("https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2200&q=90");
+        background-color: #3a2a2e;
+        background-image: var(--bg-spring);
       }
 
       .season-section.summer::before {
-        background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=90");
+        background-color: #1f2e22;
+        background-image: var(--bg-summer);
       }
 
       .season-section.autumn::before {
-        background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90");
+        background-color: #33241a;
+        background-image: var(--bg-autumn);
       }
 
       .season-section.winter::before {
-        background-image: url("https://images.unsplash.com/photo-1483664852095-d6cc6870702d?auto=format&fit=crop&w=2200&q=90");
+        background-color: #22303a;
+        background-image: var(--bg-winter);
       }
 
       .season-overlay {
@@ -311,6 +356,11 @@
         display: block;
         overflow: hidden;
         position: relative;
+      }
+
+      .project-media picture {
+        display: block;
+        height: 100%;
       }
 
       .project-media img {
@@ -464,8 +514,6 @@
       .winter-layout {
         align-items: end;
         display: grid;
-        gap: clamp(36px, 6vw, 88px);
-        grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
         min-height: 88svh;
       }
 
@@ -478,37 +526,13 @@
         line-height: 1.9;
       }
 
-      .video-placeholder {
-        align-content: center;
-        aspect-ratio: 16 / 9;
-        background: rgba(255, 250, 241, 0.1);
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(255, 250, 241, 0.28);
-        border-radius: 8px;
-        display: grid;
-        min-height: 220px;
-        padding: 28px;
-      }
-
-      .video-placeholder span {
-        color: var(--gold);
-        font-size: 13px;
-        font-weight: 900;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-      }
-
-      .video-placeholder strong {
-        font-size: clamp(24px, 3vw, 42px);
-        line-height: 1.08;
-      }
-
       .contact {
         animation: contact-drift 34s ease-in-out infinite;
-        background:
+        background-color: #241a11;
+        background-image:
           linear-gradient(90deg, rgba(28, 18, 11, 0.78), rgba(28, 18, 11, 0.28) 62%),
           linear-gradient(0deg, rgba(28, 18, 11, 0.74), rgba(28, 18, 11, 0.16) 54%),
-          url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90");
+          var(--bg-contact);
         background-position: center;
         background-size: cover;
         color: #fffaf1;
@@ -524,26 +548,32 @@
         padding: 28px;
       }
 
-      .email {
-        display: block;
-        font-size: clamp(22px, 3vw, 38px);
+      .contact-note {
+        color: rgba(255, 250, 241, 0.82);
+        line-height: 1.9;
+        margin-bottom: 22px;
+      }
+
+      .primary-contact {
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 250, 241, 0.62);
+        display: inline-flex;
+        font-size: clamp(17px, 2vw, 26px);
         font-weight: 900;
-        overflow-wrap: anywhere;
-      }
-
-      .socials {
-        display: flex;
-        flex-wrap: wrap;
         gap: 12px;
-        margin-top: 28px;
+        overflow-wrap: anywhere;
+        padding-bottom: 8px;
       }
 
-      .socials a {
-        border: 1px solid rgba(255, 250, 241, 0.3);
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 800;
-        padding: 10px 14px;
+      .primary-contact:hover,
+      .primary-contact:focus-visible {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+
+      .primary-contact:focus-visible {
+        outline: 2px solid #fffaf1;
+        outline-offset: 4px;
       }
 
       @media (max-width: 980px) {
@@ -562,9 +592,6 @@
           gap: 18px;
         }
 
-        .winter-layout {
-          grid-template-columns: 1fr;
-        }
       }
 
       @media (max-width: 640px) {
@@ -660,56 +687,80 @@
           <div class="works-grid">
             <article class="project-card">
               <a class="project-media" href="./projects/reading-shelf/" target="_blank" rel="noreferrer" aria-label="Reading Shelfを開く">
-                <img src="./assets/portfolio/reading-shelf.jpg" alt="Reading Shelfの読書棚画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/reading-shelf.webp" type="image/webp" />
+                  <img src="./assets/portfolio/reading-shelf.jpg" alt="Reading Shelfの読書棚画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">01</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Reading</span><span>2026</span></div><h3>Reading Shelf</h3><p class="project-description">読んだ本、読む前の期待、進捗を一つの本棚に整理する読書記録PWA。</p><div class="project-tags"><span>PWA</span><span>Local Storage</span><span>Responsive</span></div><a class="project-link" href="./projects/reading-shelf/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/wabisabi/" target="_blank" rel="noreferrer" aria-label="三分録を開く">
-                <img src="./assets/portfolio/wabisabi.jpg" alt="三分録の録音画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/wabisabi.webp" type="image/webp" />
+                  <img src="./assets/portfolio/wabisabi.jpg" alt="三分録の録音画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">02</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Voice</span><span>2026</span></div><h3>三分録</h3><p class="project-description">毎日3分の録音を習慣化し、記録からX・Substack向けの発信案までつなぐ。</p><div class="project-tags"><span>Audio</span><span>Speech</span><span>PWA</span></div><a class="project-link" href="./projects/wabisabi/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/levellog/" target="_blank" rel="noreferrer" aria-label="LevelLogを開く">
-                <img src="./assets/portfolio/levellog.jpg" alt="LevelLogのクエスト管理画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/levellog.webp" type="image/webp" />
+                  <img src="./assets/portfolio/levellog.jpg" alt="LevelLogのクエスト管理画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">03</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Productivity</span><span>2026</span></div><h3>LevelLog</h3><p class="project-description">行動をEXPに変換し、レベル、時間価値、週次レビューを可視化する習慣アプリ。</p><div class="project-tags"><span>Gamification</span><span>Local Storage</span><span>PWA</span></div><a class="project-link" href="./projects/levellog/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/quote/" target="_blank" rel="noreferrer" aria-label="1日1名言を開く">
-                <img src="./assets/portfolio/one-day-one-quote.jpg" alt="1日1名言の日替わり画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/one-day-one-quote.webp" type="image/webp" />
+                  <img src="./assets/portfolio/one-day-one-quote.jpg" alt="1日1名言の日替わり画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">04</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Daily</span><span>2026</span></div><h3>1日1名言</h3><p class="project-description">日替わりの名言、今日の行動、振り返りを一画面で続けるモバイルPWA。</p><div class="project-tags"><span>Daily Content</span><span>Notifications</span><span>PWA</span></div><a class="project-link" href="./projects/quote/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/country-quiz/" target="_blank" rel="noreferrer" aria-label="世界の国クイズを開く">
-                <img src="./assets/portfolio/world-country-quiz-cover.jpg" alt="地球と国旗を描いた世界の国クイズの表紙" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/world-country-quiz-cover.webp" type="image/webp" />
+                  <img src="./assets/portfolio/world-country-quiz-cover.jpg" alt="地球と国旗を描いた世界の国クイズの表紙" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">05</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>Game / Learning</span><span>2026</span></div><h3>世界の国クイズ</h3><p class="project-description">地図で国を探索し、国旗クイズで知識を確かめるインタラクティブ学習ゲーム。</p><div class="project-tags"><span>Quiz</span><span>SVG Map</span><span>Interactive</span></div><a class="project-link" href="./projects/country-quiz/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/cat-quiz/" target="_blank" rel="noreferrer" aria-label="世界ねこ図鑑クイズを開く">
-                <img src="./assets/portfolio/cat-quiz.jpg" alt="世界ねこ図鑑クイズのトップ画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/cat-quiz.webp" type="image/webp" />
+                  <img src="./assets/portfolio/cat-quiz.jpg" alt="世界ねこ図鑑クイズのトップ画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">06</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>Game / Encyclopedia</span><span>2026</span></div><h3>世界ねこ図鑑クイズ</h3><p class="project-description">36種の猫を写真、生態、地域から学べる図鑑と確認クイズの学習体験。</p><div class="project-tags"><span>Data UI</span><span>Quiz</span><span>Responsive</span></div><a class="project-link" href="./projects/cat-quiz/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/contracts/" target="_blank" rel="noreferrer" aria-label="ビジネス契約ラーニングを開く">
-                <img src="./assets/portfolio/business-contracts.jpg" alt="ビジネス契約ラーニングの契約一覧画面" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/business-contracts.webp" type="image/webp" />
+                  <img src="./assets/portfolio/business-contracts.jpg" alt="ビジネス契約ラーニングの契約一覧画面" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">07</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Learning</span><span>2026</span></div><h3>ビジネス契約ラーニング</h3><p class="project-description">起業、転職、副業で出会う8種類の契約を学び、16問で確認できる学習アプリ。</p><div class="project-tags"><span>Research</span><span>Quiz</span><span>Information Design</span></div><a class="project-link" href="./projects/contracts/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
             <article class="project-card">
               <a class="project-media" href="./projects/money-anime/" target="_blank" rel="noreferrer" aria-label="AIアニメ制作ケーススタディを開く">
-                <img src="./assets/portfolio/money-anime.jpg" alt="100円玉が日本の山里から冒険へ出発するAIアニメのキービジュアル" loading="lazy" decoding="async" />
+                <picture>
+                  <source srcset="./assets/portfolio/money-anime.webp" type="image/webp" />
+                  <img src="./assets/portfolio/money-anime.jpg" alt="100円玉が日本の山里から冒険へ出発するAIアニメのキービジュアル" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
                 <span class="project-number">08</span><span class="project-status">Case Study</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>AI Anime / Production</span><span>2026</span></div><h3>100円が冒険に出た!?</h3><p class="project-description">投資の仕組みを子どもに伝える60秒縦型AIアニメの企画・演出・生成設計。</p><div class="project-tags"><span>Script</span><span>Prompt Design</span><span>Storyboarding</span></div><a class="project-link" href="./projects/money-anime/" target="_blank" rel="noreferrer">ケースを見る <span>↗</span></a></div>
@@ -743,26 +794,26 @@
             <h2>速さよりも、長く残る余韻を。</h2>
             <p>日本の伝統文化が持つ余白、静けさ、素材への敬意。その感覚を、Web、ゲーム、映像、音楽の体験に取り入れます。</p>
           </div>
-          <div class="video-placeholder">
-            <span>Introduction Video</span>
-            <strong>紹介動画をここに配置予定</strong>
-          </div>
         </div>
       </section>
 
       <section id="contact" class="section contact">
         <div>
           <p class="section-label">Contact</p>
-          <h2>制作の相談、コラボレーション、出演・発表の連絡はこちらへ。</h2>
+          <h2>制作の相談やコラボレーションは、GitHubからご連絡ください。</h2>
         </div>
         <div class="contact-card">
-          <a class="email" href="mailto:hello@example.com">hello@example.com</a>
-          <div class="socials">
-            <a href="https://x.com/">X</a>
-            <a href="https://www.instagram.com/">Instagram</a>
-            <a href="https://www.youtube.com/">YouTube</a>
-            <a href="https://github.com/">GitHub</a>
-          </div>
+          <p class="contact-note">掲載している作品のソースコードと最新の更新は、すべてGitHubで公開しています。</p>
+          <p class="section-label">GitHub</p>
+          <a
+            class="primary-contact"
+            href="https://github.com/dxiongda441-maker"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="GitHubプロフィール dxiongda441-maker を開く"
+          >
+            dxiongda441-maker <span aria-hidden="true">↗</span>
+          </a>
         </div>
       </section>
     </main>

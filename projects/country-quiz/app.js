@@ -1464,6 +1464,21 @@ document.querySelector("#installApp").addEventListener("click", async () => {
 window.addEventListener("online", () => showToast("オンラインに戻りました。"));
 window.addEventListener("offline", () => showToast("オフラインで利用中です。"));
 
+// 全195か国分の国旗をまとめて保存するのは初回表示の負担が大きいので、
+// 画面が落ち着いてからバックグラウンドで依頼する。通信量の節約設定時は行わない。
+function requestFlagPrefetch() {
+  const connection = navigator.connection;
+  if (connection?.saveData) return;
+  const start = async () => {
+    const registration = await navigator.serviceWorker.ready;
+    registration.active?.postMessage({ type: "prefetch-flags" });
+  };
+  const schedule = window.requestIdleCallback
+    ? window.requestIdleCallback.bind(window)
+    : (fn) => window.setTimeout(fn, 4000);
+  schedule(() => start().catch(() => {}), { timeout: 10000 });
+}
+
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator) || !window.isSecureContext) return;
   try {
@@ -1476,6 +1491,7 @@ async function registerServiceWorker() {
       refreshing = true;
       showToast("アプリを更新しました。次回表示から反映されます。");
     });
+    requestFlagPrefetch();
   } catch (error) {
     console.error(error);
     showToast("オフライン機能を有効にできませんでした。", "error");

@@ -53,18 +53,46 @@ const state = {
   liveTranscript: "",
 };
 
+// GitHub Pages では他の作品と同一オリジンで動き localStorage を共有するため、
+// キーには作品ごとのプレフィックスを付ける。
+const STORAGE_PREFIX = "sanpunroku-";
+const THEMES_KEY = `${STORAGE_PREFIX}themes`;
+const RECORDS_KEY = `${STORAGE_PREFIX}records`;
+
+function readJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw === null) return fallback;
+    return JSON.parse(raw) ?? fallback;
+  } catch (error) {
+    // 壊れた値が入っていても起動できなくならないようにする。
+    return fallback;
+  }
+}
+
+// 以前は "themes" / "records" という汎用的なキーを使っていた。
+// 既存の録音や設定が消えないよう、初回起動時に新しいキーへ移す。
+function migrateLegacyStorage() {
+  for (const [legacy, current] of [["themes", THEMES_KEY], ["records", RECORDS_KEY]]) {
+    const value = localStorage.getItem(legacy);
+    if (value === null) continue;
+    if (localStorage.getItem(current) === null) localStorage.setItem(current, value);
+    localStorage.removeItem(legacy);
+  }
+}
+
 const storage = {
   getThemes() {
-    return JSON.parse(localStorage.getItem("themes") || "null") || defaultThemes;
+    return readJSON(THEMES_KEY, null) || defaultThemes;
   },
   setThemes(themes) {
-    localStorage.setItem("themes", JSON.stringify(themes));
+    localStorage.setItem(THEMES_KEY, JSON.stringify(themes));
   },
   getRecords() {
-    return JSON.parse(localStorage.getItem("records") || "[]");
+    return readJSON(RECORDS_KEY, []);
   },
   setRecords(records) {
-    localStorage.setItem("records", JSON.stringify(records));
+    localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
   },
 };
 
@@ -439,7 +467,8 @@ function registerServiceWorker() {
 }
 
 function init() {
-  if (!localStorage.getItem("themes")) storage.setThemes(defaultThemes);
+  migrateLegacyStorage();
+  if (!localStorage.getItem(THEMES_KEY)) storage.setThemes(defaultThemes);
   renderThemeOptions();
   renderThemes();
   renderRecords();

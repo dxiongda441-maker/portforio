@@ -15,7 +15,7 @@
 
 - **ビルドしない。** npm、バンドラ、フレームワークを導入しない。ブラウザがそのまま読めるものだけ書く。
 - トップページの変更は `index.html` に閉じる。新しく外部 CSS/JS を作らない
-  （`style.css` / `main.js` の二の舞を避ける）。
+  （かつて `style.css` / `main.js` が誰にも参照されないまま 1 年近く残った。同じことを繰り返さない）。
 - 既存の書き方に合わせる。インデント 2 スペース、CSS 変数は和色の命名を踏襲。
 - HTML は日本語コンテンツ前提（`<html lang="ja">`）。
 - 画像は `loading="lazy" decoding="async"` を付ける（既存カードに準拠）。
@@ -26,14 +26,19 @@
 `projects/` 配下の 5 件（`reading-shelf` `wabisabi` `levellog` `quote` `country-quiz`）は
 Service Worker でキャッシュしている。**ファイルを直しただけでは利用者に反映されない。**
 
-各 SW の 1 行目に `CACHE_NAME` がある。
+各 SW の冒頭に `CACHE_PREFIX` と `CACHE_NAME` がある。
 
 ```js
-const CACHE_NAME = "reading-shelf-v5";   // ← 編集したら v6 に上げる
+const CACHE_PREFIX = "reading-shelf-";
+const CACHE_NAME = `${CACHE_PREFIX}v5`;   // ← 編集したら v6 に上げる
 ```
 
-`activate` で「`CACHE_NAME` と一致しないキャッシュを全削除」する実装になっているため、
+`activate` は「**自分の `CACHE_PREFIX` で始まるもののうち、現行 `CACHE_NAME` 以外**」だけを消す。
 **バージョンを上げることが更新を配信する唯一の手段**。
+
+⚠️ **`CACHE_PREFIX` はアプリごとに固有にすること。** GitHub Pages では 5 つの PWA が同一オリジンで
+動くため Cache Storage を共有している。プレフィックスで絞らずに後片付けすると
+**他のアプリのオフライン機能を消す**（2026-09-02 の PR #3 で修正済みの不具合）。
 
 - [ ] 中身を変えたら `CACHE_NAME` の末尾の数字を +1 する
 - [ ] **ファイルを新規追加した場合**は、SW 内の `APP_SHELL` / `ASSETS` 配列にもパスを足す

@@ -1,6 +1,6 @@
 # 構成の実態
 
-> 最終確認: 2026-08-28 / 確認者: Claude
+> 最終確認: 2026-09-02 / 確認者: Claude
 > ここは「今どうなっているか」を書く場所。「なぜそうしたか」は `docs/decisions/` に書く。
 
 ## 全体像
@@ -10,38 +10,43 @@
 つまり「リポジトリの見た目 = 公開される中身」。生成物や中間ファイルの概念はない。
 
 ```
-index.html                  トップページ（自己完結・770行）
-style.css                   ⚠️ 未使用（旧デザインの残骸）
-main.js                     ⚠️ 未使用（旧デザインの残骸）
-assets/portfolio/*.jpg      作品カードのサムネイル
+index.html                  トップページ（自己完結・821行）
+404.html                    404 ページ
+robots.txt / sitemap.xml    クローラ向け
+CLAUDE.md / docs/           このプロジェクトの記憶
+assets/portfolio/*.jpg      作品カードのサムネイル（同名の .webp を併置）
 projects/<slug>/            各作品の実体。それぞれ独立した静的アプリ
+tools/fetch-backgrounds.sh  背景写真をローカルに取り込むスクリプト（未実行）
 .github/workflows/deploy.yml  Pages デプロイ
 ```
 
 ## index.html — 自己完結している
 
-**`<script>` タグも `<link>` タグも 0 個。** 検証コマンド:
+**`<script>` タグは 0 個、CSS の外部読み込みも 0 個。** 検証コマンド:
 
 ```bash
-grep -c '<script' index.html   # => 0
-grep -c '<link'   index.html   # => 0
+grep -c '<script' index.html            # => 0
+grep -c 'rel="stylesheet"' index.html   # => 0
 ```
+
+`<link>` タグ自体は 5 個あるが、favicon / apple-touch-icon / canonical /
+`dns-prefetch` `preconnect`（Unsplash 向け）だけで、スタイルは読み込んでいない。
 
 したがって:
 
-- **スタイルを変える** → `index.html` 冒頭の `<style>` ブロックを編集する（`style.css` ではない）
+- **スタイルを変える** → `index.html` 冒頭の `<style>` ブロックを編集する（外部 CSS ファイルは存在しない）
 - **作品カードを追加する** → `#works` セクション内の `<article class="project-card">` を直接複製して編集する
 
 ### セクション構成（四季に対応）
 
 | id | テーマ | 行番号の目安 |
 |---|---|---|
-| `home` | Hero | 621〜 |
-| `about` | Spring | 636〜 |
-| `works` | Summer | 650〜 |
-| `skills` | Autumn | 721〜 |
-| `story` | Winter / Philosophy | 738〜 |
-| `contact` | — | 753〜 |
+| `home` | Hero | 648〜 |
+| `about` | Spring | 663〜 |
+| `works` | Summer | 677〜 |
+| `skills` | Autumn | 772〜 |
+| `story` | Winter / Philosophy | 789〜 |
+| `contact` | — | 800〜 |
 
 ※ 行番号は編集で動く。`grep -n '<section' index.html` で都度確認すること。
 
@@ -50,17 +55,19 @@ grep -c '<link'   index.html   # => 0
 `--ink` `--soft-ink` `--paper` `--line` `--moss` `--leaf` `--persimmon` `--gold`
 和の色名で統一されている。新しい色を足すときはこの命名に合わせる。
 
-## style.css / main.js が「残骸」である根拠
+## 旧デザインの残骸（`style.css` / `main.js`）は削除済み
 
-- `index.html` から一切参照されていない（上記 grep が 0）
-- 定義している CSS 変数系統が違う: `--neon-cyan` `--neon-lime` `--surface` ＝ ネオン基調。
-  現行 `index.html` の和色パレットとは別デザイン
-- `main.js` は `#projects-data` という JSON `<script>` タグを読んでカードを動的生成する実装だが、
-  `index.html` にその要素は存在しない（作品は HTML 直書きに変わった）
-- 最終更新: `style.css` / `main.js` = 2025-10-08、`index.html` = 2026-07-14
+2025-10 のネオン基調デザインの遺物で、`index.html` から一切参照されないまま残っていた。
+**2026-09-02 の PR #3 で削除**したので、もう存在しない。
 
-→ **現状は「消してもトップページの表示は変わらない」状態。** ただし削除の判断は未実施。
-   `docs/decisions/0001-static-site-single-file.md` を参照。
+当時の実装を読みたいときは git 履歴から取れる。
+
+```bash
+git show 76ace1e:style.css
+git show 76ace1e:main.js
+```
+
+経緯は `docs/decisions/0001-static-site-single-file.md`。
 
 ## projects/ — 各作品
 

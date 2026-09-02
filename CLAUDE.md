@@ -19,8 +19,8 @@
 
 ## 常に守るルール
 
-1. **トップページは `index.html` 1枚で完結している。** CSS は `<style>` に、作品カードは HTML に直書き。`<script>` も `<link>` も 0 個。
-2. `style.css` と `main.js` は **どこからも読み込まれていない旧デザインの残骸**。触る前に必ず `docs/context/architecture.md` を確認する。
+1. **トップページは `index.html` 1枚で完結している。** CSS は `<style>` に、作品カードは HTML に直書き。`<script>` は 0 個、CSS の外部読み込みも 0 個。
+2. **トップページ用の外部 CSS/JS を新しく作らない。** 旧デザインの `style.css` / `main.js` は 2026-09-02 に削除済み。同じ構成に戻さない。
 3. ビルド工程・npm・フレームワークは使わない。ファイルを直接編集する。
 4. 設計判断をしたら `docs/decisions/` に 1 ファイル追加する（`/decide` コマンドあり）。
 5. **`projects/` の PWA を編集したら Service Worker の `CACHE_NAME` を上げる。**
@@ -29,7 +29,8 @@
 
 ## 既知の注意点
 
-- `README.md` の「使い方」節（`npm install` / `npm run dev` / `app/page.tsx`）は**実態と一致していない**。該当ファイルは存在しない。修正は未着手。
+- **背景写真6枚を Unsplash から直リンクしている。** 外部が落ちると背景が出ない。ローカル化の手順は `tools/fetch-backgrounds.sh`（未実行）。
+- **`LICENSE` が無い。** 公開リポジトリだが利用条件を明示していない。
 
 ## 個人設定
 

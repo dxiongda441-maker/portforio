@@ -1,4 +1,7 @@
-const CACHE_NAME = "world-country-quiz-v7";
+// GitHub Pages では全アプリが同一オリジンのため Cache Storage を共有する。
+// 後片付けは自分のプレフィックスを持つものだけに限定する。
+const CACHE_PREFIX = "world-country-quiz-";
+const CACHE_NAME = `${CACHE_PREFIX}v8`;
 const CORE_SHELL = [
   "./",
   "./index.html",
@@ -12,23 +15,45 @@ const CORE_SHELL = [
   "./assets/app-icon-maskable-512.png"
 ];
 
+// 初回インストールでは起動に必要な分だけ取得する。国旗は表示したものが
+// fetch ハンドラ経由で自動的にキャッシュされ、全件のまとめ取得はページ側から
+// "prefetch-flags" を受け取ったときにバックグラウンドで行う。
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     await cache.addAll(CORE_SHELL);
     const response = await fetch("./data/countries.json");
-    const master = await response.clone().json();
     await cache.put("./data/countries.json", response);
-    const flags = master.countries.map((country) => country.flagPath);
-    for (let index = 0; index < flags.length; index += 24) {
-      await Promise.all(flags.slice(index, index + 24).map((url) => cache.add(url)));
-    }
   })());
   self.skipWaiting();
 });
 
+let flagPrefetch = null;
+
+async function prefetchFlags() {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match("./data/countries.json");
+  const master = await (cached || await fetch("./data/countries.json")).json();
+  const flags = master.countries.map((country) => country.flagPath);
+  for (let index = 0; index < flags.length; index += 12) {
+    await Promise.all(
+      flags.slice(index, index + 12).map(async (url) => {
+        if (await cache.match(url)) return;
+        // 1枚失敗しても残りの取得は続ける。
+        await cache.add(url).catch(() => {});
+      })
+    );
+  }
+}
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "prefetch-flags") return;
+  flagPrefetch = flagPrefetch || prefetchFlags().catch(() => {});
+  event.waitUntil(flagPrefetch);
+});
+
 self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))));
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map((key) => caches.delete(key)))));
   self.clients.claim();
 });
 

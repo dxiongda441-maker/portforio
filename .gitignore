@@ -1,0 +1,16 @@
+# OS が作るファイル
+.DS_Store
+Thumbs.db
+
+# エディタ
+.vscode/
+.idea/
+*.swp
+
+# 作業中に入り込みやすいもの
+node_modules/
+package-lock.json
+*.log
+
+# 注意: tools/fetch-backgrounds.sh が作る assets/backgrounds/ は
+# 公開に必要なのでコミットする（ここでは除外しない）。

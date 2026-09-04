@@ -7,13 +7,57 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Reading Shelf" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="読んだ本、読む前の期待、進捗を一つの本棚に整理する読書記録PWA。" />
     <title>Reading Shelf</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./assets/app-icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./assets/app-icon.svg" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/projects/reading-shelf/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="オルタ Portfolio" />
+    <meta property="og:title" content="Reading Shelf" />
+    <meta property="og:description" content="読んだ本、読む前の期待、進捗を一つの本棚に整理する読書記録PWA。" />
+    <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/projects/reading-shelf/" />
+    <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/reading-shelf.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="800" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Reading Shelf" />
+    <meta name="twitter:description" content="読んだ本、読む前の期待、進捗を一つの本棚に整理する読書記録PWA。" />
+    <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/reading-shelf.jpg" />
+    <style>
+      /* ポートフォリオ側の共通パーツ。各アプリのCSSに依存しないよう独立させている。 */
+      .portfolio-back {
+        align-items: center;
+        background: #211812;
+        color: #fffaf1;
+        display: flex;
+        font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 clamp(16px, 4vw, 32px);
+        position: relative;
+        text-decoration: none;
+        z-index: 60;
+      }
+
+      .portfolio-back:hover,
+      .portfolio-back:focus-visible {
+        color: #d8aa4d;
+      }
+
+      .portfolio-back:focus-visible {
+        outline: 2px solid #d8aa4d;
+        outline-offset: -4px;
+      }
+    </style>
   </head>
   <body>
+    <a class="portfolio-back" href="../../"><span aria-hidden="true">←</span> オルタのポートフォリオへ戻る</a>
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">

@@ -554,6 +554,44 @@ function renderCats(filter = "all") {
   hydrateImages();
 }
 
+const IMAGE_TIMEOUT_MS = 8000;
+
+// Wikipediaが応答しないまま待ち続けると「読み込み中」が残り続けるため、
+// 時間で打ち切る。結果は成功・失敗ともにキャッシュして、絞り込みで
+// 再描画したときに同じ通信を繰り返さないようにする。
+async function fetchCatSummary(wiki) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
+  try {
+    const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${wiki}`, {
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error(`image fetch failed: ${response.status}`);
+    const data = await response.json();
+    return {
+      src: data.thumbnail?.source || data.originalimage?.source || "",
+      description: data.description || ""
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function loadImage(img, src) {
+  return new Promise((resolve, reject) => {
+    img.addEventListener("load", resolve, { once: true });
+    img.addEventListener("error", reject, { once: true });
+    img.src = src;
+  });
+}
+
+function showImageFallback(loading) {
+  loading.classList.add("is-fallback");
+  loading.innerHTML =
+    '<span class="fallback-mark" aria-hidden="true">猫</span>' +
+    "<span>写真はカード下部のWikipediaリンクから確認できます</span>";
+}
+
 async function hydrateImages() {
   const images = document.querySelectorAll("img[data-wiki]");
   images.forEach(async (img) => {
@@ -562,22 +600,17 @@ async function hydrateImages() {
     const loading = media.querySelector(".loading");
     try {
       if (!imageCache.has(wiki)) {
-        const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${wiki}`);
-        if (!response.ok) throw new Error("image fetch failed");
-        const data = await response.json();
-        imageCache.set(wiki, {
-          src: data.thumbnail?.source || data.originalimage?.source,
-          description: data.description || ""
-        });
+        imageCache.set(wiki, fetchCatSummary(wiki).catch(() => null));
       }
-      const image = imageCache.get(wiki);
-      if (!image.src) throw new Error("no image");
-      img.src = image.src;
+      const image = await imageCache.get(wiki);
+      if (!image?.src) throw new Error("no image");
+      // 画像そのものが読めない場合もあるので、表示の切り替えは読み込み完了後に行う。
+      await loadImage(img, image.src);
       img.alt = `${img.alt} ${image.description}`.trim();
       img.hidden = false;
       loading.hidden = true;
     } catch (error) {
-      loading.textContent = "写真はリンク先で確認できます";
+      showImageFallback(loading);
     }
   });
 }

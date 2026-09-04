@@ -42,7 +42,8 @@ keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
 ```
 
 **この `startsWith(CACHE_PREFIX)` を外してはいけない。** GitHub Pages では全作品が同一オリジンで
-動くため Cache Storage を共有しており、外すと他の作品のオフラインキャッシュを巻き込んで消す。
+動くため Cache Storage を共有しており、外すと他の作品のオフラインキャッシュを巻き込んで消す
+（2026-09-02 の PR #3 で修正された実際の不具合。経緯は `docs/decisions/0003`）。
 
 - [ ] 中身を変えたら `CACHE_NAME` の版数を +1 する
 - [ ] **ファイルを新規追加した場合**は、SW 内の `APP_SHELL` / `ASSETS` 配列にもパスを足す

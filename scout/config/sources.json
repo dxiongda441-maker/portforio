@@ -1,0 +1,13 @@
+{
+  "_comment": "情報源。ここを自分の追いたいフィードに差し替えてください。urlはRSSかAtomのURL。",
+  "windowHours": 48,
+  "maxItems": 120,
+  "sources": [
+    { "name": "Publickey", "url": "https://www.publickey1.jp/atom.xml" },
+    { "name": "ITmedia AI+", "url": "https://rss.itmedia.co.jp/rss/2.0/aiplus.xml" },
+    { "name": "TechCrunch", "url": "https://techcrunch.com/feed/" },
+    { "name": "Hacker News", "url": "https://hnrss.org/frontpage" },
+    { "name": "Zenn", "url": "https://zenn.dev/feed" },
+    { "name": "Googleニュース: Claude", "url": "https://news.google.com/rss/search?q=Claude+AI&hl=ja&gl=JP&ceid=JP:ja" }
+  ]
+}

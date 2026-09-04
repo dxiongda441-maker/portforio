@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f1e8" />
+    <meta name="description" content="Scout。業界・競合・トレンド情報を集め、自分の関心プロファイルとの関連度で選別する日次ダイジェスト。" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Scout — 今日読む価値のある記事だけ</title>
+    <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/projects/scout/" />
+    <style>
+      /* ポートフォリオ側の共通パーツ。アプリ側のCSSに依存しないよう独立させている。 */
+      .portfolio-back {
+        align-items: center;
+        background: #211812;
+        color: #fffaf1;
+        display: flex;
+        font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 clamp(16px, 4vw, 32px);
+        position: relative;
+        text-decoration: none;
+        z-index: 60;
+      }
+
+      .portfolio-back:hover,
+      .portfolio-back:focus-visible {
+        background: #33241a;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="portfolio-back" href="../../">← ポートフォリオへ戻る</a>
+
+    <header class="masthead">
+      <div class="masthead-inner">
+        <p class="eyebrow">Daily Digest</p>
+        <h1>Scout</h1>
+        <p class="lede">集めた記事を、あなたの関心プロファイルとの関連度だけで並べ替えています。</p>
+        <dl class="stats" id="stats" hidden>
+          <div><dt>更新</dt><dd id="stat-updated">—</dd></div>
+          <div><dt>記事</dt><dd id="stat-count">—</dd></div>
+          <div><dt>採点</dt><dd id="stat-scorer">—</dd></div>
+        </dl>
+      </div>
+    </header>
+
+    <nav class="tabs" id="tabs" hidden>
+      <button type="button" class="tab is-active" data-view="recommended">おすすめ</button>
+      <button type="button" class="tab" data-view="all">すべて</button>
+      <button type="button" class="tab" data-view="saved">保存済み</button>
+      <button type="button" class="tab" data-view="hidden">興味なし</button>
+    </nav>
+
+    <main id="main">
+      <p class="state" id="state">読み込んでいます…</p>
+      <div class="cards" id="cards"></div>
+    </main>
+
+    <div class="tray" id="tray" hidden>
+      <span id="tray-count">0件を保存中</span>
+      <button type="button" id="copy" class="tray-button">Obsidian用にコピー</button>
+    </div>
+
+    <template id="card-template">
+      <article class="card">
+        <div class="score"><span class="score-value"></span></div>
+        <div class="card-body">
+          <h2 class="title"><a target="_blank" rel="noopener noreferrer"></a></h2>
+          <p class="meta"><span class="source"></span><span class="dot">·</span><span class="when"></span></p>
+          <p class="why"></p>
+          <p class="angle"></p>
+          <ul class="tags"></ul>
+          <div class="actions">
+            <label class="save"><input type="checkbox" /><span>保存</span></label>
+            <button type="button" class="ghost hide">興味なし</button>
+            <button type="button" class="ghost restore">戻す</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

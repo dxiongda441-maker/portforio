@@ -39,8 +39,9 @@ assets/
   og-cover.jpg      SNSシェア用のOGP画像（1200×630）
   portfolio/        作品カードのサムネイル
 projects/           各作品の実体。1ディレクトリ＝1作品で完結
+scout/              日次ダイジェストの収集エンジン（作品ではなく自分用ツール）
 tools/              メンテナンス用スクリプト
-.github/workflows/  main へのpushでGitHub Pagesへ自動デプロイ
+.github/workflows/  Pagesへの自動デプロイと、Scoutの毎朝の収集
 ```
 
 ## 背景写真をローカルに置き換える
@@ -100,3 +101,14 @@ GitHub Pagesへ公開されます。手動の操作は不要です。
 | 世界ねこ図鑑クイズ | 図鑑＋クイズ | `projects/cat-quiz/` |
 | ビジネス契約ラーニング | 契約の学習アプリ | `projects/contracts/` |
 | 100円が冒険に出た!? | AIアニメ制作ケーススタディ | `projects/money-anime/` |
+
+## 自分用ツール
+
+ポートフォリオの作品ではなく、日々の作業を減らすために置いているものです。
+
+| ツール | 内容 | ディレクトリ |
+| --- | --- | --- |
+| Scout | 業界・競合・トレンド記事を集め、関心プロファイルとの関連度で選別する日次ダイジェスト | `scout/`（エンジン）+ `projects/scout/`（表示） |
+
+使い方と注意点は `scout/README.md` にあります。Scoutは `.works-grid` にも `sitemap.xml` にも
+載せていません。作品として見せるものではないためです。

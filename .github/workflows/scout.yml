@@ -1,0 +1,48 @@
+name: Scout digest
+
+on:
+  schedule:
+    # 21:00 UTC = 翌6:00 JST。毎朝、起きたときに選別済みで並んでいる状態にする。
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scout
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 依存を入れる
+        working-directory: scout
+        run: npm install --no-audit --no-fund
+
+      - name: 記事を集めて採点する
+        env:
+          # 未設定でもキーワード採点で動く。設定するとClaudeが採点する。
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scout/collect.mjs
+
+      - name: 変化があればコミットする
+        run: |
+          if [ -z "$(git status --porcelain -- projects/scout/data/digest.json)" ]; then
+            echo "ダイジェストに変化なし。コミットしません。"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projects/scout/data/digest.json
+          git commit -m "Update Scout digest"
+          git push

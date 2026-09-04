@@ -1,0 +1,13 @@
+{
+  "name": "scout",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "関心プロファイルで記事を選別する日次ダイジェスト",
+  "scripts": {
+    "collect": "node collect.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0"
+  }
+}

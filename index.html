@@ -484,31 +484,40 @@
         padding: 28px;
       }
 
-      .skill-row + .skill-row {
-        margin-top: 24px;
+      .capability + .capability {
+        border-top: 1px solid rgba(255, 250, 241, 0.18);
+        margin-top: 20px;
+        padding-top: 20px;
       }
 
-      .skill-row div {
+      .capability h3 {
+        align-items: baseline;
         display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
+        flex-wrap: wrap;
+        font-size: 17px;
+        gap: 4px 12px;
+        margin: 0 0 8px;
       }
 
-      meter {
-        background: rgba(80, 99, 65, 0.14);
-        border: 0;
+      .capability h3 small {
+        color: var(--gold);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .capability p {
+        font-size: 15px;
+        line-height: 1.8;
+        margin: 0;
+      }
+
+      .capability .evidence {
+        color: rgba(255, 250, 241, 0.7);
         display: block;
-        height: 12px;
-        width: 100%;
-      }
-
-      meter::-webkit-meter-bar {
-        background: rgba(80, 99, 65, 0.14);
-        border: 0;
-      }
-
-      meter::-webkit-meter-optimum-value {
-        background: linear-gradient(90deg, var(--moss), var(--leaf), var(--persimmon));
+        font-size: 13px;
+        margin-top: 6px;
       }
 
       .winter-layout {
@@ -774,14 +783,46 @@
         <div class="season-inner split">
           <div>
             <p class="section-label">Skills / Autumn</p>
-            <h2>つくる力を、視覚的に整理する。</h2>
+            <h2>数字ではなく、作ったもので示す。</h2>
           </div>
           <div class="skill-panel glass">
-            <div class="skill-row"><div><span>Frontend</span><strong>92%</strong></div><meter min="0" max="100" value="92">92%</meter></div>
-            <div class="skill-row"><div><span>Game Design</span><strong>78%</strong></div><meter min="0" max="100" value="78">78%</meter></div>
-            <div class="skill-row"><div><span>Video</span><strong>72%</strong></div><meter min="0" max="100" value="72">72%</meter></div>
-            <div class="skill-row"><div><span>Music</span><strong>68%</strong></div><meter min="0" max="100" value="68">68%</meter></div>
-            <div class="skill-row"><div><span>Direction</span><strong>84%</strong></div><meter min="0" max="100" value="84">84%</meter></div>
+            <div class="capability">
+              <h3>実装 <small>Implementation</small></h3>
+              <p>
+                フレームワークを使わず、HTML・CSS・JavaScript だけで PWA を組む。
+                Service Worker によるオフライン動作、キャッシュ戦略、インストール可能なアプリ化まで。
+                <span class="evidence">Reading Shelf、三分録、1日1名言、世界の国クイズ、LevelLog の5作品で実装</span>
+              </p>
+            </div>
+            <div class="capability">
+              <h3>情報設計 <small>Structure</small></h3>
+              <p>
+                そのままでは学びにくい題材を、順番と粒度から組み直して学べる形にする。
+                <span class="evidence">ビジネス契約ラーニング、世界の国クイズ、世界ねこ図鑑クイズ</span>
+              </p>
+            </div>
+            <div class="capability">
+              <h3>企画・演出 <small>Direction</small></h3>
+              <p>
+                何を、誰に、どの順で見せるか。構成から生成の設計まで決めて、最後まで通す。
+                <span class="evidence">100円が冒険に出た!? — 60秒縦型AIアニメの企画・構成・生成設計</span>
+              </p>
+            </div>
+            <div class="capability">
+              <h3>運用 <small>Operations</small></h3>
+              <p>
+                公開して終わりにしない。同一オリジンで複数の PWA が Cache Storage を共有し、
+                互いのキャッシュを削除していた不具合を、キャッシュ名の名前空間化と既存データの移行で解消した。
+                <span class="evidence">全8作品を GitHub Pages で公開・保守中。push でのデプロイまで自動化</span>
+              </p>
+            </div>
+            <div class="capability">
+              <h3>速度 <small>Pace</small></h3>
+              <p>
+                企画から公開まで、1作品あたり数日。作りながら決めて、出してから直す。
+                <span class="evidence">2026年7月〜8月に8作品を公開</span>
+              </p>
+            </div>
           </div>
         </div>
       </section>

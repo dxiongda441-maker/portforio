@@ -19,17 +19,14 @@
 
 ## 常に守るルール
 
-1. **トップページは `index.html` 1枚で完結している。** CSS は `<style>` に、作品カードは HTML に直書き。`<script>` も `<link>` も 0 個。
-2. `style.css` と `main.js` は **どこからも読み込まれていない旧デザインの残骸**。触る前に必ず `docs/context/architecture.md` を確認する。
-3. ビルド工程・npm・フレームワークは使わない。ファイルを直接編集する。
+1. **トップページは `index.html` 1枚で完結している。** CSS も作品カードも直書き。
+   JavaScript は使っていない（`<script>` は 0 個）。
+2. ビルド工程・npm・フレームワークは使わない。ファイルを直接編集する。
+3. **`projects/` の PWA を編集したら Service Worker の `CACHE_NAME` を上げる。**
+   キャッシュ名は必ず `CACHE_PREFIX`（作品ごと）付き。全作品が同一オリジンのため、
+   プレフィックスを外すと他の作品のキャッシュを消す（詳細は `docs/context/conventions.md`）。
 4. 設計判断をしたら `docs/decisions/` に 1 ファイル追加する（`/decide` コマンドあり）。
-5. **`projects/` の PWA を編集したら Service Worker の `CACHE_NAME` を上げる。**
-   忘れると利用者に更新が届かない（詳細は `docs/context/conventions.md`）。
-6. 応答は日本語で行う。
-
-## 既知の注意点
-
-- `README.md` の「使い方」節（`npm install` / `npm run dev` / `app/page.tsx`）は**実態と一致していない**。該当ファイルは存在しない。修正は未着手。
+5. 応答は日本語で行う。
 
 ## 個人設定
 

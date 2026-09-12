@@ -100,3 +100,4 @@ GitHub Pagesへ公開されます。手動の操作は不要です。
 | 世界ねこ図鑑クイズ | 図鑑＋クイズ | `projects/cat-quiz/` |
 | ビジネス契約ラーニング | 契約の学習アプリ | `projects/contracts/` |
 | 100円が冒険に出た!? | AIアニメ制作ケーススタディ | `projects/money-anime/` |
+| 琥珀 KOHAKU COFFEE | カフェのランディングページ | `projects/cafe-lp/` |

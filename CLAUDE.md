@@ -26,7 +26,17 @@
 5. **`projects/` の PWA を編集したら Service Worker の `CACHE_NAME` を上げる。**
    キャッシュ名は必ず作品ごとの `CACHE_PREFIX` 付き。全作品が同一オリジンのため、
    プレフィックスを外すと他作品のキャッシュを消す（`docs/decisions/0003`）。
+   ファイルを新規追加したら SW の `APP_SHELL` / `ASSETS` にも足す。
 6. 応答は日本語で行う。
+
+## 完了の条件 — 人に見せる前に自分で確かめる
+
+1. `bash tools/check.sh` が「すべて OK」（ルール 1・2・5 とリンク/sitemap の整合を機械判定）
+2. 見た目の変更は `bash tools/screenshot.sh [ページ] [幅]` で撮り、**PNG を Read で開いて自分で見る**
+   （既定 375px / 1280px。外部画像は作業環境から取れず欠けることがある）
+3. 作業ブランチに commit & push（確認不要。クラウド環境は push しないと消える）
+
+docs と実物が食い違ったら**実物が正**。気づいたら `docs/context/` を直す。
 
 ## 既知の注意点
 
@@ -66,4 +76,5 @@
 
 - HTML / CSS / JavaScript は読める。基本的な用語の説明は不要。
 - 込み入った仕組み（Service Worker、ビルド、非同期処理など）は一言だけ補足する。
-- 制作は Claude / Codex を併用している。
+- 制作は Claude / Codex を併用している。docs に載っていない変更が入っていることがあるので、
+  着手前に `git log --oneline -5` で直近の変更を見る。

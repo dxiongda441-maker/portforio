@@ -15,9 +15,9 @@ const SPEEDS = [
 function loadStore() {
   try {
     const data = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
-    return { names: [], stats: {}, speed: 1, options: {}, ...data };
+    return { names: [], stats: {}, speed: 1, sound: true, options: {}, ...data };
   } catch {
-    return { names: [], stats: {}, speed: 1, options: {} };
+    return { names: [], stats: {}, speed: 1, sound: true, options: {} };
   }
 }
 
@@ -33,6 +33,20 @@ const store = loadStore();
 const params = new URLSearchParams(location.search);
 // ?speed=0 は動作確認用（CPUの待ち時間をほぼ無くす）
 Speed.factor = params.has("speed") ? Number(params.get("speed")) : store.speed;
+Sound.enabled = store.sound !== false;
+
+// CPUの強さ。levels: true のゲームにだけ設定欄を出す
+const LEVEL_OPTION = {
+  key: "level",
+  label: "CPUの強さ",
+  choices: [
+    ["easy", "よわい"],
+    ["normal", "ふつう"],
+    ["hard", "つよい"],
+  ],
+  default: "normal",
+};
+const gameOptions = (game) => [...(game.levels ? [LEVEL_OPTION] : []), ...(game.options || [])];
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -72,6 +86,9 @@ const ui = {
   hideCover() {
     $("#cover").hidden = true;
   },
+  waiting(on) {
+    $(".control").classList.toggle("waiting", on);
+  },
 };
 
 let current = null; // 実行中の Session
@@ -100,6 +117,7 @@ function renderMenu() {
   }
   renderStats();
   renderSpeed();
+  renderSound();
 }
 
 function playersLabel(game) {
@@ -135,6 +153,23 @@ function renderStats() {
   box.append(table);
 }
 
+function renderSound() {
+  for (const btn of document.querySelectorAll(".sound-toggle")) {
+    const short = btn.classList.contains("bar-btn");
+    btn.textContent = Sound.enabled ? (short ? "🔊" : "🔊 音あり") : short ? "🔇" : "🔇 音なし";
+    btn.setAttribute("aria-label", Sound.enabled ? "効果音: オン" : "効果音: オフ");
+    btn.setAttribute("aria-pressed", String(Sound.enabled));
+  }
+}
+
+function toggleSound() {
+  Sound.enabled = !Sound.enabled;
+  store.sound = Sound.enabled;
+  saveStore();
+  renderSound();
+  Sound.play("turn");
+}
+
 function renderSpeed() {
   const box = $("#speed");
   box.replaceChildren();
@@ -166,7 +201,7 @@ function openSetup(game) {
   const count = Math.min(max, Math.max(min, game.defaultPlayers || min));
   const saved = store.options[game.id] || {};
   const options = {};
-  for (const opt of game.options || []) {
+  for (const opt of gameOptions(game)) {
     const valid = opt.choices.some(([v]) => v === saved[opt.key]);
     options[opt.key] = valid ? saved[opt.key] : opt.default;
   }
@@ -263,7 +298,7 @@ function renderSetup() {
 
   const optBox = $("#setup-options");
   optBox.replaceChildren();
-  for (const opt of game.options || []) {
+  for (const opt of gameOptions(game)) {
     const row = h("div", { class: "opt-row" }, h("p", { class: "opt-label", text: opt.label }));
     const segs = h("div", { class: "segs" });
     for (const [value, label] of opt.choices) {
@@ -286,7 +321,7 @@ function renderSetup() {
     row.append(segs);
     optBox.append(row);
   }
-  $("#setup-options-wrap").hidden = !(game.options || []).length;
+  $("#setup-options-wrap").hidden = !gameOptions(game).length;
 }
 
 function startFromSetup() {
@@ -338,51 +373,96 @@ async function startGame(game, seatList, options) {
 }
 
 function recordResult(ranking, total) {
+  const places = placesOf(ranking);
   ranking.forEach((entry, index) => {
     if (!entry.player.human) return;
+    const place = places[index];
     const st = store.stats[entry.player.name] || { points: 0, wins: 0, plays: 0 };
     st.plays += 1;
-    st.points += total - 1 - index;
-    if (index === 0) st.wins += 1;
+    st.points += total - 1 - place;
+    if (place === 0) st.wins += 1;
     store.stats[entry.player.name] = st;
   });
   saveStore();
 }
 
+/** 同点（key が同じ）なら同じ順位にする */
+function placesOf(ranking) {
+  const places = [];
+  ranking.forEach((entry, i) => {
+    const prev = ranking[i - 1];
+    places.push(i > 0 && entry.key !== undefined && prev.key === entry.key ? places[i - 1] : i);
+  });
+  return places;
+}
+
 function showResult(game, ranking, seatList, options) {
   const box = $("#result-list");
   box.replaceChildren();
+  const places = placesOf(ranking);
   ranking.forEach((entry, index) => {
+    const place = places[index];
     box.append(
       h(
         "li",
-        { class: index === 0 ? "first" : "" },
-        h("span", { class: "place", text: index === 0 ? "👑 1位" : placeLabel(index) }),
+        { class: place === 0 ? "first" : "" },
+        h("span", { class: "place", text: place === 0 ? "👑 1位" : placeLabel(place) }),
         h("strong", { text: entry.player.name }),
         entry.note ? h("small", { text: entry.note }) : null,
       ),
     );
   });
   $("#result-title").textContent = `${game.title} 結果`;
-  const winner = ranking[0];
-  $("#result-lead").textContent = winner ? `${winner.player.name}の勝ち！` : "";
+  const winners = ranking.filter((_, i) => places[i] === 0).map((e) => e.player.name);
+  $("#result-lead").textContent = winners.length > 1 ? `${winners.join("と")}が同点1位！` : winners.length ? `${winners[0]}の勝ち！` : "";
+  const humanWon = ranking.some((e, i) => places[i] === 0 && e.player.human);
+  const noHumans = !ranking.some((e) => e.player.human);
+  if (humanWon || noHumans) {
+    Sound.play("win");
+    launchConfetti();
+  } else {
+    Sound.play("bad");
+  }
   $("#result").hidden = false;
   $("#result-again").onclick = () => {
-    $("#result").hidden = true;
+    hideResult();
     startGame(game, seatList, options);
   };
   $("#result-menu").onclick = () => {
-    $("#result").hidden = true;
+    hideResult();
     backToMenu();
   };
   $("#result-again").focus();
+}
+
+function hideResult() {
+  $("#result").hidden = true;
+  $("#confetti").replaceChildren();
+}
+
+function launchConfetti() {
+  const box = $("#confetti");
+  box.replaceChildren();
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const colors = ["#d8aa4d", "#c8372d", "#fffaf1", "#3f8f4f", "#7a5ea8", "#7fd1ff"];
+  const marks = ["♠", "♥", "♦", "♣", "", "", ""];
+  for (let i = 0; i < 44; i += 1) {
+    const mark = marks[i % marks.length];
+    box.append(
+      h("span", {
+        class: mark ? "confetti-mark" : "confetti-bit",
+        text: mark,
+        style: `left:${Math.random() * 100}%;--c:${colors[i % colors.length]};--d:${(Math.random() * 0.8).toFixed(2)}s;--t:${(2.2 + Math.random() * 1.6).toFixed(2)}s;--x:${Math.round(Math.random() * 120 - 60)}px;--r:${Math.round(Math.random() * 720 - 360)}deg`,
+      }),
+    );
+  }
 }
 
 function backToMenu() {
   if (current) current.abort();
   current = null;
   ui.hideCover();
-  $("#result").hidden = true;
+  hideResult();
   renderMenu();
   showScreen("screen-menu");
 }
@@ -411,6 +491,7 @@ $("#rules-close").addEventListener("click", () => {
   else dialog.removeAttribute("open");
 });
 $("#cover-btn").addEventListener("click", () => current && current.answer("ready"));
+for (const btn of document.querySelectorAll(".sound-toggle")) btn.addEventListener("click", toggleSound);
 $("#stats-reset").addEventListener("click", () => {
   if (!confirm("家族ランキングの記録をすべて消しますか？")) return;
   store.stats = {};

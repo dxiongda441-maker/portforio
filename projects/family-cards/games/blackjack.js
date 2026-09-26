@@ -124,6 +124,7 @@
             const choices = [10, 20, 50].filter((v) => v <= p.chips);
             const list = choices.map((v, i) => ({ label: `${v}枚`, value: v, primary: i === 0 }));
             if (!choices.includes(p.chips)) list.push({ label: `全部（${p.chips}）`, value: p.chips });
+            s.yourTurn(p);
             bet = await s.choose(list, `${p.name}: いくら賭けますか？（持ち ${p.chips}枚）`);
           } else {
             await s.sleep(300);
@@ -139,6 +140,7 @@
         for (let k = 0; k < 2; k += 1) {
           for (const p of seated) {
             p.hand.push(draw());
+            s.sfx("draw");
             render();
             await s.sleep(160);
           }
@@ -158,6 +160,7 @@
             turnPlayer = p;
             if (isBJ(p.hand)) {
               p.result = "BJ!";
+              s.sfx("special");
               s.say(`${p.name}: ブラックジャック！`);
               render();
               await s.sleep(700);
@@ -175,6 +178,7 @@
                   { label: "スタンド", value: "stand" },
                 ];
                 if (canDouble) list.push({ label: `ダブル（+${p.bet}）`, value: "double" });
+                if (p.hand.length === 2) s.yourTurn(p);
                 action = await s.choose(list, `${p.name}: いま ${t.value}。どうする？`);
               } else {
                 s.note(`${p.name}が考えています…`);
@@ -202,11 +206,13 @@
               }
               const c = draw();
               p.hand.push(c);
+              s.sfx("draw");
               s.say(`${p.name}: ヒット → ${cardName(c)}（${total(p.hand).value}）`);
             }
             if (total(p.hand).value > 21) {
               p.result = "バースト";
               s.say(`${p.name}: バースト…`);
+              s.sfx("bad");
             }
             render();
             await s.sleep(500);
@@ -253,6 +259,7 @@
             p.result = "負け";
           }
         }
+        s.sfx(seated.some((p) => p.human && /勝ち/.test(p.result)) ? "good" : "card");
         s.say(`ディーラー ${d > 21 ? "バースト" : d}。${seated.map((p) => `${p.name} ${p.result}`).join(" / ")}`);
         for (const p of P) p.bet = 0;
         render();
@@ -263,7 +270,7 @@
         }
       }
 
-      return [...P].sort((a, b) => b.chips - a.chips).map((p) => ({ player: p, note: `チップ ${p.chips}枚` }));
+      return [...P].sort((a, b) => b.chips - a.chips).map((p) => ({ player: p, note: `チップ ${p.chips}枚`, key: p.chips }));
     },
   });
 })();

@@ -9,6 +9,7 @@ registerGame({
   tagline: "7から順番に並べる。パスは3回まで",
   players: [2, 6],
   defaultPlayers: 4,
+  levels: true,
   options: [
     { key: "passes", label: "パスできる回数", choices: [[3, "3回"], [5, "5回"], [99, "無制限"]], default: 3 },
   ],
@@ -40,6 +41,7 @@ registerGame({
     const busted = [];
     let turnPlayer = null;
     let lastCard = null;
+    let lastAt = 0;
 
     const inGame = (p) => !finished.includes(p) && !busted.includes(p);
     const range = (suit) => {
@@ -58,17 +60,29 @@ registerGame({
     function cpuPick(p) {
       const options = p.hand.filter(playable);
       if (!options.length) return null;
+      const level = s.options.level || "normal";
+      if (level === "easy") return pickRandom(options);
       let best = null;
       for (const card of options) {
         const down = card.rank < 7;
-        const beyond = p.hand.filter((c) => c.suit === card.suit && (down ? c.rank < card.rank : c.rank > card.rank));
+        const beyond = (c) => c.suit === card.suit && (down ? c.rank < card.rank : c.rank > card.rank);
+        const mine = p.hand.filter(beyond).length;
         // 自分が先のカードを持っているほど、その方向を開けたい
-        const score = beyond.length * 2 + (beyond.length ? 1 : 0) - (down ? card.rank : 14 - card.rank) * 0.15 + Math.random();
+        let score = mine * 2 + (mine ? 1 : 0) - (down ? card.rank : 14 - card.rank) * 0.15 + Math.random();
+        if (level === "hard") {
+          // その先を持っているのが他の人だけなら、開けると相手が得をする
+          const others = (down ? card.rank - 1 : 13 - card.rank) - mine;
+          score -= others * 0.35;
+        }
         if (!best || score > best.score) best = { card, score };
       }
-      // 先の札を持っていない列は、パスが1回も減っていないときだけ、わざとパスして止めることがある
-      const stopper = best.score < 1 && p.passes === 0 && p.hand.length > 4 && limit < 99;
-      if (stopper && Math.random() < 0.15) return null;
+      const spare = limit < 99 ? limit - p.passes : 0;
+      if (level === "hard") {
+        // パスに余裕があり、どれを出しても相手を助けるだけなら止める
+        if (best.score < 0.5 && spare >= 2 && p.hand.length > 3 && Math.random() < 0.5) return null;
+      } else if (best.score < 1 && p.passes === 0 && p.hand.length > 4 && spare > 0 && Math.random() < 0.15) {
+        return null; // たまにわざとパスして止める
+      }
       return best.card;
     }
 
@@ -81,7 +95,7 @@ registerGame({
           const isLast = lastCard && lastCard.suit === suit && lastCard.rank === rank;
           row.append(
             h("span", {
-              class: `b7-cell${on ? " on" : ""}${on && (suit === "H" || suit === "D") ? " red" : ""}${isLast ? " last" : ""}`,
+              class: `b7-cell${on ? " on" : ""}${on && (suit === "H" || suit === "D") ? " red" : ""}${isLast ? " last" : ""}${isLast && isFresh(lastAt) ? " fresh" : ""}`,
               text: on ? RANK_LABEL[rank] : "",
               "aria-label": on ? `${SUIT_MARK[suit]}${RANK_LABEL[rank]}` : null,
             }),
@@ -122,6 +136,7 @@ registerGame({
       let card;
       if (p.human) {
         await s.handoff(p);
+        s.yourTurn(p);
         const can = p.hand.some(playable);
         const left = limit >= 99 ? "" : `（残り${limit - p.passes}回）`;
         s.note(can ? "出すカードをタップしてください" : `出せるカードがありません。パスしてください${left}`);
@@ -143,15 +158,19 @@ registerGame({
         takeOut(p.hand, [card]);
         placed[card.suit].add(card.rank);
         lastCard = card;
+        lastAt = Date.now();
         s.say(`${p.name}: ${cardName(card)}`);
+        s.sfx("card");
         if (!p.hand.length) {
           finished.push(p);
           s.say(`${p.name} あがり！（${finished.length}位）`);
+          s.sfx("good");
         }
       } else if (limit < 99 && p.passes >= limit) {
         busted.push(p);
         for (const c of p.hand) placed[c.suit].add(c.rank);
         s.say(`${p.name}: パスの回数を超えてドボン！ 手札を場に置きます`);
+        s.sfx("bad");
         p.hand = [];
       } else {
         p.passes += 1;

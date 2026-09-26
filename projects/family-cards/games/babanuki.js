@@ -43,6 +43,8 @@ registerGame({
     let picking = null; // { player, target } 人間が選んでいる最中
     let turnPlayer = null;
     let lastPair = [];
+    let pairAt = 0;
+    let discarded = 0;
 
     const inGame = (p) => p.hand.length > 0 && !finished.includes(p);
     const nextActive = (from) => {
@@ -91,7 +93,8 @@ registerGame({
           "div",
           { class: "center-info" },
           h("p", { class: "center-label", text: turnPlayer ? `${turnPlayer.name}の番` : "ペアを捨てています" }),
-          lastPair.length ? h("div", { class: "pile-row" }, lastPair.map((c) => cardEl(c, { size: "sm" }))) : null,
+          lastPair.length ? h("div", { class: "pile-row" }, lastPair.map((c) => cardEl(c, { size: "lg", pop: isFresh(pairAt) }))) : null,
+          h("p", { class: "muted small", text: `捨てたペア: ${discarded / 2}組` }),
           jiji ? h("p", { class: "muted small", text: "ジジ抜き: 1枚抜いてあります" }) : null,
         );
       }
@@ -109,6 +112,7 @@ registerGame({
     await s.sleep(500);
     for (const p of P) {
       const pairs = discardPairs(p);
+      discarded += pairs.length;
       shuffle(p.hand);
       s.log(`${p.name}: ペアを${pairs.length / 2}組捨てた（残り${p.hand.length}枚）`);
     }
@@ -136,6 +140,7 @@ registerGame({
       let card;
       if (p.human) {
         await s.handoff(p);
+        s.yourTurn(p);
         shuffle(target.hand);
         picking = { player: p, target };
         s.note(`${target.name}の手札から1枚引いてください`);
@@ -153,6 +158,8 @@ registerGame({
       takeOut(target.hand, [card]);
       p.hand.push(card);
       fresh.add(card);
+      s.sfx("draw");
+      if (card.joker && s.isViewer(p)) s.sfx("bad");
       if (s.isViewer(p)) s.say(`${target.name}から ${cardName(card)} を引いた`);
       else if (s.isViewer(target)) s.say(`${p.name}に ${cardName(card)} を引かれた`);
       else s.say(`${p.name}が${target.name}から1枚引いた`);
@@ -162,6 +169,9 @@ registerGame({
       const pair = discardPairs(p);
       if (pair.length) {
         lastPair = pair;
+        pairAt = Date.now();
+        discarded += pair.length;
+        s.sfx("card");
         fresh.clear();
         s.say(`${p.name}: ${cardNames(pair)} のペアを捨てた！`);
       }
@@ -173,11 +183,13 @@ registerGame({
       if (target.hand.length === 0 && !finished.includes(target)) {
         finished.push(target);
         s.say(`${target.name} あがり！（${finished.length}位）`);
+        s.sfx("good");
         await s.sleep(700);
       }
       if (p.hand.length === 0 && !finished.includes(p)) {
         finished.push(p);
         s.say(`${p.name} あがり！（${finished.length}位）`);
+        s.sfx("good");
         await s.sleep(700);
       }
       turn = nextActive(p) || p;

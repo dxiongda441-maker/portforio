@@ -76,6 +76,7 @@ registerGame({
               { label: "ロー ↓", value: "low", primary: true },
             ];
             if (streak > 0) list.push({ label: `ストップ（+${streak}点）`, value: "stop" });
+            if (streak === 0) s.yourTurn(p);
             choice = await s.choose(list, `${p.name}: 次は ${RANK_LABEL[currentCard.rank]} より大きい？小さい？`);
           } else {
             await s.sleep(700);
@@ -91,6 +92,7 @@ registerGame({
             break;
           }
           nextCard = draw();
+          s.sfx("card");
           render();
           await s.sleep(700);
           const diff = nextCard.rank - currentCard.rank;
@@ -101,8 +103,10 @@ registerGame({
             s.note(`${p.name}: ${label} → 同じ数字！ セーフ`);
           } else if ((diff > 0) === (choice === "high")) {
             streak += 1;
+            s.sfx("good");
             s.note(`${p.name}: ${label} → 当たり！ 連続 ${streak}`);
           } else {
+            s.sfx("bad");
             s.say(`${p.name}: ${label} → はずれ… ${streak ? `連続${streak}は消えました` : ""}`);
             streak = 0;
             render();
@@ -120,6 +124,6 @@ registerGame({
     }
     turnPlayer = null;
     render();
-    return [...P].sort((a, b) => b.score - a.score).map((p) => ({ player: p, note: `${p.score}点` }));
+    return [...P].sort((a, b) => b.score - a.score).map((p) => ({ player: p, note: `${p.score}点`, key: p.score }));
   },
 });

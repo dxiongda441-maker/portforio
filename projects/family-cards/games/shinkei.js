@@ -70,7 +70,7 @@ registerGame({
       const info = (p) => `<span class="pts">${p.taken.length / 2}組</span>`;
       s.layout({
         top: s.seats({ players: P, current: turnPlayer, info, count: () => null, faceUp: () => null }),
-        center: grid,
+        center: h("div", { class: "center-info wide" }, grid, P.length === 1 ? h("p", { class: "muted small", text: `めくった回数: ${tries}回` }) : null),
       });
     }
     s.renderFn = render;
@@ -101,16 +101,20 @@ registerGame({
     }
 
     let idx = 0;
+    let lastHumanTurn = -1;
     s.say(`${P[0].name}から始めます`);
     while (slots.some((slot) => slot.state !== "taken")) {
       const p = P[idx];
       turnPlayer = p;
       open = [];
       s.note(`${p.name}の番: 1枚目をめくってください`);
+      if (p.human && (idx !== lastHumanTurn || P.length > 1)) s.yourTurn(p);
+      lastHumanTurn = idx;
       render();
       for (let k = 0; k < 2; k += 1) {
         const index = await flip(p);
         slots[index].state = "up";
+        s.sfx("draw");
         open.push(index);
         remember(index);
         if (k === 0) s.note(`${p.name}の番: 2枚目をめくってください`);
@@ -124,6 +128,7 @@ registerGame({
           forget(i);
         }
         p.taken.push(a, b);
+        s.sfx("good");
         s.say(`${p.name}: ${cardName(a)} と ${cardName(b)} でペア！ もう一度`);
         await s.sleep(900);
         render();
@@ -140,6 +145,6 @@ registerGame({
     if (P.length === 1) {
       return [{ player: P[0], note: `${tries}回でクリア！` }];
     }
-    return [...P].sort((a, b) => b.taken.length - a.taken.length).map((p) => ({ player: p, note: `${p.taken.length / 2}組` }));
+    return [...P].sort((a, b) => b.taken.length - a.taken.length).map((p) => ({ player: p, note: `${p.taken.length / 2}組`, key: p.taken.length }));
   },
 });

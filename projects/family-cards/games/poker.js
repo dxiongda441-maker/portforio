@@ -91,6 +91,8 @@
     tagline: "役をそろえてチップを奪い合う",
     players: [2, 6],
     defaultPlayers: 4,
+    levels: true,
+    logic: { evaluate, compare, cpuDiscards },
     options: [
       { key: "hands", label: "ゲーム数", choices: [[5, "5ゲーム"], [10, "10ゲーム"], [15, "15ゲーム"]], default: 5 },
       { key: "chips", label: "最初のチップ", choices: [[100, "100枚"], [200, "200枚"]], default: 100 },
@@ -195,6 +197,31 @@
       }
       s.renderFn = render;
 
+      /** CPUの賭け方。強さ設定で性格が変わる */
+      function cpuBet(p, toCall, canRaise, size) {
+        const st = strength(p.hand, phase.includes("2回目"));
+        const r = Math.random();
+        const level = s.options.level || "normal";
+        if (level === "easy") {
+          // 何でもついてくるが、あまり上乗せしない
+          if (st >= 2.5 && canRaise && r < 0.4) return "raise";
+          if (toCall === 0) return "call";
+          return st >= 1 || r < 0.55 ? "call" : "fold";
+        }
+        if (level === "hard") {
+          const odds = toCall / (pot() + toCall || 1);
+          if (st >= 2.5) return canRaise && r < 0.9 ? "raise" : "call";
+          if (st >= 2) return toCall === 0 ? (canRaise && r < 0.55 ? "raise" : "call") : odds > 0.4 && r < 0.3 ? "fold" : "call";
+          if (st >= 1) return toCall === 0 ? (canRaise && r < 0.12 ? "raise" : "call") : odds <= 0.28 ? "call" : "fold";
+          if (toCall === 0) return canRaise && contenders().length <= 3 && r < 0.14 ? "raise" : "call"; // ときどきブラフ
+          return odds < 0.12 && r < 0.35 ? "call" : "fold";
+        }
+        if (st >= 2.5) return canRaise && r < 0.8 ? "raise" : "call";
+        if (st >= 2) return toCall === 0 ? (canRaise && r < 0.45 ? "raise" : "call") : toCall > p.chips * 0.6 && r < 0.4 ? "fold" : "call";
+        if (st >= 1) return toCall === 0 ? (canRaise && r < 0.15 ? "raise" : "call") : toCall <= size && r < 0.7 ? "call" : "fold";
+        return toCall === 0 ? (canRaise && r < 0.08 ? "raise" : "call") : r < 0.12 ? "call" : "fold";
+      }
+
       async function bettingRound(size) {
         for (const p of P) p.roundBet = 0;
         let currentBet = 0;
@@ -217,6 +244,7 @@
           let action;
           if (p.human) {
             await s.handoff(p);
+            s.yourTurn(p);
             const callLabel = toCall === 0 ? "チェック" : p.chips <= toCall ? `オールイン（${p.chips}）` : `コール（${toCall}）`;
             const raiseLabel = toCall === 0 ? `ベット（${size}）` : `レイズ（+${size}）`;
             const list = [{ label: callLabel, value: "call", primary: true }];
@@ -226,13 +254,9 @@
           } else {
             s.note(`${p.name}が考えています…`);
             await s.sleep(700);
-            const st = strength(p.hand, phase.includes("2回目"));
-            const r = Math.random();
-            if (st >= 2.5) action = canRaise && r < 0.8 ? "raise" : "call";
-            else if (st >= 2) action = toCall === 0 ? (canRaise && r < 0.45 ? "raise" : "call") : toCall > p.chips * 0.6 && r < 0.4 ? "fold" : "call";
-            else if (st >= 1) action = toCall === 0 ? (canRaise && r < 0.15 ? "raise" : "call") : toCall <= size && r < 0.7 ? "call" : "fold";
-            else action = toCall === 0 ? (canRaise && r < 0.08 ? "raise" : "call") : r < 0.12 ? "call" : "fold";
+            action = cpuBet(p, toCall, canRaise, size);
           }
+          if (action !== "fold" && (toCall > 0 || action === "raise")) s.sfx("draw");
           if (action === "fold") {
             p.folded = true;
             s.say(`${p.name}: フォールド`);
@@ -268,6 +292,7 @@
           let discards;
           if (p.human) {
             await s.handoff(p);
+            s.yourTurn(p);
             sel = new Set();
             selecting = true;
             refresh = () =>
@@ -295,6 +320,7 @@
           takeOut(p.hand, discards);
           discardPile.push(...discards);
           const got = draw(discards.length);
+          if (got.length) s.sfx("card");
           p.hand.push(...got);
           p.hand.sort((a, b) => val(a) - val(b));
           s.say(`${p.name}: ${discards.length}枚交換${s.isViewer(p) && got.length ? `（${cardNames(got)} を引いた）` : ""}`);
@@ -375,6 +401,7 @@
           s.conceal();
           const { won, evals } = distribute();
           for (const p of live) results.set(p, evals.get(p).name);
+          s.sfx([...won].some(([p, amount]) => amount > 0 && p.human) ? "good" : "card");
           for (const p of live) s.log(`${p.name}: ${evals.get(p).name}（${cardNames(p.hand)}）`);
           s.say(
             [...won]
@@ -393,7 +420,7 @@
         dealer = (dealer + 1) % n;
       }
 
-      return [...P].sort((a, b) => b.chips - a.chips).map((p) => ({ player: p, note: `チップ ${p.chips}枚` }));
+      return [...P].sort((a, b) => b.chips - a.chips).map((p) => ({ player: p, note: `チップ ${p.chips}枚`, key: p.chips }));
     },
   });
 })();

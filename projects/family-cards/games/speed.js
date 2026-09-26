@@ -37,6 +37,7 @@ registerGame({
       p.hand = [];
     }
     const piles = [[], []];
+    const pileAt = [0, 0];
     let winner = null;
     let started = false;
     let stuckSince = 0;
@@ -73,7 +74,9 @@ registerGame({
       const target = pileFor(card);
       if (target === undefined) return false;
       piles[target].push(card);
+      pileAt[target] = Date.now();
       p.field[slot] = p.deck.pop() || null;
+      s.sfx("card");
       stuckSince = 0;
       checkWin(p);
       render();
@@ -93,6 +96,7 @@ registerGame({
         if (card) piles[i].push(card);
       }
       banner = "せーの！";
+      s.sfx("special");
       s.log("せーの！ 台札を出し直しました");
       checkWin(A);
       checkWin(B);
@@ -126,6 +130,7 @@ registerGame({
               onClick: clickable
                 ? () => {
                     if (!tryPlay(p, slot)) {
+                      s.sfx("error");
                       flash = { player: p, slot };
                       render();
                     }
@@ -145,7 +150,7 @@ registerGame({
     function render() {
       const pileEl = (i) => {
         const pile = piles[i];
-        return pile.length ? cardEl(pile[pile.length - 1], { size: "xl" }) : h("div", { class: "card ghost xl" });
+        return pile.length ? cardEl(pile[pile.length - 1], { size: "xl", pop: isFresh(pileAt[i], 300) }) : h("div", { class: "card ghost xl" });
       };
       const board = h(
         "div",
@@ -164,6 +169,7 @@ registerGame({
     }
     for (const count of ["3", "2", "1"]) {
       banner = count;
+      s.sfx("turn");
       render();
       await s.sleep(600);
     }

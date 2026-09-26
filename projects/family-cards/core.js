@@ -110,6 +110,8 @@ function cardEl(card, opts = {}) {
   if (opts.hint) el.classList.add("hint");
   if (opts.dim) el.classList.add("dim");
   if (opts.fresh) el.classList.add("fresh");
+  if (opts.pop) el.classList.add("pop");
+  if (clickable && opts.selected !== undefined) el.setAttribute("aria-pressed", String(Boolean(opts.selected)));
   if (clickable) el.addEventListener("click", () => opts.onClick(card, el));
   return el;
 }
@@ -121,6 +123,73 @@ function miniFan(count) {
   for (let i = 0; i < shown; i += 1) fan.append(h("span", { class: "mini-back" }));
   fan.append(h("b", { text: `${count}枚` }));
   return fan;
+}
+
+/* ---------- 効果音（音声ファイルを使わず Web Audio で合成） ---------- */
+
+const SFX = {
+  card: [["noise", 0, 0.07, 2400, 0.35]],
+  draw: [["noise", 0, 0.05, 3600, 0.25]],
+  turn: [["sine", 660, 0, 0.12, 0.1], ["sine", 880, 0.1, 0.18, 0.1]],
+  good: [["triangle", 523, 0, 0.1, 0.12], ["triangle", 659, 0.08, 0.1, 0.12], ["triangle", 784, 0.16, 0.18, 0.12]],
+  bad: [["square", 220, 0, 0.14, 0.05], ["square", 165, 0.12, 0.22, 0.05]],
+  error: [["square", 150, 0, 0.12, 0.05]],
+  special: [["sawtooth", 392, 0, 0.08, 0.05], ["sawtooth", 523, 0.07, 0.08, 0.05], ["sawtooth", 659, 0.14, 0.08, 0.05], ["sawtooth", 1047, 0.21, 0.25, 0.05]],
+  win: [["triangle", 523, 0, 0.14, 0.12], ["triangle", 659, 0.13, 0.14, 0.12], ["triangle", 784, 0.26, 0.14, 0.12], ["triangle", 1047, 0.39, 0.45, 0.14]],
+};
+
+const Sound = {
+  enabled: true,
+  ctx: null,
+  play(name) {
+    if (!this.enabled || !SFX[name]) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!this.ctx) this.ctx = new AC();
+      if (this.ctx.state === "suspended") this.ctx.resume();
+      const t0 = this.ctx.currentTime + 0.01;
+      for (const [kind, a, b, c, d] of SFX[name]) {
+        if (kind === "noise") this.noise(t0 + a, b, c, d);
+        else this.tone(kind, a, t0 + b, c, d);
+      }
+    } catch {
+      /* 音が出せない環境でも遊べる */
+    }
+  },
+  tone(type, freq, start, dur, vol) {
+    const ctx = this.ctx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(vol, start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start + dur + 0.02);
+  },
+  noise(start, dur, freq, vol) {
+    const ctx = this.ctx;
+    const buffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * dur), ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i += 1) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const src = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    src.buffer = buffer;
+    filter.type = "bandpass";
+    filter.frequency.value = freq;
+    gain.gain.value = vol;
+    src.connect(filter).connect(gain).connect(ctx.destination);
+    src.start(start);
+  },
+};
+
+/** 直前に出たカードだけを弾ませるための判定（再描画のたびに跳ねないように） */
+function isFresh(stamp, ms = 450) {
+  return Boolean(stamp) && Date.now() - stamp < ms;
 }
 
 /* ---------- ゲーム登録 ---------- */
@@ -203,6 +272,7 @@ class Session {
         return;
       }
       this.waiter = { resolve, reject };
+      this.ui.waiting(true);
     });
   }
 
@@ -210,7 +280,25 @@ class Session {
     const waiter = this.waiter;
     if (!waiter) return;
     this.waiter = null;
+    this.ui.waiting(false);
     waiter.resolve(value);
+  }
+
+  sfx(name) {
+    if (this.alive && Speed.factor > 0.05) Sound.play(name);
+  }
+
+  /** 人間の番が来たことを音と振動で知らせる */
+  yourTurn(player) {
+    if (!player || !player.human) return;
+    this.sfx("turn");
+    if (navigator.vibrate && Speed.factor > 0.05) {
+      try {
+        navigator.vibrate(25);
+      } catch {
+        /* 未対応 */
+      }
+    }
   }
 
   abort() {
@@ -225,6 +313,7 @@ class Session {
       this.waiter.reject(new Aborted());
       this.waiter = null;
     }
+    this.ui.waiting(false);
   }
 
   render() {
@@ -264,6 +353,7 @@ class Session {
     this.render();
     this.actions([]);
     this.ui.showCover(player.name);
+    this.sfx("turn");
     try {
       await this.ask();
     } finally {
@@ -329,7 +419,7 @@ class Session {
       row.append(
         cardEl(card, {
           onClick: opts.onClick && playable ? opts.onClick : null,
-          selected: opts.selected ? opts.selected.has(card) : false,
+          selected: opts.selected ? opts.selected.has(card) : undefined,
           hint: opts.hint ? opts.hint.has(card) : false,
           dim: opts.playable ? !playable : false,
           fresh: opts.fresh ? opts.fresh.has(card) : false,

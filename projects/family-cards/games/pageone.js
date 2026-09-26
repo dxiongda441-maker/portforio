@@ -9,6 +9,7 @@ registerGame({
   tagline: "同じマークか同じ数字を出していく",
   players: [2, 6],
   defaultPlayers: 4,
+  levels: true,
   options: [
     { key: "special", label: "特殊カード（2・8・J）", choices: [[true, "あり"], [false, "なし"]], default: true },
   ],
@@ -40,6 +41,7 @@ registerGame({
     let turnPlayer = null;
     let winner = null;
     let fresh = new Set();
+    let topAt = 0;
 
     const top = () => discard[discard.length - 1];
     const canPlay = (card) => {
@@ -68,7 +70,7 @@ registerGame({
           "div",
           { class: "pile-row" },
           h("div", { class: "pile-stack" }, cardEl(null, { size: "lg" }), h("b", { text: `山札 ${deck.length}` })),
-          cardEl(top(), { size: "lg" }),
+          cardEl(top(), { size: "lg", pop: isFresh(topAt) }),
         ),
         h(
           "p",
@@ -97,13 +99,22 @@ registerGame({
     function cpuPick(p) {
       const options = p.hand.filter(canPlay);
       if (!options.length) return null;
+      const level = s.options.level || "normal";
+      if (level === "easy") return pickRandom(options);
       const count = (st) => p.hand.filter((c) => c.suit === st).length;
       const next = P[(p.id + 1) % P.length];
+      const danger = Math.min(...P.filter((q) => q !== p).map((q) => q.hand.length));
       let best = null;
       for (const card of options) {
         let score = count(card.suit) + Math.random();
-        if (special && card.rank === 8) score -= 6; // 切り札は温存
+        if (special && card.rank === 8) score -= level === "hard" && p.hand.length <= 2 ? -3 : 6; // 切り札は温存（最後は切る）
         if (special && (card.rank === 2 || card.rank === 11) && next.hand.length <= 2) score += 5;
+        if (level === "hard") {
+          // 同じ数字の別マークを持っていれば、マークを変えて逃げ道を作れる
+          if (p.hand.some((c) => c !== card && c.rank === card.rank)) score += 1.5;
+          // だれかがページワン目前なら、攻撃札を優先
+          if (special && danger <= 2 && (card.rank === 2 || card.rank === 11)) score += 3;
+        }
         if (!best || score > best.score) best = { card, score };
       }
       return best.card;
@@ -124,6 +135,8 @@ registerGame({
     async function playCard(p, card) {
       takeOut(p.hand, [card]);
       discard.push(card);
+      topAt = Date.now();
+      s.sfx("card");
       suit = card.suit;
       let msg = `${p.name}: ${cardName(card)}`;
       let skip = false;
@@ -139,8 +152,12 @@ registerGame({
         msg += "（次の人はお休み）";
       }
       s.say(msg);
+      if (special && [2, 8, 11].includes(card.rank)) s.sfx("special");
       if (p.hand.length === 1) s.say(`${p.name}「ページワン！」`);
-      if (p.hand.length === 0) winner = p;
+      if (p.hand.length === 0) {
+        winner = p;
+        s.sfx("good");
+      }
       return skip;
     }
 
@@ -153,7 +170,10 @@ registerGame({
       turnPlayer = p;
       fresh = new Set();
       let skip = false;
-      if (p.human) await s.handoff(p);
+      if (p.human) {
+        await s.handoff(p);
+        s.yourTurn(p);
+      }
 
       if (pendingDraw > 0 && !p.hand.some(canPlay)) {
         const got = [];
@@ -164,6 +184,7 @@ registerGame({
         p.hand.push(...got);
         fresh = new Set(got);
         s.say(`${p.name}: ${got.length}枚引いた`);
+        s.sfx("draw");
         pendingDraw = 0;
         render();
         await s.sleep(p.human ? 1100 : 700);
@@ -202,6 +223,7 @@ registerGame({
           } else {
             p.hand.push(c);
             fresh = new Set([c]);
+            s.sfx("draw");
             s.say(`${p.name}: 1枚引いた${s.isViewer(p) ? `（${cardName(c)}）` : ""}`);
             render();
             if (canPlay(c)) {
@@ -240,8 +262,8 @@ registerGame({
     await s.sleep(800);
     const rest = P.filter((p) => p !== winner).sort((a, b) => a.hand.length - b.hand.length);
     if (!winner) {
-      return [...P].sort((a, b) => a.hand.length - b.hand.length).map((p) => ({ player: p, note: `残り${p.hand.length}枚` }));
+      return [...P].sort((a, b) => a.hand.length - b.hand.length).map((p) => ({ player: p, note: `残り${p.hand.length}枚`, key: p.hand.length }));
     }
-    return [{ player: winner, note: "あがり" }, ...rest.map((p) => ({ player: p, note: `残り${p.hand.length}枚` }))];
+    return [{ player: winner, note: "あがり" }, ...rest.map((p) => ({ player: p, note: `残り${p.hand.length}枚`, key: p.hand.length }))];
   },
 });

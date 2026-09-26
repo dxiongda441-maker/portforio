@@ -9,6 +9,7 @@ registerGame({
   tagline: "ウソを見抜け！ A→2→3…の順に出していく",
   players: [3, 6],
   defaultPlayers: 4,
+  levels: true,
   options: [],
   rules: `
     <ol>
@@ -42,6 +43,9 @@ registerGame({
     let selecting = false;
     let winner = null;
     let refresh = () => {};
+    let pileAt = 0;
+    // ダウトでめくられて公開されたカードが、いまだれの手札にあるか（「つよい」CPUが覚える）
+    const known = new Map();
 
     const sortHand = (p) => sortByRank(p.hand);
 
@@ -56,7 +60,7 @@ registerGame({
           { class: "doubt-pile" },
           revealed
             ? h("div", { class: "pile-row" }, revealed.map((c) => cardEl(c, { size: "lg" })))
-            : h("div", { class: "pile-stack" }, pile.length ? cardEl(null, { size: "lg" }) : h("div", { class: "card ghost lg" }), h("b", { text: `場 ${pile.length}枚` })),
+            : h("div", { class: "pile-stack" }, pile.length ? cardEl(null, { size: "lg", pop: isFresh(pileAt) }) : h("div", { class: "card ghost lg" }), h("b", { text: `場 ${pile.length}枚` })),
         ),
         lastPlay ? h("p", { class: "center-label", text: `${lastPlay.player.name}:「${RANK_LABEL[lastPlay.rank]}」を${lastPlay.count}枚` }) : null,
       );
@@ -100,11 +104,20 @@ registerGame({
     }
 
     function cpuDoubts(q, play) {
+      const level = s.options.level || "normal";
       const held = q.hand.filter((c) => c.rank === play.rank).length;
-      if (held + play.count > 4) return true;
+      let elsewhere = 0;
+      if (level === "hard") {
+        for (const [card, holder] of known) {
+          if (card.rank === play.rank && holder !== q && holder !== play.player && holder.hand.includes(card)) elsewhere += 1;
+        }
+      }
+      if (held + elsewhere + play.count > 4) return true; // 数が合わない＝確実にウソ
       let chance = 0.07 + 0.12 * (play.count - 1) + held * 0.1;
-      if (play.player.hand.length === 0) chance += 0.5;
+      if (play.player.hand.length === 0) chance += level === "hard" ? 0.7 : 0.5;
+      else if (level === "hard" && play.player.hand.length <= 2) chance += 0.15;
       if (pile.length > 12) chance -= 0.05;
+      if (level === "easy") chance *= 0.5;
       return Math.random() < chance;
     }
 
@@ -117,6 +130,7 @@ registerGame({
       let cards;
       if (p.human) {
         await s.handoff(p);
+        s.yourTurn(p);
         sel = new Set();
         selecting = true;
         refresh = () =>
@@ -149,6 +163,8 @@ registerGame({
       }
       takeOut(p.hand, cards);
       pile.push(...cards);
+      pileAt = Date.now();
+      s.sfx("card");
       lastPlay = { player: p, count: cards.length, rank, cards };
       s.say(`${p.name}:「${RANK_LABEL[rank]}」を${cards.length}枚出した（残り${p.hand.length}枚）`);
       if (p.human) s.conceal();
@@ -176,10 +192,13 @@ registerGame({
         const lie = cards.some((c) => c.rank !== rank);
         revealed = cards;
         s.say(`${doubter.name}「ダウト！」`);
+        s.sfx("special");
         render();
         await s.sleep(1100);
         const taker = lie ? p : doubter;
         taker.hand.push(...pile);
+        for (const c of cards) known.set(c, taker);
+        s.sfx(taker.human ? "bad" : "good");
         s.say(lie ? `ウソでした！ ${p.name}が場の${pile.length}枚を引き取ります` : `本当でした！ ${doubter.name}が場の${pile.length}枚を引き取ります`);
         pile = [];
         await s.sleep(1500);
@@ -188,6 +207,7 @@ registerGame({
       if (p.hand.length === 0) {
         winner = p;
         s.say(`${p.name} あがり！`);
+        s.sfx("good");
       }
       render();
       await s.sleep(400);
@@ -198,6 +218,6 @@ registerGame({
     render();
     await s.sleep(800);
     const rest = P.filter((p) => p !== winner).sort((a, b) => a.hand.length - b.hand.length);
-    return [{ player: winner, note: "あがり" }, ...rest.map((p) => ({ player: p, note: `残り${p.hand.length}枚` }))];
+    return [{ player: winner, note: "あがり" }, ...rest.map((p) => ({ player: p, note: `残り${p.hand.length}枚`, key: p.hand.length }))];
   },
 });

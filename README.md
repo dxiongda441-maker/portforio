@@ -38,7 +38,8 @@ assets/
   apple-touch-icon.png
   og-cover.jpg      SNSシェア用のOGP画像（1200×630）
   portfolio/        作品カードのサムネイル
-projects/           各作品の実体。1ディレクトリ＝1作品で完結
+projects/           各作品の実体。1ディレクトリ＝1作品で完結（各フォルダに README.md）
+docs/chats.md       チャットごとの成果物と、未取り込みのブランチの一覧
 tools/              メンテナンス用スクリプト
 .github/workflows/  main へのpushでGitHub Pagesへ自動デプロイ
 ```

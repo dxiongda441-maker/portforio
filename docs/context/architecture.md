@@ -13,7 +13,7 @@
 index.html                  トップページ（HTML + CSS を1ファイルに同梱・821行）
 404.html                    404 ページ
 robots.txt / sitemap.xml    クローラ向け
-CLAUDE.md / docs/           このプロジェクトの記憶
+CLAUDE.md / docs/           このプロジェクトの記憶（docs/chats.md = チャット別の成果物一覧）
 assets/
   favicon.svg               ファビコン
   apple-touch-icon.png
@@ -89,7 +89,7 @@ git show 76ace1e:main.js
 
 ## projects/ — 各作品
 
-9 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
+10 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
 
 基本構成は `index.html` + `app.js` + `styles.css`。うち 5 件は
 `manifest.webmanifest`(または `manifest.json`) + `sw.js`(または `service-worker.js`) を持つ **PWA**。
@@ -105,11 +105,14 @@ git show 76ace1e:main.js
 | `contracts` | ビジネス契約ラーニング | 静的 | — |
 | `money-anime` | 100円が冒険に出た!? | 静的 | — |
 | `family-cards` | 年末ファミリートランプ | 静的（複数JS） | — |
+| `cafe-lp` | 琥珀 KOHAKU COFFEE | 静的（HTML+CSSのみ） | — |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
   国データは mledoze/countries 由来（ODbL-1.0）。**ライセンス表記を消さないこと。**
 - `contracts` は `data.js` にデータを分離。
+- 各作品フォルダに `README.md`（概要・ファイルの役割・編集時の注意）がある。どのチャットで作ったかは `docs/chats.md`。
+- `cafe-lp` は架空のカフェの LP。`index.html` + `styles.css` のみで JS なし。LP の型との対応は同フォルダの `README.md`。
 - `money-anime` はアプリではなくケーススタディ（`index.html` + `cover.jpg` のみ）。
 - `family-cards` はトランプ10種のゲーム集。`app.js` と `styles.css` に加えて、共通部品の `core.js` と
   1ゲーム1ファイルの `games/*.js` を**通常の `<script>` で順番に読み込む**（ES Modules は使わない）。

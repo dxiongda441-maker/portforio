@@ -52,7 +52,7 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
     [ -f "$sw" ] || continue
     dir=$(dirname "$sw")
     base=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)
-    if [ -n "$(git diff --name-only "$base" -- "$dir")" ] && ! git diff "$base" -- "$sw" | grep -q '^+.*CACHE_NAME'; then
+    if [ -n "$(git diff --name-only "$base" -- "$dir" ":(exclude)$dir/*.md")" ] && ! git diff "$base" -- "$sw" | grep -q '^+.*CACHE_NAME'; then
       ng "$dir を変更したのに $sw の CACHE_NAME が上がっていない"
     fi
   done

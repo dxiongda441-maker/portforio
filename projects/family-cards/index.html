@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="ババ抜き・大富豪・ポーカー・七並べなど10種類のトランプゲームを、1台の端末で家族と、またはコンピューター相手に遊べるゲーム集。" />
+    <meta name="theme-color" content="#123d2c" />
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+    <title>年末ファミリートランプ</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/projects/family-cards/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="オルタ Portfolio" />
+    <meta property="og:title" content="年末ファミリートランプ" />
+    <meta property="og:description" content="ババ抜き・大富豪・ポーカー・七並べなど10種類のトランプゲームを、1台の端末で家族と、またはコンピューター相手に遊べるゲーム集。" />
+    <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/projects/family-cards/" />
+    <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/family-cards.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="800" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="年末ファミリートランプ" />
+    <meta name="twitter:description" content="ババ抜き・大富豪・ポーカー・七並べなど10種類のトランプゲームを、1台の端末で家族と、またはコンピューター相手に遊べるゲーム集。" />
+    <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/family-cards.jpg" />
+    <style>
+      /* ポートフォリオ側の共通パーツ。各アプリのCSSに依存しないよう独立させている。 */
+      .portfolio-back {
+        align-items: center;
+        background: #211812;
+        color: #fffaf1;
+        display: flex;
+        font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 clamp(16px, 4vw, 32px);
+        position: relative;
+        text-decoration: none;
+        z-index: 60;
+      }
+
+      .portfolio-back:hover,
+      .portfolio-back:focus-visible {
+        color: #d8aa4d;
+      }
+
+      .portfolio-back:focus-visible {
+        outline: 2px solid #d8aa4d;
+        outline-offset: -4px;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="portfolio-back" href="../../"><span aria-hidden="true">←</span> オルタのポートフォリオへ戻る</a>
+
+    <main id="app">
+      <!-- メニュー -->
+      <section id="screen-menu" class="screen">
+        <header class="hero">
+          <p class="eyebrow">年末年始は、みんなでトランプ</p>
+          <h1>年末ファミリー<br class="sp" />トランプ</h1>
+          <p class="lead">
+            1台のスマホやタブレットを家族で回して遊べる、10種類のトランプゲーム集。
+            人数が足りないときはコンピューターが相手をします。
+          </p>
+          <div class="hero-suits" aria-hidden="true"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></div>
+        </header>
+
+        <section class="menu-section" aria-labelledby="games-heading">
+          <h2 id="games-heading">ゲームをえらぶ</h2>
+          <div id="game-list" class="game-list"></div>
+        </section>
+
+        <section class="menu-section panel" aria-labelledby="stats-heading">
+          <h2 id="stats-heading">家族ランキング</h2>
+          <p class="muted small">1位ほど多くのポイントが入ります（人数−順位）。記録はこの端末にだけ保存されます。</p>
+          <div id="stats"></div>
+          <button id="stats-reset" type="button" class="btn ghost-btn small-btn" hidden>記録をリセット</button>
+        </section>
+
+        <section class="menu-section panel" aria-labelledby="speed-heading">
+          <h2 id="speed-heading">設定</h2>
+          <p class="opt-label">CPUのテンポ</p>
+          <div id="speed" class="segs"></div>
+          <p class="opt-label">効果音</p>
+          <button type="button" class="seg sound-toggle"></button>
+        </section>
+      </section>
+
+      <!-- 参加者設定 -->
+      <section id="screen-setup" class="screen" hidden>
+        <div class="setup">
+          <button id="setup-back" type="button" class="link-btn">← ゲーム一覧</button>
+          <h1 id="setup-title"></h1>
+          <p id="setup-lead" class="muted"></p>
+
+          <h2>人数</h2>
+          <div id="setup-count" class="segs"></div>
+
+          <h2>参加する人</h2>
+          <p class="muted small">名前をタップして変更できます。「人が遊ぶ」と「CPU」はボタンで切り替え。</p>
+          <div id="setup-seats" class="seat-list"></div>
+          <p id="setup-note" class="note"></p>
+
+          <div id="setup-options-wrap">
+            <h2>ルール設定</h2>
+            <div id="setup-options"></div>
+          </div>
+
+          <div class="setup-actions">
+            <button id="setup-rules" type="button" class="btn">ルールを読む</button>
+            <button id="setup-start" type="button" class="btn primary big">スタート！</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ゲーム -->
+      <section id="screen-game" class="screen" hidden>
+        <div class="game-bar">
+          <button id="quit-btn" type="button" class="bar-btn">← やめる</button>
+          <h1 id="game-title"></h1>
+          <div class="bar-right">
+            <button type="button" class="bar-btn sound-toggle"></button>
+            <button id="rules-btn" type="button" class="bar-btn">ルール</button>
+          </div>
+        </div>
+        <div id="table" class="table"></div>
+        <div class="control">
+          <p id="message" class="message" aria-live="polite"></p>
+          <div id="actions" class="actions"></div>
+        </div>
+        <details class="log">
+          <summary>これまでの流れ</summary>
+          <ol id="log"></ol>
+        </details>
+      </section>
+    </main>
+
+    <!-- 端末を渡す画面 -->
+    <div id="cover" class="overlay cover" hidden>
+      <div class="dialog-card">
+        <p>次は</p>
+        <h2 id="cover-name"></h2>
+        <p>さんの番です。<br />ほかの人は画面を見ないでね。</p>
+        <button id="cover-btn" type="button" class="btn primary big">準備OK・カードを見る</button>
+      </div>
+    </div>
+
+    <!-- 結果 -->
+    <div id="result" class="overlay" hidden>
+      <div id="confetti" class="confetti" aria-hidden="true"></div>
+      <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="result-title">
+        <p id="result-title" class="muted"></p>
+        <h2 id="result-lead"></h2>
+        <ol id="result-list" class="result-list"></ol>
+        <div class="setup-actions">
+          <button id="result-menu" type="button" class="btn">メニューへ</button>
+          <button id="result-again" type="button" class="btn primary">もう一度</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ルール -->
+    <dialog id="rules-dialog" class="rules-dialog" aria-labelledby="rules-title">
+      <h2 id="rules-title"></h2>
+      <div id="rules-body" class="rules-body"></div>
+      <button id="rules-close" type="button" class="btn primary">閉じる</button>
+    </dialog>
+
+    <script src="./core.js"></script>
+    <script src="./games/babanuki.js"></script>
+    <script src="./games/daifugo.js"></script>
+    <script src="./games/shichinarabe.js"></script>
+    <script src="./games/poker.js"></script>
+    <script src="./games/doubt.js"></script>
+    <script src="./games/pageone.js"></script>
+    <script src="./games/shinkei.js"></script>
+    <script src="./games/speed.js"></script>
+    <script src="./games/blackjack.js"></script>
+    <script src="./games/highlow.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -21,6 +21,8 @@ assets/
   portfolio/                作品カードのサムネイル（.jpg と同名 .webp を併置）
 projects/<slug>/            各作品の実体。それぞれ独立した静的アプリ
 tools/fetch-backgrounds.sh  背景写真をローカルに取り込むスクリプト（未実行）
+tools/check.sh              ルールの機械チェック（読むだけ・書き換えない）
+tools/screenshot.sh         ヘッドレス Chromium で撮影（出力はリポジトリ外）
 .github/workflows/deploy.yml  Pages デプロイ
 ```
 
@@ -127,6 +129,8 @@ git show 76ace1e:main.js
 - `<link rel="canonical">`
 - OGP 一式（`og:type` `og:locale` `og:site_name` `og:title` `og:description` `og:url` `og:image`）
 - Twitter Card
-- `<a class="portfolio-back" href="../../">` の戻り導線
+- `href="../../"` の戻り導線（通常は `<a class="portfolio-back">`。`money-anime` だけ `<a class="back" href="../../#works">`）
+
+`tools/check.sh` がこれらの有無を全作品について確認する。
 
 <!-- ✏️ 新しい作品や構成変更を入れたら、ここを更新してください -->

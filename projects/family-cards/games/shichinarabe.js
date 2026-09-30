@@ -11,7 +11,15 @@ registerGame({
   defaultPlayers: 4,
   levels: true,
   options: [
-    { key: "passes", label: "パスできる回数", choices: [[3, "3回"], [5, "5回"], [99, "無制限"]], default: 3 },
+    { key: "passes", label: "パスできる回数", choices: [[1, "1回"], [3, "3回"], [5, "5回"], [99, "無制限"]], default: 3 },
+    {
+      key: "tunnel",
+      group: "local",
+      label: "トンネル（A と K がつながる）",
+      help: "A まで並んだら K から、K まで並んだら A から続けて出せる。",
+      choices: [[true, "あり"], [false, "なし"]],
+      default: false,
+    },
   ],
   rules: `
     <ol>
@@ -21,6 +29,7 @@ registerGame({
       <li>パスの回数を超えると<b>ドボン（脱落）</b>。持っていたカードはすべて場に置かれます。</li>
       <li>手札を早くなくした人から順位が決まります。脱落した人は最下位グループです。</li>
     </ol>
+    <p><b>トンネル（設定でオン）</b>: A まで並んだら、そのマークの K の側から続けて出せます（K まで並んだら A から）。</p>
     <p>作戦: 自分がたくさん持っているマークの方向は早めに開けて、ほかの人が持っていそうな所は止めておくと有利です。</p>
   `,
 
@@ -44,16 +53,27 @@ registerGame({
     let lastAt = 0;
 
     const inGame = (p) => !finished.includes(p) && !busted.includes(p);
-    const range = (suit) => {
-      let lo = 7;
-      let hi = 7;
-      while (placed[suit].has(lo - 1)) lo -= 1;
-      while (placed[suit].has(hi + 1)) hi += 1;
-      return { lo, hi };
+    const tunnel = Boolean(s.options.tunnel);
+    const wrap = (r) => (!tunnel ? r : r === 0 ? 13 : r === 14 ? 1 : r);
+    /** 7からつながっている数字（トンネルありなら A と K もつながる） */
+    const connected = (suit) => {
+      const seen = new Set([7]);
+      const stack = [7];
+      while (stack.length) {
+        const r = stack.pop();
+        for (const nb of [wrap(r - 1), wrap(r + 1)]) {
+          if (nb >= 1 && nb <= 13 && placed[suit].has(nb) && !seen.has(nb)) {
+            seen.add(nb);
+            stack.push(nb);
+          }
+        }
+      }
+      return seen;
     };
     const playable = (card) => {
-      const { lo, hi } = range(card.suit);
-      return card.rank === lo - 1 || card.rank === hi + 1;
+      if (placed[card.suit].has(card.rank)) return false;
+      const conn = connected(card.suit);
+      return conn.has(wrap(card.rank - 1)) || conn.has(wrap(card.rank + 1));
     };
     const sortHand = (p) => [...p.hand].sort((a, b) => SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit) || a.rank - b.rank);
 

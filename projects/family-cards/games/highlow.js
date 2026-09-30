@@ -11,13 +11,21 @@ registerGame({
   defaultPlayers: 3,
   options: [
     { key: "goal", label: "目標ポイント", choices: [[5, "5点"], [10, "10点"], [15, "15点"]], default: 10 },
+    {
+      key: "tie",
+      group: "local",
+      label: "同じ数字が出たとき",
+      help: "次のカードが同じ数字だったときの扱い。",
+      choices: [["safe", "セーフ（もう一度）"], ["out", "はずれ"], ["win", "当たり"]],
+      default: "safe",
+    },
   ],
   rules: `
     <ol>
       <li>表になっているカードを見て、次のカードが<b>ハイ（大きい）</b>か<b>ロー（小さい）</b>かを当てます。A が一番小さく、K が一番大きい数字です。</li>
       <li>当たると連続記録が1つ増え、続けて挑戦できます。</li>
       <li>好きなところで <b>ストップ</b> すると、連続記録がそのままポイントになります。</li>
-      <li>はずれると、その番の連続記録は0になって次の人へ。同じ数字が出たときはセーフで、もう一度予想できます。</li>
+      <li>はずれると、その番の連続記録は0になって次の人へ。同じ数字が出たときは、設定に応じてセーフ（もう一度予想）・はずれ・当たりのどれかになります。</li>
       <li>先に目標ポイントに届いた人の勝ち（その周の最後まで遊んで決着）。</li>
     </ol>
   `,
@@ -99,9 +107,10 @@ registerGame({
           const label = choice === "high" ? "ハイ" : "ロー";
           currentCard = nextCard;
           nextCard = null;
-          if (diff === 0) {
+          const tieRule = s.options.tie || "safe";
+          if (diff === 0 && tieRule === "safe") {
             s.note(`${p.name}: ${label} → 同じ数字！ セーフ`);
-          } else if ((diff > 0) === (choice === "high")) {
+          } else if ((diff === 0 && tieRule === "win") || (diff !== 0 && (diff > 0) === (choice === "high"))) {
             streak += 1;
             s.sfx("good");
             s.note(`${p.name}: ${label} → 当たり！ 連続 ${streak}`);

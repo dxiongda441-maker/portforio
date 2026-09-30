@@ -1,0 +1,17 @@
+{
+  "name": "年末ファミリートランプ",
+  "short_name": "ファミリートランプ",
+  "description": "ババ抜き・大富豪・ポーカー・七並べなど10種類のトランプゲームを、家族やコンピューターと遊べるゲーム集。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d3d2a",
+  "theme_color": "#123d2c",
+  "lang": "ja",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -12,6 +12,22 @@ registerGame({
   options: [
     { key: "size", label: "カードの枚数", choices: [[16, "16枚（小さい子向け）"], [24, "24枚"], [52, "52枚（全部）"]], default: 24 },
     { key: "memory", label: "CPUの記憶力", choices: [[0.3, "よわい"], [0.6, "ふつう"], [0.9, "つよい"]], default: 0.6 },
+    {
+      key: "pairRule",
+      group: "local",
+      label: "ペアになる条件",
+      help: "「同じ色も」にすると、♠と♣、♥と♦ のように色までそろったときだけペア（むずかしくなる）。",
+      choices: [["rank", "同じ数字"], ["color", "同じ数字＋同じ色"]],
+      default: "rank",
+    },
+    {
+      key: "bonus",
+      group: "local",
+      label: "そろえたらもう一度",
+      help: "ペアをそろえた人が続けてめくれるか。",
+      choices: [[true, "あり"], [false, "なし"]],
+      default: true,
+    },
   ],
   rules: `
     <ol>
@@ -20,6 +36,7 @@ registerGame({
       <li>違う数字なら裏に戻して、次の人の番です。</li>
       <li>全部なくなったとき、ペアを一番多く取った人の勝ち。</li>
     </ol>
+    <p>設定で「同じ数字＋同じ色でないとペアにならない」「そろえてももう一度めくれない」に変えられます。</p>
     <p>1人で遊ぶと、何回でクリアできたかを記録します。</p>
   `,
 
@@ -33,7 +50,10 @@ registerGame({
       cards = [];
       const all = makeDeck();
       for (let rank = 1; rank <= pairs; rank += 1) {
-        const [a, b] = shuffle(all.filter((c) => c.rank === rank));
+        // 「同じ色」ルールのときは、その数字の赤2枚か黒2枚のどちらかを使う
+        const red = Math.random() < 0.5;
+        const pool = s.options.pairRule === "color" ? all.filter((c) => c.rank === rank && isRed(c) === red) : all.filter((c) => c.rank === rank);
+        const [a, b] = shuffle(pool);
         cards.push(a, b);
       }
     }
@@ -47,9 +67,11 @@ registerGame({
     let tries = 0;
     let open = [];
 
+    // ペアの判定に使う値（「同じ色も」なら 数字＋色）
+    const keyOf = (card) => (s.options.pairRule === "color" ? `${card.rank}${isRed(card) ? "r" : "b"}` : String(card.rank));
     const remember = (index) => {
       for (const p of P) {
-        if (!p.human && Math.random() < s.options.memory) p.memory.set(index, slots[index].card.rank);
+        if (!p.human && Math.random() < s.options.memory) p.memory.set(index, keyOf(slots[index].card));
       }
     };
     const forget = (index) => {
@@ -94,7 +116,7 @@ registerGame({
         return pickRandom(unknown.length ? unknown : down);
       }
       const first = open[0];
-      const match = known.find(([i, rank]) => i !== first && rank === slots[first].card.rank);
+      const match = known.find(([i, rank]) => i !== first && rank === keyOf(slots[first].card));
       if (match) return match[0];
       const unknown = down.filter((i) => i !== first && !p.memory.has(i));
       return pickRandom(unknown.length ? unknown : down.filter((i) => i !== first));
@@ -122,15 +144,17 @@ registerGame({
       }
       tries += 1;
       const [a, b] = open.map((i) => slots[i].card);
-      if (a.rank === b.rank) {
+      if (keyOf(a) === keyOf(b)) {
         for (const i of open) {
           slots[i].state = "taken";
           forget(i);
         }
         p.taken.push(a, b);
         s.sfx("good");
-        s.say(`${p.name}: ${cardName(a)} と ${cardName(b)} でペア！ もう一度`);
+        const again = s.options.bonus !== false;
+        s.say(`${p.name}: ${cardName(a)} と ${cardName(b)} でペア！${again ? " もう一度" : ""}`);
         await s.sleep(900);
+        if (!again) idx = (idx + 1) % P.length;
         render();
       } else {
         s.note(`${p.name}: ざんねん（${cardName(a)} と ${cardName(b)}）`);

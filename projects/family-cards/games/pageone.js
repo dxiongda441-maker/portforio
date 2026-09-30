@@ -11,29 +11,42 @@ registerGame({
   defaultPlayers: 4,
   levels: true,
   options: [
-    { key: "special", label: "特殊カード（2・8・J）", choices: [[true, "あり"], [false, "なし"]], default: true },
+    { key: "hand", label: "最初に配る枚数", choices: [[0, "おまかせ"], [5, "5枚"], [7, "7枚"]], default: 0 },
+    { key: "two", group: "local", label: "2（ドロー2）", help: "次の人は2枚引く。", choices: [[true, "あり"], [false, "なし"]], default: true },
+    { key: "stack", group: "local", label: "2の重ね", help: "2を出されたら、2を重ねて次の人へ押しつけられる（枚数は増えていく）。", choices: [[true, "あり"], [false, "なし"]], default: true },
+    { key: "eight", group: "local", label: "8（ワイルド）", help: "いつでも出せて、次のマークを好きに決められる。", choices: [[true, "あり"], [false, "なし"]], default: true },
+    { key: "jack", group: "local", label: "J（スキップ）", help: "次の人をとばす。", choices: [[true, "あり"], [false, "なし"]], default: true },
+    { key: "noSpecialFinish", group: "local", label: "特殊カードで上がれない", help: "最後の1枚が 2・8・J のときは出せず、山札から引く。", choices: [[true, "あり"], [false, "なし"]], default: false },
   ],
   rules: `
     <ol>
-      <li>1人7枚（5人以上なら5枚）配り、山札の1枚を表にして始めます。</li>
+      <li>1人7枚（5人以上なら5枚。設定で変更可）配り、山札の1枚を表にして始めます。</li>
       <li>場のカードと<b>同じマーク</b>か<b>同じ数字</b>のカードを1枚出します。</li>
       <li>出せないとき（出したくないとき）は山札から1枚引きます。引いたカードが出せればそのまま出せます。</li>
       <li>残り1枚になったら「ページワン！」（この画面では自動で宣言します）。</li>
       <li>最初に手札をなくした人の勝ち。残りの人は手札が少ない順です。</li>
     </ol>
-    <p><b>特殊カード（ありの場合）</b></p>
+    <p><b>特殊カード</b>（地域で違うので、設定画面で1枚ずつオン/オフできます）</p>
     <ul>
       <li><b>8</b>: いつでも出せて、次のマークを好きに決められる。</li>
       <li><b>J</b>: 次の人をとばす。</li>
-      <li><b>2</b>: 次の人は2枚引く。2を出せば、さらに次の人へ押しつけられる（枚数は重なる）。</li>
+      <li><b>2</b>: 次の人は2枚引く。<b>2の重ね</b>がありなら、2を出してさらに次の人へ押しつけられる（枚数は重なる）。</li>
+      <li><b>特殊カードで上がれない</b>（ありの場合）: 最後の1枚が特殊カードだと出せず、山札から引きます。</li>
     </ul>
   `,
 
   async play(s) {
     const P = s.players;
-    const special = s.options.special;
+    const R = {
+      two: s.options.two !== false,
+      stack: s.options.stack !== false,
+      eight: s.options.eight !== false,
+      jack: s.options.jack !== false,
+      noSpecialFinish: Boolean(s.options.noSpecialFinish),
+    };
+    const isSpecial = (c) => (R.two && c.rank === 2) || (R.eight && c.rank === 8) || (R.jack && c.rank === 11);
     let deck = shuffle(makeDeck());
-    const perPlayer = P.length >= 5 ? 5 : 7;
+    const perPlayer = s.options.hand || (P.length >= 5 ? 5 : 7);
     for (let k = 0; k < perPlayer; k += 1) for (const p of P) p.hand.push(deck.pop());
     const discard = [deck.pop()];
     let suit = discard[0].suit;
@@ -45,8 +58,10 @@ registerGame({
 
     const top = () => discard[discard.length - 1];
     const canPlay = (card) => {
-      if (pendingDraw > 0) return card.rank === 2;
-      if (special && card.rank === 8) return true;
+      // 特殊カードで上がれないルール: 最後の1枚が特殊カードなら出せない
+      if (R.noSpecialFinish && turnPlayer && turnPlayer.hand.length === 1 && isSpecial(card)) return false;
+      if (pendingDraw > 0) return R.stack && card.rank === 2;
+      if (R.eight && card.rank === 8) return true;
       return card.suit === suit || card.rank === top().rank;
     };
     const sortHand = (p) => [...p.hand].sort((a, b) => SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit) || a.rank - b.rank);
@@ -107,13 +122,15 @@ registerGame({
       let best = null;
       for (const card of options) {
         let score = count(card.suit) + Math.random();
-        if (special && card.rank === 8) score -= level === "hard" && p.hand.length <= 2 ? -3 : 6; // 切り札は温存（最後は切る）
-        if (special && (card.rank === 2 || card.rank === 11) && next.hand.length <= 2) score += 5;
+        if (R.eight && card.rank === 8) score -= level === "hard" && p.hand.length <= 2 ? -3 : 6; // 切り札は温存（最後は切る）
+        if (((R.two && card.rank === 2) || (R.jack && card.rank === 11)) && next.hand.length <= 2) score += 5;
+        // 特殊カードで上がれないなら、特殊カードは早めに使う
+        if (R.noSpecialFinish && isSpecial(card) && p.hand.length <= 3) score += 4;
         if (level === "hard") {
           // 同じ数字の別マークを持っていれば、マークを変えて逃げ道を作れる
           if (p.hand.some((c) => c !== card && c.rank === card.rank)) score += 1.5;
           // だれかがページワン目前なら、攻撃札を優先
-          if (special && danger <= 2 && (card.rank === 2 || card.rank === 11)) score += 3;
+          if (danger <= 2 && ((R.two && card.rank === 2) || (R.jack && card.rank === 11))) score += 3;
         }
         if (!best || score > best.score) best = { card, score };
       }
@@ -140,19 +157,19 @@ registerGame({
       suit = card.suit;
       let msg = `${p.name}: ${cardName(card)}`;
       let skip = false;
-      if (special && card.rank === 8) {
+      if (R.eight && card.rank === 8) {
         render();
         suit = await chooseSuit(p);
         msg += `（マークを${SUIT_MARK[suit]}に変更）`;
-      } else if (special && card.rank === 2) {
+      } else if (R.two && card.rank === 2) {
         pendingDraw += 2;
         msg += `（次の人は${pendingDraw}枚引く）`;
-      } else if (special && card.rank === 11) {
+      } else if (R.jack && card.rank === 11) {
         skip = true;
         msg += "（次の人はお休み）";
       }
       s.say(msg);
-      if (special && [2, 8, 11].includes(card.rank)) s.sfx("special");
+      if (isSpecial(card)) s.sfx("special");
       if (p.hand.length === 1) s.say(`${p.name}「ページワン！」`);
       if (p.hand.length === 0) {
         winner = p;
@@ -238,7 +255,7 @@ registerGame({
                 );
               } else {
                 await s.sleep(500);
-                play = !(special && c.rank === 8 && p.hand.length > 3);
+                play = !(R.eight && c.rank === 8 && p.hand.length > 3);
               }
               if (play) skip = await playCard(p, c);
               else s.log(`${p.name}: パス`);

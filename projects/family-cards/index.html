@@ -8,6 +8,12 @@
     <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
     <title>年末ファミリートランプ</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="トランプ" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/projects/family-cards/" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ja_JP" />
@@ -86,6 +92,15 @@
           <p class="opt-label">効果音</p>
           <button type="button" class="seg sound-toggle"></button>
         </section>
+        <section class="menu-section panel" aria-labelledby="install-heading">
+          <h2 id="install-heading">スマホのアプリのように使う</h2>
+          <p class="muted small">ホーム画面に追加すると、アイコンから全画面で開けます。一度開けば、電波のない場所でも遊べます。</p>
+          <button id="install-btn" type="button" class="btn primary" hidden>ホーム画面に追加する</button>
+          <ul class="install-steps">
+            <li><b>iPhone / iPad</b>: Safari で開き、下の共有ボタン（□↑）→「ホーム画面に追加」</li>
+            <li><b>Android</b>: Chrome で開き、右上のメニュー（⋮）→「ホーム画面に追加」または「アプリをインストール」</li>
+          </ul>
+        </section>
       </section>
 
       <!-- 参加者設定 -->
@@ -163,7 +178,7 @@
 
     <!-- ルール -->
     <dialog id="rules-dialog" class="rules-dialog" aria-labelledby="rules-title">
-      <h2 id="rules-title"></h2>
+      <h2 id="rules-title" tabindex="-1"></h2>
       <div id="rules-body" class="rules-body"></div>
       <button id="rules-close" type="button" class="btn primary">閉じる</button>
     </dialog>

@@ -101,3 +101,4 @@ GitHub Pagesへ公開されます。手動の操作は不要です。
 | ビジネス契約ラーニング | 契約の学習アプリ | `projects/contracts/` |
 | 100円が冒険に出た!? | AIアニメ制作ケーススタディ | `projects/money-anime/` |
 | 年末ファミリートランプ | 家族向けトランプゲーム集（10種） | `projects/family-cards/` |
+| 琥珀 KOHAKU COFFEE | カフェのランディングページ | `projects/cafe-lp/` |

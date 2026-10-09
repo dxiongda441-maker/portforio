@@ -105,7 +105,7 @@
     .legend { font-size: 12px; color: var(--usuzumi); margin: 12px 0 0; text-align: center; }
 
     /* Calendar */
-    table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; border-radius: var(--radius); overflow: hidden; }
+    table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; background: #fff; border-radius: var(--radius); overflow: hidden; }
     th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
     th { background: #fbf6ef; font-size: 13px; white-space: nowrap; }
     td:first-child { white-space: nowrap; font-weight: 700; }
@@ -128,6 +128,12 @@
       padding: 14px;
     }
     .caption p { margin: 10px 0 0; font-size: 13px; color: var(--usuzumi); }
+
+    /* Images */
+    .images { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+    .images figure { margin: 0; }
+    .images img { width: 100%; height: auto; display: block; border-radius: 10px; border: 1px solid var(--line); }
+    .images figcaption { font-size: 12px; color: var(--usuzumi); margin-top: 6px; text-align: center; }
 
     /* Report */
     .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
@@ -155,7 +161,8 @@
       .two { display: grid; grid-template-columns: 400px 1fr; gap: 32px; align-items: start; }
       .captions { grid-template-columns: repeat(3, 1fr); }
       .kpis { grid-template-columns: repeat(4, 1fr); }
-      .plan { grid-template-columns: repeat(3, 1fr); }
+      .plan { grid-template-columns: repeat(2, 1fr); }
+      .images { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
@@ -245,7 +252,19 @@
 
     <section>
       <div class="wrap">
-        <h2><span class="num">3</span>投稿文（こちらで作成）</h2>
+        <h2><span class="num">3</span>投稿画像・ストーリー（こちらで作成）</h2>
+        <p class="lead">お知らせ系は文字入り画像をこちらで作ります。ストーリーは型を用意し、店主さんの写真をはめ込みます。</p>
+        <div class="images">
+          <figure><img src="posts/calendar.png" alt="10月の営業日カレンダーの投稿画像" loading="lazy" decoding="async" width="1080" height="1350"><figcaption>お知らせ（営業日）</figcaption></figure>
+          <figure><img src="posts/welcome.png" alt="はじめての方へ、お店の紹介の投稿画像" loading="lazy" decoding="async" width="1080" height="1350"><figcaption>はじめての方へ</figcaption></figure>
+          <figure><img src="posts/story.png" alt="焼き上がりを知らせるストーリー画像" loading="lazy" decoding="async" width="1080" height="1920"><figcaption>ストーリー（焼き上がり）</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2><span class="num">4</span>投稿文（こちらで作成）</h2>
         <p class="lead">お店の言葉づかいに合わせて書きます。公開前に店主さんの確認を取ります。</p>
         <div class="captions">
           <article class="panel caption">
@@ -295,7 +314,7 @@
 
     <section>
       <div class="wrap">
-        <h2><span class="num">4</span>月次報告（月末にお渡し）</h2>
+        <h2><span class="num">5</span>月次報告（月末にお渡し）</h2>
         <p class="lead">数字と、「来月どうするか」をセットでお伝えします。</p>
         <div class="kpis">
           <div class="kpi"><span>フォロワー</span><b>612</b><em>+38</em></div>
@@ -326,9 +345,14 @@
         <p class="lead">まずは3か月お試しいただく形をおすすめしています。</p>
         <div class="plan">
           <div class="panel">
+            <h3>ネタと文章のお届け</h3>
+            <div class="price">月 10,000円</div>
+            <ul><li>投稿カレンダー（月8本分のネタ）</li><li>投稿文・ハッシュタグ</li><li>投稿は店主さんご自身で</li></ul>
+          </div>
+          <div class="panel">
             <h3>Instagram運用</h3>
             <div class="price">月 20,000円〜</div>
-            <ul><li>月8投稿（企画・画像・文章・投稿）</li><li>投稿カレンダー</li><li>月次報告</li></ul>
+            <ul><li>月8投稿（企画・画像・文章・投稿）</li><li>ストーリー用の型</li><li>投稿カレンダー・月次報告</li></ul>
           </div>
           <div class="panel">
             <h3>ホームページ制作</h3>

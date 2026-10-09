@@ -22,6 +22,7 @@ assets/
 projects/<slug>/            各作品の実体。それぞれ独立した静的アプリ
 samples/<業種>/             受託制作の営業用見本（noindex・sitemap 対象外 → decisions/0004）
 tools/fetch-backgrounds.sh  背景写真をローカルに取り込むスクリプト（未実行）
+tools/insta-post/           Instagram投稿画像のテンプレート（template.html）と PNG 書き出し（render.js・Playwright）
 .github/workflows/deploy.yml  Pages デプロイ
 ```
 
@@ -130,6 +131,7 @@ git show 76ace1e:main.js
 |---|---|
 | カフェ（サイト） | `samples/cafe/index.html` |
 | カフェ（Instagram運用の見本） | `samples/cafe/instagram.html` |
+| カフェ（投稿画像。`tools/insta-post/` から書き出し） | `samples/cafe/posts/*.png` |
 | 整体院（旧方針。未使用 → decisions/0005） | `samples/seitai/` |
 
 <!-- ✏️ 新しい作品や構成変更を入れたら、ここを更新してください -->

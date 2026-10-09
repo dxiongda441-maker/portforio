@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>Instagram 投稿テンプレート</title>
+  <style>
+    :root {
+      --sumi: #3a2e27;
+      --usuzumi: #7a6a5e;
+      --kinari: #faf4ea;
+      --line: #eadfce;
+      --kogecha: #8a5a3b;
+      --kuchiba: #e0a458;
+    }
+
+    * { box-sizing: border-box; }
+
+    body { margin: 0; background: #ccc; font-family: "Noto Sans CJK JP", "Hiragino Sans", sans-serif; }
+
+    .frame { position: relative; overflow: hidden; color: var(--sumi); margin: 40px; }
+    .feed { width: 1080px; height: 1350px; }
+    .story { width: 1080px; height: 1920px; }
+
+    .brand { position: absolute; left: 80px; bottom: 64px; font-size: 30px; letter-spacing: 0.2em; color: var(--usuzumi); }
+
+    /* お知らせ：営業日カレンダー */
+    #calendar { background: var(--kinari); padding: 96px 80px; }
+    #calendar .eyebrow { font-size: 34px; letter-spacing: 0.3em; color: var(--kogecha); }
+    #calendar h1 { font-size: 104px; margin: 8px 0 48px; line-height: 1.2; }
+    #calendar table { width: 100%; border-collapse: separate; border-spacing: 10px; }
+    #calendar th { font-size: 30px; color: var(--usuzumi); font-weight: 400; }
+    #calendar td { height: 150px; background: #fff; border-radius: 18px; text-align: center; font-size: 44px; font-weight: 700; }
+    #calendar td.off { background: var(--kogecha); color: #fff; }
+    #calendar td.empty { background: transparent; }
+    #calendar .legend { margin-top: 32px; font-size: 32px; color: var(--usuzumi); }
+    #calendar .legend span { display: inline-block; width: 30px; height: 30px; border-radius: 8px; background: var(--kogecha); vertical-align: -4px; margin-right: 10px; }
+
+    /* はじめての方へ */
+    #welcome { background: var(--kogecha); color: #fff; padding: 120px 80px; }
+    #welcome .eyebrow { font-size: 34px; letter-spacing: 0.3em; opacity: 0.8; }
+    #welcome h1 { font-size: 112px; line-height: 1.3; margin: 12px 0 72px; }
+    #welcome ul { list-style: none; margin: 0; padding: 0; }
+    #welcome li { font-size: 48px; padding: 30px 0; border-top: 2px solid rgba(255, 255, 255, 0.25); }
+    #welcome li b { color: #f5d29f; margin-right: 16px; }
+    #welcome .brand { color: rgba(255, 255, 255, 0.7); }
+    #welcome .swipe { position: absolute; right: 80px; bottom: 64px; font-size: 34px; }
+
+    /* ストーリー：焼き上がり */
+    #story { background: linear-gradient(170deg, #f0cf9c, #d99a56 70%, #b9805c); }
+    #story .photo { position: absolute; inset: 0; display: grid; place-items: center; font-size: 40px; color: rgba(58, 46, 39, 0.45); }
+    #story .card { position: absolute; left: 80px; right: 80px; bottom: 360px; background: rgba(255, 252, 246, 0.95); border-radius: 40px; padding: 56px 60px; }
+    #story .time { font-size: 40px; color: var(--kogecha); font-weight: 700; }
+    #story .card h1 { font-size: 92px; margin: 8px 0 16px; line-height: 1.25; }
+    #story .card p { font-size: 40px; margin: 0; color: var(--usuzumi); }
+    #story .badge { position: absolute; top: 260px; right: 80px; background: var(--sumi); color: #fff; font-size: 40px; padding: 18px 36px; border-radius: 999px; }
+  </style>
+</head>
+<body>
+  <!-- 1. お知らせ（フィード 1080×1350） -->
+  <section class="frame feed" id="calendar">
+    <div class="eyebrow">OPEN DAYS</div>
+    <h1>10月の営業日</h1>
+    <table>
+      <tr><th>日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th></tr>
+      <tr><td class="empty"></td><td class="empty"></td><td class="empty"></td><td class="empty"></td><td>1</td><td>2</td><td>3</td></tr>
+      <tr><td>4</td><td class="off">5</td><td class="off">6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+      <tr><td>11</td><td class="off">12</td><td class="off">13</td><td>14</td><td>15</td><td>16</td><td>17</td></tr>
+      <tr><td>18</td><td class="off">19</td><td class="off">20</td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+      <tr><td>25</td><td class="off">26</td><td class="off">27</td><td>28</td><td>29</td><td>30</td><td>31</td></tr>
+    </table>
+    <p class="legend"><span></span>お休み　11:00〜18:00（売り切れ次第終了）</p>
+    <div class="brand">ことり舎</div>
+  </section>
+
+  <!-- 2. はじめての方へ（フィード 1080×1350） -->
+  <section class="frame feed" id="welcome">
+    <div class="eyebrow">FOR NEW GUESTS</div>
+    <h1>はじめての方へ</h1>
+    <ul>
+      <li><b>01</b>〇〇駅から歩いて6分</li>
+      <li><b>02</b>8席だけの小さなお店です</li>
+      <li><b>03</b>焼き菓子はすべてテイクアウトOK</li>
+      <li><b>04</b>月・火はお休みです</li>
+    </ul>
+    <div class="brand">ことり舎</div>
+    <div class="swipe">人気メニュー →</div>
+  </section>
+
+  <!-- 3. ストーリー（1080×1920）。背景は実際には店主の写真 -->
+  <section class="frame story" id="story">
+    <div class="photo">ここに焼き上がりの写真</div>
+    <div class="badge">焼きたて</div>
+    <div class="card">
+      <div class="time">11:00 焼き上がりました</div>
+      <h1>焦がしバターの<br>フィナンシェ</h1>
+      <p>今日は30個。なくなり次第終了です</p>
+    </div>
+  </section>
+</body>
+</html>

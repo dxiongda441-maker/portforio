@@ -298,28 +298,84 @@ function renderSetup() {
 
   const optBox = $("#setup-options");
   optBox.replaceChildren();
-  for (const opt of gameOptions(game)) {
-    const row = h("div", { class: "opt-row" }, h("p", { class: "opt-label", text: opt.label }));
-    const segs = h("div", { class: "segs" });
-    for (const [value, label] of opt.choices) {
-      segs.append(
-        h(
-          "button",
-          {
-            type: "button",
-            class: `seg${options[opt.key] === value ? " on" : ""}`,
-            "aria-pressed": String(options[opt.key] === value),
-            onclick: () => {
-              options[opt.key] = value;
-              renderSetup();
-            },
+  const all = gameOptions(game);
+  const isDefault = () => all.every((opt) => options[opt.key] === opt.default);
+
+  // おすすめセット（ゲーム側で presets を定義したときだけ）＋初期設定に戻す
+  const presetBox = h("div", { class: "presets" });
+  for (const preset of game.presets || []) {
+    const active = Object.entries(preset.values).every(([k, v]) => options[k] === v);
+    presetBox.append(
+      h(
+        "button",
+        {
+          type: "button",
+          class: `seg preset${active ? " on" : ""}`,
+          "aria-pressed": String(active),
+          onclick: () => {
+            Object.assign(options, preset.values);
+            renderSetup();
           },
-          label,
-        ),
+        },
+        h("strong", { text: preset.label }),
+        preset.note ? h("small", { text: preset.note }) : null,
+      ),
+    );
+  }
+  presetBox.append(
+    h(
+      "button",
+      {
+        type: "button",
+        class: "btn ghost-btn small-btn",
+        disabled: isDefault() || null,
+        onclick: () => {
+          for (const opt of all) options[opt.key] = opt.default;
+          renderSetup();
+        },
+      },
+      "初期設定に戻す",
+    ),
+  );
+  optBox.append(presetBox);
+
+  const groups = [
+    ["basic", "基本ルール", all.filter((opt) => opt.group !== "local")],
+    ["local", "ローカルルール（地域・家庭ごとの決まり）", all.filter((opt) => opt.group === "local")],
+  ];
+  for (const [id, title, list] of groups) {
+    if (!list.length) continue;
+    const changed = list.filter((opt) => options[opt.key] !== opt.default).length;
+    const section = h("section", { class: `opt-group opt-${id}` }, h("h3", {}, title, changed ? h("span", { class: "badge gold", text: `${changed}件変更` }) : null));
+    for (const opt of list) {
+      const row = h(
+        "div",
+        { class: `opt-row${options[opt.key] !== opt.default ? " changed" : ""}` },
+        h("p", { class: "opt-label", text: opt.label }),
+        opt.help ? h("p", { class: "opt-help", text: opt.help }) : null,
       );
+      const segs = h("div", { class: "segs" });
+      for (const [value, label] of opt.choices) {
+        segs.append(
+          h(
+            "button",
+            {
+              type: "button",
+              class: `seg${options[opt.key] === value ? " on" : ""}`,
+              "aria-pressed": String(options[opt.key] === value),
+              onclick: () => {
+                options[opt.key] = value;
+                renderSetup();
+              },
+            },
+            label,
+          ),
+        );
+      }
+      row.append(segs);
+      section.append(row);
     }
-    row.append(segs);
-    optBox.append(row);
+    optBox.append(section);
   }
   $("#setup-options-wrap").hidden = !gameOptions(game).length;
 }
@@ -467,24 +523,42 @@ function backToMenu() {
   showScreen("screen-menu");
 }
 
-function openRules(game) {
+/** いま選んでいるルール設定を、ルール説明の先頭に一覧で出す */
+function currentRulesHtml(game, options) {
+  const all = gameOptions(game);
+  if (!options || !all.length) return "";
+  const esc = (text) => String(text).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+  const items = all
+    .map((opt) => {
+      const choice = opt.choices.find(([v]) => v === options[opt.key]);
+      const changed = options[opt.key] !== opt.default;
+      return `<li${changed ? ' class="changed"' : ""}><span>${esc(opt.label)}</span><b>${esc(choice ? choice[1] : "")}</b></li>`;
+    })
+    .join("");
+  return `<div class="rules-current"><h3>この卓の設定</h3><ul>${items}</ul></div>`;
+}
+
+function openRules(game, options) {
   $("#rules-title").textContent = `${game.title} のルール`;
-  $("#rules-body").innerHTML = game.rules;
+  $("#rules-body").innerHTML = currentRulesHtml(game, options) + game.rules;
   const dialog = $("#rules-dialog");
   if (typeof dialog.showModal === "function") dialog.showModal();
   else dialog.setAttribute("open", "");
+  // 「閉じる」に自動で移動して下までスクロールしないよう、見出しから読み始める
+  $("#rules-title").focus();
+  dialog.scrollTop = 0;
 }
 
 /* ---------- イベント ---------- */
 
 $("#setup-back").addEventListener("click", backToMenu);
 $("#setup-start").addEventListener("click", startFromSetup);
-$("#setup-rules").addEventListener("click", () => openRules(setupState.game));
+$("#setup-rules").addEventListener("click", () => openRules(setupState.game, setupState.options));
 $("#quit-btn").addEventListener("click", () => {
   if (current && current.alive && !confirm("ゲームをやめてメニューに戻りますか？")) return;
   backToMenu();
 });
-$("#rules-btn").addEventListener("click", () => current && openRules(current.game));
+$("#rules-btn").addEventListener("click", () => current && openRules(current.game, current.options));
 $("#rules-close").addEventListener("click", () => {
   const dialog = $("#rules-dialog");
   if (typeof dialog.close === "function") dialog.close();
@@ -501,3 +575,27 @@ $("#stats-reset").addEventListener("click", () => {
 
 renderMenu();
 showScreen("screen-menu");
+
+// Android の Chrome などは「ホーム画面に追加」をボタンから出せる
+let installPrompt = null;
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  $("#install-btn").hidden = false;
+});
+$("#install-btn").addEventListener("click", async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  await installPrompt.userChoice.catch(() => null);
+  installPrompt = null;
+  $("#install-btn").hidden = true;
+});
+
+// オフラインでも遊べるように（ホーム画面に追加したときもこれで動く）
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      /* 登録できなくても通常どおり遊べる */
+    });
+  });
+}

@@ -10,7 +10,17 @@ registerGame({
   players: [3, 6],
   defaultPlayers: 4,
   levels: true,
-  options: [],
+  options: [
+    { key: "maxCards", label: "1回に出せる枚数", choices: [[4, "4枚まで"], [2, "2枚まで"], [1, "1枚だけ"]], default: 4 },
+    {
+      key: "jokers",
+      group: "local",
+      label: "ジョーカー",
+      help: "ジョーカーはどの数字としても「本当」になる。",
+      choices: [[0, "なし"], [1, "1枚"], [2, "2枚"]],
+      default: 0,
+    },
+  ],
   rules: `
     <ol>
       <li>カードを全員に配ります。</li>
@@ -25,12 +35,16 @@ registerGame({
       </li>
       <li>最初に手札をなくした人の勝ち。残りの人は手札が少ない順です。</li>
     </ol>
+    <p>設定で、1回に出せる枚数（4枚まで／2枚まで／1枚だけ）と、ジョーカー（どの数字としても本当になる）を変えられます。</p>
     <p>この画面では、カードが出されたあとに人間の参加者に「ダウト！」ボタンが出ます。人間がだれも言わなかったときは CPU が判断します。</p>
   `,
 
   async play(s) {
     const P = s.players;
-    const deck = shuffle(makeDeck());
+    const maxCards = s.options.maxCards || 4;
+    const jokerCount = s.options.jokers || 0;
+    const deck = shuffle(makeDeck({ jokers: jokerCount }));
+    const honest = (c) => c.joker || c.rank === rank;
     const offset = Math.floor(Math.random() * P.length);
     deck.forEach((card, i) => P[(i + offset) % P.length].hand.push(card));
 
@@ -74,7 +88,7 @@ registerGame({
               onClick: selecting
                 ? (card) => {
                     if (sel.has(card)) sel.delete(card);
-                    else if (sel.size < 4) sel.add(card);
+                    else if (sel.size < maxCards) sel.add(card);
                     render();
                     refresh();
                   }
@@ -86,15 +100,19 @@ registerGame({
     s.renderFn = render;
 
     function cpuPlay(p) {
-      const truth = p.hand.filter((c) => c.rank === rank);
-      if (truth.length) {
-        const out = [...truth];
-        const others = p.hand.filter((c) => c.rank !== rank);
-        if (others.length > 3 && out.length < 3 && Math.random() < 0.2) out.push(farthest(others));
+      // ジョーカーは本当の札として扱えるが、なるべく本物の数字を先に使う
+      const truth = [...p.hand.filter((c) => !c.joker && c.rank === rank), ...p.hand.filter((c) => c.joker)];
+      const naturals = truth.filter((c) => !c.joker).length;
+      if (naturals || (truth.length && p.hand.length === truth.length)) {
+        const out = truth.slice(0, Math.max(1, Math.min(maxCards, naturals || truth.length)));
+        const others = p.hand.filter((c) => !honest(c));
+        if (others.length > 3 && out.length < Math.min(3, maxCards) && Math.random() < 0.2) out.push(farthest(others));
         return out;
       }
-      const out = [farthest(p.hand)];
-      if (p.hand.length > 6 && Math.random() < 0.15) out.push(farthest(p.hand.filter((c) => c !== out[0])));
+      const lies = p.hand.filter((c) => !c.joker);
+      if (!lies.length) return truth.slice(0, 1);
+      const out = [farthest(lies)];
+      if (maxCards > 1 && lies.length > 6 && Math.random() < 0.15) out.push(farthest(lies.filter((c) => c !== out[0])));
       return out;
     }
     // 次に必要になるまで一番遠い数字（＝当分出番がないカード）
@@ -112,13 +130,16 @@ registerGame({
           if (card.rank === play.rank && holder !== q && holder !== play.player && holder.hand.includes(card)) elsewhere += 1;
         }
       }
-      if (held + elsewhere + play.count > 4) return true; // 数が合わない＝確実にウソ
+      if (held + elsewhere + play.count > 4 + jokerCount) return true; // 数が合わない＝確実にウソ
       let chance = 0.07 + 0.12 * (play.count - 1) + held * 0.1;
       if (play.player.hand.length === 0) chance += level === "hard" ? 0.7 : 0.5;
       else if (level === "hard" && play.player.hand.length <= 2) chance += 0.15;
       if (pile.length > 12) chance -= 0.05;
       if (level === "easy") chance *= 0.5;
-      return Math.random() < chance;
+      // CPUが何人いても「卓のだれかがダウトする確率」が chance 程度になるよう、1人あたりに割り戻す
+      const judges = P.filter((x) => !x.human && x !== play.player).length;
+      const each = 1 - Math.pow(1 - Math.min(Math.max(chance, 0), 0.95), 1 / Math.max(1, judges));
+      return Math.random() < each;
     }
 
     let idx = Math.floor(Math.random() * P.length);
@@ -145,7 +166,7 @@ registerGame({
           const v = await s.ask();
           if (v === "play" && sel.size) break;
           if (v === "hint") {
-            const truth = p.hand.filter((c) => c.rank === rank).slice(0, 4);
+            const truth = p.hand.filter(honest).slice(0, maxCards);
             sel = new Set(truth);
             s.note(truth.length ? `本当の「${RANK_LABEL[rank]}」は${truth.length}枚あります` : `「${RANK_LABEL[rank]}」は持っていません。ウソをつくしかない！`);
             render();
@@ -189,7 +210,7 @@ registerGame({
       }
 
       if (doubter) {
-        const lie = cards.some((c) => c.rank !== rank);
+        const lie = cards.some((c) => !honest(c));
         revealed = cards;
         s.say(`${doubter.name}「ダウト！」`);
         s.sfx("special");

@@ -34,6 +34,9 @@
     return rev ? -info.minStart : info.maxStart;
   }
 
+  /** st.opts でオフにされていなければオン（テストなどで opts を渡さなくても標準ルールで動く） */
+  const ruleOn = (st, key) => !st.opts || st.opts[key] !== false;
+
   /** 革命と11バックを合わせた「いま逆転しているか」 */
   const flipped = (st) => st.rev !== st.back;
 
@@ -74,13 +77,25 @@
     if (!field) return true;
     const f = field.info;
     if (info.type !== f.type || info.count !== f.count) return false;
-    if (f.allJoker && f.count === 1 && isSpade3(cards)) return true; // スペ3返し
+    if (f.allJoker && f.count === 1 && isSpade3(cards) && ruleOn(st, "spade3")) return true; // スペ3返し
     if (f.allJoker) return false;
     if (st.lock && !fitsLock(cards, st.lock)) return false;
     return power(info, flipped(st)) > power(f, flipped(st));
   }
 
-  const makesRevolution = (info) => (info.type === "set" && info.count >= 4 && !info.allJoker) || (info.type === "seq" && info.count >= 5);
+  const makesRevolution = (info, st = {}) =>
+    ruleOn(st, "revolution") && ((info.type === "set" && info.count >= 4 && !info.allJoker) || (info.type === "seq" && info.count >= 5 && ruleOn(st, "seqRevolution")));
+  /** 出した中に、その数字のカードが何枚あるか（5スキップ・7渡し・10捨ての枚数） */
+  const countRank = (cards, info, rank) =>
+    info.type === "set" && info.rank === rank ? cards.length : cards.filter((c) => !c.joker && c.rank === rank).length;
+
+  /** 反則上がり: 最後の1手にジョーカー・最強の数字（通常2／逆転中3）・8・♠3（スペ3返しあり）を含む */
+  function isFoulFinish(cards, st) {
+    const top = flipped(st) ? 3 : 2;
+    return cards.some(
+      (c) => c.joker || c.rank === top || (c.rank === 8 && ruleOn(st, "eight")) || (c.suit === "S" && c.rank === 3 && ruleOn(st, "spade3")),
+    );
+  }
   const hasRank = (info, cards, rank) => (info.type === "set" ? info.rank === rank : cards.some((c) => !c.joker && c.rank === rank));
 
   function describe(info) {
@@ -173,9 +188,9 @@
     const { info } = cand;
     if (info.type !== "set") return false;
     const jokers = unseen.filter((c) => c.joker).length;
-    if (info.allJoker) return !(info.count === 1 && unseen.some((c) => c.suit === "S" && c.rank === 3));
+    if (info.allJoker) return !(info.count === 1 && ruleOn(st, "spade3") && unseen.some((c) => c.suit === "S" && c.rank === 3));
     if (jokers >= info.count) return false;
-    const eff = flipped({ ...st, rev: st.rev !== makesRevolution(info) });
+    const eff = flipped({ ...st, rev: st.rev !== makesRevolution(info, st) });
     const counts = new Map();
     for (const c of unseen) if (!c.joker) counts.set(str(c), (counts.get(str(c)) || 0) + 1);
     for (const [v, cnt] of counts) {
@@ -193,7 +208,8 @@
     const level = ctx.level || "normal";
     const list = candidates(hand, st, allowSeq);
     if (!list.length) return "pass";
-    const finishing = list.find((c) => c.cards.length === hand.length);
+    const foulOn = st.opts && st.opts.foul;
+    const finishing = list.find((c) => c.cards.length === hand.length && !(foulOn && isFoulFinish(c.cards, st)));
     if (finishing) return finishing.cards; // これで上がれる
 
     if (level === "easy") {
@@ -228,7 +244,13 @@
       score += jokerUsed * (hand.length <= cards.length + 2 ? 2 : 25);
       if (info.type === "set" && info.rank && groupSize(info.rank) > cards.length - jokerUsed) score += 4; // 組を崩す
       if (!st.field) score -= cards.length * 2.5; // 親のときはたくさん出したい
-      if (makesRevolution(info)) {
+      // 反則上がりありのとき、使えない札だけが手に残る出し方は避ける
+      if (foulOn && level !== "easy") {
+        const rest = hand.filter((c) => !cards.includes(c));
+        if (rest.length && rest.every((c) => isFoulFinish([c], st))) score += 18;
+        if (isFoulFinish(cards, st) && hand.length <= 4) score -= 6; // 残り少ないうちに切り札を使い切る
+      }
+      if (makesRevolution(info, st)) {
         // 革命後に得をするか: 残る手札に弱い札（7以下）と強い札（Q以上）のどちらが多いか
         const rest = nat.filter((c) => !cards.includes(c));
         const weak = rest.filter((c) => str(c) <= 7).length;
@@ -258,15 +280,39 @@
     players: [3, 6],
     defaultPlayers: 4,
     levels: true,
-    logic: { analyze, canBeat, candidates, cpuChoose, unbeatable, fitsLock },
+    logic: { analyze, canBeat, candidates, cpuChoose, unbeatable, fitsLock, isFoulFinish, makesRevolution },
     options: [
       { key: "rounds", label: "回戦数", choices: [[1, "1回戦"], [3, "3回戦"], [5, "5回戦"]], default: 3 },
       { key: "jokers", label: "ジョーカー", choices: [[0, "なし"], [1, "1枚"], [2, "2枚"]], default: 2 },
-      { key: "eight", label: "8切り", choices: [[true, "あり"], [false, "なし"]], default: true },
-      { key: "seq", label: "階段（同じマークの連番）", choices: [[true, "あり"], [false, "なし"]], default: true },
-      { key: "shibari", label: "縛り（同じマークが続くと固定）", choices: [[true, "あり"], [false, "なし"]], default: false },
-      { key: "jback", label: "11バック（Jで一時的に逆転）", choices: [[true, "あり"], [false, "なし"]], default: false },
-      { key: "miyako", label: "都落ち（4人以上）", choices: [[true, "あり"], [false, "なし"]], default: false },
+      { key: "revolution", group: "local", label: "革命", help: "同じ数字を4枚以上出すと、強さが逆転する。", choices: [[true, "あり"], [false, "なし"]], default: true },
+      { key: "seqRevolution", group: "local", label: "階段革命", help: "5枚以上の階段でも革命になる。", choices: [[true, "あり"], [false, "なし"]], default: true },
+      { key: "seq", group: "local", label: "階段", help: "同じマークの3枚以上の連番（例 ♠5-6-7）をまとめて出せる。", choices: [[true, "あり"], [false, "なし"]], default: true },
+      { key: "eight", group: "local", label: "8切り", help: "8を出すと場が流れ、出した人がもう一度出せる。", choices: [[true, "あり"], [false, "なし"]], default: true },
+      { key: "spade3", group: "local", label: "スペ3返し", help: "ジョーカー1枚には ♠3 だけが勝てる。", choices: [[true, "あり"], [false, "なし"]], default: true },
+      { key: "shibari", group: "local", label: "縛り", help: "同じマークの組み合わせが2回続くと、場が流れるまでそのマークしか出せない。", choices: [[true, "あり"], [false, "なし"]], default: false },
+      { key: "jback", group: "local", label: "11バック（Jバック）", help: "J を出すと、場が流れるまで強さが逆転する。", choices: [[true, "あり"], [false, "なし"]], default: false },
+      { key: "five", group: "local", label: "5スキップ（5飛び）", help: "5を出すと、出した枚数だけ次の人をとばす。", choices: [[true, "あり"], [false, "なし"]], default: false },
+      { key: "seven", group: "local", label: "7渡し", help: "7を出すと、出した枚数だけ好きなカードを次の人に渡せる。", choices: [[true, "あり"], [false, "なし"]], default: false },
+      { key: "ten", group: "local", label: "10捨て", help: "10を出すと、出した枚数だけ好きなカードを捨てられる。", choices: [[true, "あり"], [false, "なし"]], default: false },
+      { key: "foul", group: "local", label: "反則上がり", help: "ジョーカー・2（革命中は3）・8・♠3 で上がると反則で最下位。", choices: [[true, "あり"], [false, "なし"]], default: false },
+      { key: "miyako", group: "local", label: "都落ち（4人以上）", help: "2回戦目以降、大富豪が1位で上がれないと、その場で大貧民に転落する。", choices: [[true, "あり"], [false, "なし"]], default: false },
+    ],
+    presets: [
+      {
+        label: "かんたん",
+        note: "はじめての人・子ども向け",
+        values: { jokers: 1, revolution: true, seqRevolution: false, seq: false, eight: false, spade3: false, shibari: false, jback: false, five: false, seven: false, ten: false, foul: false, miyako: false },
+      },
+      {
+        label: "標準",
+        note: "よく遊ばれる形",
+        values: { jokers: 2, revolution: true, seqRevolution: true, seq: true, eight: true, spade3: true, shibari: false, jback: false, five: false, seven: false, ten: false, foul: false, miyako: false },
+      },
+      {
+        label: "ローカル全部入り",
+        note: "にぎやかに遊びたいとき",
+        values: { jokers: 2, revolution: true, seqRevolution: true, seq: true, eight: true, spade3: true, shibari: true, jback: true, five: true, seven: true, ten: true, foul: true, miyako: true },
+      },
     ],
     rules: `
       <p>カードの強さは <b>3 &lt; 4 &lt; … &lt; K &lt; A &lt; 2 &lt; ジョーカー</b>。手札を早くなくした順に順位が決まります。</p>
@@ -275,16 +321,20 @@
         <li>場と<b>同じ枚数・同じ形</b>で、より強いカードを出します。出せない・出したくないときはパス。</li>
         <li>全員がパスして一周したら場が流れ、最後に出した人が好きなカードから出せます。</li>
         <li><b>ペア・3枚・4枚</b>: 同じ数字をまとめて出せます。</li>
-        <li><b>階段</b>: 同じマークで3枚以上の連番（例 ♠5-6-7）。</li>
         <li><b>ジョーカー</b>: 1枚出しでは最強。組に混ぜると好きなカードの代わりになります。</li>
-        <li><b>スペ3返し</b>: ジョーカー1枚には ♠3 だけが勝てます。</li>
-        <li><b>8切り</b>: 8を含むカードを出すと場が流れ、もう一度出せます。</li>
-        <li><b>革命</b>: 同じ数字を4枚以上（または5枚以上の階段）出すと、強さが逆転します。</li>
       </ol>
-      <p><b>追加ルール（設定でオン）</b></p>
+      <p><b>ローカルルール</b>（地域や家庭で違うので、設定画面でひとつずつオン/オフできます）</p>
       <ul>
+        <li><b>革命</b>: 同じ数字を4枚以上出すと強さが逆転。<b>階段革命</b>がありなら5枚以上の階段でも革命。</li>
+        <li><b>階段</b>: 同じマークで3枚以上の連番（例 ♠5-6-7）。</li>
+        <li><b>8切り</b>: 8を含むカードを出すと場が流れ、もう一度出せます。</li>
+        <li><b>スペ3返し</b>: ジョーカー1枚には ♠3 だけが勝てます（場が流れます）。</li>
         <li><b>縛り</b>: 同じマークの組み合わせが2回続けて出ると、場が流れるまでそのマークしか出せません（ジョーカーは代わりに使えます）。</li>
         <li><b>11バック</b>: J を含むカードを出すと、場が流れるまで強さが逆転します。</li>
+        <li><b>5スキップ</b>: 5を出すと、出した5の枚数だけ次の人をとばします。</li>
+        <li><b>7渡し</b>: 7を出すと、出した7の枚数だけ好きなカードを次の人に渡します。</li>
+        <li><b>10捨て</b>: 10を出すと、出した10の枚数だけ好きなカードを捨てられます。</li>
+        <li><b>反則上がり</b>: 最後の1手にジョーカー・2（逆転中は3）・8・♠3 を含むと反則。その人は最下位になります。</li>
         <li><b>都落ち</b>: 2回戦目以降、前回の大富豪より先にだれかが上がると、大富豪はその場で大貧民に転落します。</li>
       </ul>
       <p>2回戦目からは最初にカード交換があります。大貧民は一番強いカード2枚を大富豪へ、貧民は1枚を富豪へ渡し、受け取った側は好きなカードを同じ枚数返します。</p>
@@ -304,9 +354,17 @@
         p.title = "";
       }
 
-      const st = { field: null, rev: false, back: false, lock: "" };
+      const st = {
+        field: null,
+        rev: false,
+        back: false,
+        lock: "",
+        opts: { revolution: opt.revolution !== false, seqRevolution: opt.seqRevolution !== false, spade3: opt.spade3 !== false, eight: opt.eight, foul: opt.foul },
+      };
       let finished = [];
-      let fallen = null;
+      // 都落ち・反則上がりで途中退場した人（先頭ほど上の順位。最後尾が最下位）
+      let dropped = [];
+      const reason = new Map();
       let passes = new Set();
       let turnPlayer = null;
       let sel = new Set();
@@ -317,7 +375,7 @@
       let roundCards = [];
       let played = new Set();
 
-      const inGame = (p) => p.hand.length > 0 && !finished.includes(p) && p !== fallen;
+      const inGame = (p) => p.hand.length > 0 && !finished.includes(p) && !dropped.includes(p);
       const nextActive = (from) => {
         for (let step = 1; step <= n; step += 1) {
           const p = P[(from.id + step) % n];
@@ -332,6 +390,11 @@
         unseen: roundCards.filter((c) => !played.has(c) && !p.hand.includes(c)),
         minOpp: Math.min(...P.filter((q) => q !== p && inGame(q)).map((q) => q.hand.length)),
       });
+      /** CPUが渡す・捨てるカード: いまの強さで弱い順（ジョーカーは最後まで残す） */
+      const weakest = (hand, k) => {
+        const eff = flipped(st);
+        return [...hand].sort((a, b) => (a.joker ? 99 : eff ? -str(a) : str(a)) - (b.joker ? 99 : eff ? -str(b) : str(b))).slice(0, k);
+      };
       const clearField = (text) => {
         st.field = null;
         st.back = false;
@@ -346,7 +409,7 @@
           if (p.title) parts.push(`<span class="badge">${p.title}</span>`);
           const place = finished.indexOf(p);
           if (place >= 0) parts.push(`<span class="badge gold">${place + 1}位あがり</span>`);
-          else if (p === fallen) parts.push(`<span class="badge red">都落ち</span>`);
+          else if (dropped.includes(p)) parts.push(`<span class="badge red">${reason.get(p)}</span>`);
           else if (passes.has(p)) parts.push(`<span class="badge muted-badge">パス</span>`);
           parts.push(`<span class="pts">${p.total}pt</span>`);
           return parts.join(" ");
@@ -385,7 +448,7 @@
           });
         }
         s.layout({
-          top: s.seats({ current: turnPlayer, info, out: (p) => finished.includes(p) || p === fallen }),
+          top: s.seats({ current: turnPlayer, info, out: (p) => finished.includes(p) || dropped.includes(p) }),
           center,
           bottom,
           bottomTitle: me ? `${me.name}の手札${me.title ? `（${me.title}）` : ""}` : undefined,
@@ -405,8 +468,15 @@
           const cards = [...sel];
           const info = analyze(cards, allowSeq);
           const ok = canBeat(info, cards, st);
+          const foulWarn = ok && opt.foul && cards.length === p.hand.length && isFoulFinish(cards, st);
           s.actions([
-            { label: sel.size ? `出す（${sel.size}枚）` : "出す", value: "play", primary: true, disabled: !ok },
+            {
+              label: foulWarn ? "出す（反則上がりになります）" : sel.size ? `出す（${sel.size}枚）` : "出す",
+              value: "play",
+              primary: !foulWarn,
+              danger: foulWarn,
+              disabled: !ok,
+            },
             { label: "パス", value: "pass", disabled: !st.field },
             { label: "ヒント", value: "hint" },
           ]);
@@ -438,16 +508,21 @@
         }
       }
 
-      async function humanGive(p, count, partner) {
+      function humanGive(p, count, partner) {
+        return humanPick(p, count, `${partner.name}に渡す`, `${partner.name}に渡すカードを${count}枚選んでください`);
+      }
+
+      /** 手札から決まった枚数を選ばせる（交換・7渡し・10捨て） */
+      async function humanPick(p, count, verb, text) {
         await s.handoff(p);
         s.yourTurn(p);
         sel = new Set();
         hint = new Set();
         selectingFor = p;
         refreshButtons = () => {
-          s.actions([{ label: `${partner.name}に渡す（${sel.size}/${count}枚）`, value: "give", primary: true, disabled: sel.size !== count }]);
+          s.actions([{ label: `${verb}（${sel.size}/${count}枚）`, value: "give", primary: true, disabled: sel.size !== count }]);
         };
-        s.note(`${partner.name}に渡すカードを${count}枚選んでください`);
+        s.note(text);
         render();
         try {
           for (;;) {
@@ -500,7 +575,8 @@
         st.rev = false;
         clearField("");
         finished = [];
-        fallen = null;
+        dropped = [];
+        reason.clear();
         turnPlayer = null;
         s.say(`――― ${round}回戦 ―――`);
         render();
@@ -533,13 +609,15 @@
           }
 
           let cut = false;
+          let skip = 0;
           if (move === "pass") {
             passes.add(p);
             s.say(`${p.name}: パス`);
           } else {
             const info = analyze(move, allowSeq);
             const prev = st.field;
-            const spade3 = prev && prev.info.allJoker && isSpade3(move);
+            const spade3 = prev && prev.info.allJoker && isSpade3(move) && opt.spade3 !== false;
+            const foulIfFinish = opt.foul && isFoulFinish(move, st);
             takeOut(p.hand, move);
             for (const c of move) played.add(c);
             st.field = { cards: move, info, by: p, at: Date.now() };
@@ -548,7 +626,7 @@
             flash = "";
             s.say(`${p.name}: ${cardNames(move)}（${describe(info)}）`);
             s.sfx("card");
-            if (makesRevolution(info)) {
+            if (makesRevolution(info, st)) {
               st.rev = !st.rev;
               s.say(st.rev ? "革命！ 強さが逆転しました" : "革命返し！ 強さが元に戻りました");
               s.sfx("special");
@@ -575,16 +653,52 @@
               s.sfx("special");
               cut = true;
             }
+            if (opt.five) {
+              skip = countRank(move, info, 5);
+              if (skip) s.say(`5スキップ！ 次の${skip}人をとばします`);
+            }
+            if (opt.seven && p.hand.length) {
+              const k = Math.min(countRank(move, info, 7), p.hand.length);
+              const to = nextActive(p);
+              if (k && to && to !== p) {
+                render();
+                const give = p.human ? await humanPick(p, k, `${to.name}に渡す`, `7渡し: ${to.name}に渡すカードを${k}枚選んでください`) : weakest(p.hand, k);
+                takeOut(p.hand, give);
+                to.hand.push(...give);
+                const seen = s.isViewer(p) || s.isViewer(to) || s.watching;
+                s.say(`7渡し！ ${p.name} → ${to.name}へ${k}枚${seen ? `（${cardNames(give)}）` : ""}`);
+                s.sfx("draw");
+              }
+            }
+            if (opt.ten && p.hand.length) {
+              const k = Math.min(countRank(move, info, 10), p.hand.length);
+              if (k) {
+                render();
+                const drop = p.human ? await humanPick(p, k, "捨てる", `10捨て: 捨てるカードを${k}枚選んでください`) : weakest(p.hand, k);
+                takeOut(p.hand, drop);
+                for (const c of drop) played.add(c);
+                s.say(`10捨て！ ${p.name}が${k}枚捨てました（${cardNames(drop)}）`);
+                s.sfx("card");
+              }
+            }
             if (p.hand.length === 0) {
-              finished.push(p);
-              s.say(`${p.name} あがり！（${finished.length}位）`);
-              s.sfx("good");
-              const king = prevOrder && prevOrder[0];
-              if (opt.miyako && n >= 4 && finished.length === 1 && king && king !== p && inGame(king)) {
-                fallen = king;
-                king.hand = [];
-                s.say(`都落ち！ 前回の大富豪 ${king.name} は大貧民に転落`);
+              if (foulIfFinish) {
+                dropped.unshift(p);
+                reason.set(p, "反則上がり");
+                s.say(`反則上がり！ ${p.name}は最後に ${cardNames(move)} を出したので最下位です`);
                 s.sfx("bad");
+              } else {
+                finished.push(p);
+                s.say(`${p.name} あがり！（${finished.length}位）`);
+                s.sfx("good");
+                const king = prevOrder && prevOrder[0];
+                if (opt.miyako && n >= 4 && finished.length === 1 && king && king !== p && inGame(king)) {
+                  king.hand = [];
+                  dropped.push(king);
+                  reason.set(king, "都落ち");
+                  s.say(`都落ち！ 前回の大富豪 ${king.name} は大貧民に転落`);
+                  s.sfx("bad");
+                }
               }
             }
           }
@@ -612,10 +726,14 @@
             continue;
           }
           turn = nextActive(p);
+          for (let k = 0; k < skip && turn; k += 1) {
+            s.log(`${turn.name}はとばされました`);
+            turn = nextActive(turn);
+          }
         }
 
-        const last = P.find(inGame) || P.find((p) => !finished.includes(p) && p !== fallen);
-        const order = [...finished, last, fallen].filter(Boolean);
+        const last = P.find(inGame) || P.find((p) => !finished.includes(p) && !dropped.includes(p));
+        const order = [...finished, last, ...dropped].filter(Boolean);
         order.forEach((p, i) => {
           p.title = titles[i];
           p.total += n - 1 - i;

@@ -25,12 +25,28 @@
     options: [
       { key: "rounds", label: "ラウンド数", choices: [[5, "5回"], [10, "10回"], [15, "15回"]], default: 5 },
       { key: "chips", label: "最初のチップ", choices: [[100, "100枚"], [200, "200枚"]], default: 100 },
+      {
+        key: "soft17",
+        group: "local",
+        label: "ディーラーのソフト17",
+        help: "A を11と数えた17（例 A+6）のとき、ディーラーが止まるか、もう1枚引くか。",
+        choices: [["stand", "止まる"], ["hit", "引く"]],
+        default: "stand",
+      },
+      {
+        key: "bjPay",
+        group: "local",
+        label: "ブラックジャックの配当",
+        help: "最初の2枚で21のときにもらえる額（賭けに対して）。",
+        choices: [[1.5, "1.5倍"], [2, "2倍"], [1, "1倍"]],
+        default: 1.5,
+      },
     ],
     rules: `
       <p>みんなでディーラー（コンピューター）と勝負します。カードの合計を21に近づけましょう。</p>
       <ul>
         <li>2〜10はそのままの数、J・Q・K は10、A は1か11の都合のいい方。</li>
-        <li>最初の2枚で21（A と10点札）は <b>ブラックジャック</b>。賭けの1.5倍もらえます。</li>
+        <li>最初の2枚で21（A と10点札）は <b>ブラックジャック</b>。賭けの1.5倍もらえます（設定で変更可）。</li>
       </ul>
       <ol>
         <li>最初にチップを賭けて、2枚ずつ配ります。ディーラーは1枚だけ表向き。</li>
@@ -225,7 +241,11 @@
           render();
           await s.sleep(900);
           const anyAlive = seated.some((p) => total(p.hand).value <= 21 && !isBJ(p.hand));
-          while (anyAlive && total(dealer.hand).value < 17) {
+          const dealerDraws = () => {
+            const t = total(dealer.hand);
+            return t.value < 17 || (s.options.soft17 === "hit" && t.value === 17 && t.soft);
+          };
+          while (anyAlive && dealerDraws()) {
             const c = draw();
             dealer.hand.push(c);
             s.note(`ディーラー: ${cardName(c)} を引いて ${total(dealer.hand).value}`);
@@ -245,8 +265,9 @@
               p.result = "引き分け";
             } else p.result = "負け";
           } else if (bj) {
-            p.chips += p.bet + Math.floor(p.bet * 1.5);
-            p.result = `BJ 勝ち +${Math.floor(p.bet * 1.5)}`;
+            const pay = Math.floor(p.bet * (s.options.bjPay || 1.5));
+            p.chips += p.bet + pay;
+            p.result = `BJ 勝ち +${pay}`;
           } else if (t > 21) {
             p.result = "バースト 負け";
           } else if (d > 21 || t > d) {

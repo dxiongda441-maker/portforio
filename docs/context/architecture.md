@@ -91,7 +91,7 @@ git show 76ace1e:main.js
 
 10 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
 
-基本構成は `index.html` + `app.js` + `styles.css`。うち 5 件は
+基本構成は `index.html` + `app.js` + `styles.css`。うち 6 件は
 `manifest.webmanifest`(または `manifest.json`) + `sw.js`(または `service-worker.js`) を持つ **PWA**。
 
 | slug | 表示名 | 構成 | `CACHE_PREFIX` |
@@ -104,7 +104,7 @@ git show 76ace1e:main.js
 | `cat-quiz` | 世界ねこ図鑑クイズ | 静的 | — |
 | `contracts` | ビジネス契約ラーニング | 静的 | — |
 | `money-anime` | 100円が冒険に出た!? | 静的 | — |
-| `family-cards` | 年末ファミリートランプ | 静的（複数JS） | — |
+| `family-cards` | 年末ファミリートランプ | PWA（複数JS） | `family-cards-` |
 | `cafe-lp` | 琥珀 KOHAKU COFFEE | 静的（HTML+CSSのみ） | — |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
@@ -117,7 +117,9 @@ git show 76ace1e:main.js
 - `family-cards` はトランプ10種のゲーム集。`app.js` と `styles.css` に加えて、共通部品の `core.js` と
   1ゲーム1ファイルの `games/*.js` を**通常の `<script>` で順番に読み込む**（ES Modules は使わない）。
   ゲームを足すときは `games/` にファイルを作り、`registerGame({...})` を呼び、`index.html` の
-  `<script>` 列（`app.js` より前）に1行足す。SW は持たない。設計の理由は `docs/decisions/0004`。
+  `<script>` 列（`app.js` より前）に1行足す。**さらに `sw.js` の `ASSETS` にも足す**（2026-09-30 に PWA 化。`docs/decisions/0007`）。
+  - 設定項目に `group: "local"` と `help` を付けると「ローカルルール」欄に説明つきで並ぶ。
+    `presets` を定義すると「おすすめセット」ボタンが出る（大富豪が例）。
   - `levels: true` を付けたゲームには、設定画面に「CPUの強さ（よわい/ふつう/つよい）」が自動で出る（`s.options.level`）。
   - `logic: {...}` に載せた純粋関数（大富豪の役判定、ポーカーの役評価など）は `GAMES` 経由で
     ブラウザのコンソールから直接呼べる。ルールを直したらここで確かめる。

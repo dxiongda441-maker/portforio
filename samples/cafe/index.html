@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>焼き菓子とコーヒー ことり舎｜制作サンプル</title>
+  <meta name="description" content="個人経営のカフェ向け1ページサイトの制作サンプルです。店名・住所・電話番号はすべて架空です。">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="../../assets/favicon.svg">
+  <style>
+    :root {
+      --sumi: #3a2e27;
+      --usuzumi: #7a6a5e;
+      --kinari: #faf4ea;
+      --shironeri: #fffcf6;
+      --line: #eadfce;
+      --kogecha: #8a5a3b;
+      --kogecha-deep: #6b432b;
+      --kuchiba: #e0a458;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--kinari);
+      color: var(--sumi);
+      font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+      line-height: 1.9;
+      padding-bottom: 64px;
+    }
+
+    a { color: inherit; }
+
+    .sans { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+
+    .sample-bar {
+      background: var(--sumi);
+      color: var(--kinari);
+      font: 12px/1.6 "Hiragino Sans", "Noto Sans JP", sans-serif;
+      text-align: center;
+      padding: 6px 16px;
+    }
+
+    .sample-bar a { color: #f5d29f; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 252, 246, 0.94);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner, .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    .logo { text-decoration: none; font-size: 18px; letter-spacing: 0.12em; }
+
+    .header-nav { display: flex; gap: 16px; font: 13px "Hiragino Sans", "Noto Sans JP", sans-serif; }
+    .header-nav a { text-decoration: none; color: var(--usuzumi); }
+
+    section { padding: 64px 0; }
+
+    .label {
+      display: block;
+      font: 12px "Hiragino Sans", "Noto Sans JP", sans-serif;
+      letter-spacing: 0.3em;
+      color: var(--kogecha);
+      margin-bottom: 4px;
+    }
+
+    h2 { font-size: clamp(22px, 5vw, 30px); margin: 0 0 24px; line-height: 1.5; font-weight: 600; }
+
+    /* Hero */
+    .hero {
+      background:
+        radial-gradient(circle at 80% 30%, rgba(224, 164, 88, 0.28), transparent 50%),
+        linear-gradient(160deg, #f3e3cc, var(--shironeri) 60%);
+      padding: 56px 0 72px;
+      overflow: hidden;
+    }
+
+    .hero-grid { display: grid; gap: 32px; align-items: center; }
+
+    .hero h1 { font-size: clamp(26px, 6.6vw, 42px); line-height: 1.5; margin: 0 0 16px; font-weight: 600; }
+    .hero h1 span { white-space: nowrap; }
+    .hero p { margin: 0 0 24px; color: var(--usuzumi); }
+
+    .hero-illust { width: 100%; max-width: 380px; margin: 0 auto; display: block; }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50px;
+      padding: 0 24px;
+      border-radius: 999px;
+      font: 700 15px "Hiragino Sans", "Noto Sans JP", sans-serif;
+      text-decoration: none;
+    }
+
+    .btn-primary { background: var(--kogecha); color: #fff; }
+    .btn-outline { border: 1.5px solid var(--kogecha); color: var(--kogecha-deep); background: #fff; }
+
+    /* Concept */
+    .concept { text-align: center; }
+    .concept p { max-width: 560px; margin: 0 auto; }
+
+    /* Menu */
+    .bg-white { background: var(--shironeri); }
+
+    .menu-grid { display: grid; gap: 16px; }
+
+    .item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .item-photo {
+      aspect-ratio: 4 / 3;
+      display: grid;
+      place-items: center;
+      color: rgba(58, 46, 39, 0.55);
+      font: 13px "Hiragino Sans", "Noto Sans JP", sans-serif;
+    }
+
+    .p1 { background: linear-gradient(135deg, #f0cf9c, #d99a56); }
+    .p2 { background: linear-gradient(135deg, #e9c2a6, #b9805c); }
+    .p3 { background: linear-gradient(135deg, #d9c3a0, #8a6a4b); }
+
+    .item-body { padding: 16px 18px 20px; }
+    .item h3 { margin: 0; font-size: 17px; font-weight: 600; }
+    .item .price { font: 700 15px "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--kogecha); }
+    .item p { margin: 6px 0 0; font-size: 14px; color: var(--usuzumi); }
+
+    .menu-list { margin-top: 24px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 20px; }
+    .menu-list div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+    .menu-list div:last-child { border-bottom: 0; }
+    .menu-list b { font: 700 15px "Hiragino Sans", "Noto Sans JP", sans-serif; white-space: nowrap; }
+
+    .note { font: 12px/1.7 "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--usuzumi); margin-top: 12px; }
+
+    /* Instagram */
+    .insta { text-align: center; }
+    .insta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; max-width: 480px; margin: 0 auto 24px; }
+    .insta-grid span { aspect-ratio: 1; border-radius: 4px; }
+    .insta-grid span:nth-child(3n+1) { background: linear-gradient(135deg, #f0cf9c, #d99a56); }
+    .insta-grid span:nth-child(3n+2) { background: linear-gradient(135deg, #efe2cf, #c9a882); }
+    .insta-grid span:nth-child(3n) { background: linear-gradient(135deg, #e9c2a6, #9a6b4b); }
+
+    /* Info */
+    .info { display: grid; gap: 16px; }
+    .info dl { margin: 0; background: #fff; border-radius: var(--radius); border: 1px solid var(--line); padding: 8px 20px; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; font-size: 15px; }
+    .info dt { font-weight: 700; padding-top: 12px; }
+    .info dd { margin: 0; padding-bottom: 12px; border-bottom: 1px solid var(--line); color: var(--usuzumi); }
+    .info dd:last-child { border-bottom: 0; }
+
+    .map {
+      min-height: 240px;
+      border-radius: var(--radius);
+      background:
+        repeating-linear-gradient(0deg, transparent 0 38px, rgba(58, 46, 39, 0.06) 38px 40px),
+        repeating-linear-gradient(90deg, transparent 0 38px, rgba(58, 46, 39, 0.06) 38px 40px),
+        #f1ebe0;
+      display: grid;
+      place-items: center;
+      color: var(--usuzumi);
+      font: 14px "Hiragino Sans", "Noto Sans JP", sans-serif;
+      padding: 16px;
+      text-align: center;
+    }
+
+    footer.site { text-align: center; font: 12px "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--usuzumi); padding: 24px 16px; }
+
+    .fixed-cta {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .fixed-cta a {
+      min-height: 56px;
+      display: grid;
+      place-items: center;
+      text-decoration: none;
+      font: 700 15px "Hiragino Sans", "Noto Sans JP", sans-serif;
+      color: #fff;
+      background: var(--kogecha);
+    }
+
+    .fixed-cta a + a { background: var(--kogecha-deep); }
+
+    @media (min-width: 760px) {
+      body { padding-bottom: 0; }
+      .fixed-cta { display: none; }
+      .hero-grid { grid-template-columns: 1.4fr 1fr; }
+      .menu-grid { grid-template-columns: repeat(3, 1fr); }
+      .info { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 759px) {
+      .header-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sample-bar">
+    これは制作サンプルです。店名・住所・電話番号はすべて架空です。
+    <a href="instagram.html">Instagram運用の見本</a> / <a href="../../">制作者のポートフォリオへ</a>
+  </div>
+
+  <header>
+    <div class="header-inner">
+      <a class="logo" href="#top">ことり舎</a>
+      <nav class="header-nav" aria-label="ページ内">
+        <a href="#menu">メニュー</a>
+        <a href="#info">営業日・アクセス</a>
+        <a href="#instagram">Instagram</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="label">BAKE &amp; COFFEE</span>
+          <h1><span>毎朝焼く、小さな焼き菓子と</span><br><span>ていねいに淹れるコーヒー。</span></h1>
+          <p>住宅街の角にある、8席だけの小さなお店です。<br>焼き菓子はすべてテイクアウトもできます。</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="#menu">メニューを見る</a>
+            <a class="btn btn-outline" href="#info">営業日を確認する</a>
+          </div>
+        </div>
+        <svg class="hero-illust" viewBox="0 0 360 300" role="img" aria-label="コーヒーカップと焼き菓子のイラスト">
+          <circle cx="250" cy="90" r="60" fill="#f5d9ae"/>
+          <ellipse cx="170" cy="250" rx="140" ry="18" fill="#eadfce"/>
+          <path d="M90 150 h120 v50 a60 60 0 0 1 -120 0 z" fill="#fff" stroke="#8a5a3b" stroke-width="4"/>
+          <path d="M210 165 a22 22 0 0 1 0 40" fill="none" stroke="#8a5a3b" stroke-width="4"/>
+          <ellipse cx="150" cy="152" rx="56" ry="8" fill="#6b432b"/>
+          <path d="M130 120 q-10 -16 0 -32 M155 118 q-10 -16 0 -32" fill="none" stroke="#c9a882" stroke-width="4" stroke-linecap="round"/>
+          <rect x="230" y="200" width="70" height="34" rx="6" fill="#e0a458"/>
+          <rect x="236" y="206" width="58" height="8" rx="4" fill="#f0cf9c"/>
+          <circle cx="270" cy="170" r="22" fill="#d99a56"/>
+          <circle cx="270" cy="170" r="12" fill="#f0cf9c"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="concept">
+      <div class="wrap">
+        <span class="label">CONCEPT</span>
+        <h2>「ちょっと寄り道」の場所に。</h2>
+        <p>仕事帰りに、散歩の途中に、ひと息つける場所をつくりたくて始めたお店です。バターと小麦は国産のものを使い、毎朝その日のぶんだけ焼いています。</p>
+      </div>
+    </section>
+
+    <section class="bg-white" id="menu">
+      <div class="wrap">
+        <span class="label">MENU</span>
+        <h2>人気の焼き菓子</h2>
+        <div class="menu-grid">
+          <article class="item">
+            <div class="item-photo p1">写真：フィナンシェ</div>
+            <div class="item-body">
+              <h3>焦がしバターのフィナンシェ</h3>
+              <span class="price">280円</span>
+              <p>いちばん人気。外はカリッと、中はしっとり。</p>
+            </div>
+          </article>
+          <article class="item">
+            <div class="item-photo p2">写真：季節のタルト</div>
+            <div class="item-body">
+              <h3>季節のタルト（10月：かぼちゃ）</h3>
+              <span class="price">520円</span>
+              <p>季節ごとに変わる、月替わりのタルトです。</p>
+            </div>
+          </article>
+          <article class="item">
+            <div class="item-photo p3">写真：スコーン</div>
+            <div class="item-body">
+              <h3>全粒粉のスコーン</h3>
+              <span class="price">320円</span>
+              <p>素朴な味。はちみつバター付き。</p>
+            </div>
+          </article>
+        </div>
+        <div class="menu-list sans">
+          <div><span>ブレンドコーヒー</span><b>500円</b></div>
+          <div><span>カフェラテ</span><b>580円</b></div>
+          <div><span>季節のジュース</span><b>550円</b></div>
+          <div><span>焼き菓子セット（お好きな焼き菓子＋ドリンク）</span><b>ドリンク代＋200円</b></div>
+        </div>
+        <p class="note">価格はすべて税込みです（店内飲食・テイクアウト共通のサンプル表記）。</p>
+      </div>
+    </section>
+
+    <section class="insta" id="instagram">
+      <div class="wrap">
+        <span class="label">INSTAGRAM</span>
+        <h2>焼き上がりと臨時休業は<br>Instagramでお知らせしています</h2>
+        <div class="insta-grid" aria-hidden="true">
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </div>
+        <a class="btn btn-primary" href="instagram.html">@kotorisha_sample を見る</a>
+      </div>
+    </section>
+
+    <section class="bg-white" id="info">
+      <div class="wrap">
+        <span class="label">INFORMATION</span>
+        <h2>営業日・アクセス</h2>
+        <div class="info">
+          <dl>
+            <dt>住所</dt><dd>〇〇県〇〇市〇〇町4-5-6</dd>
+            <dt>アクセス</dt><dd>〇〇駅 西口から徒歩6分。駐車場はありません</dd>
+            <dt>営業時間</dt><dd>11:00〜18:00（焼き菓子がなくなり次第終了）</dd>
+            <dt>定休日</dt><dd>月曜日・火曜日（臨時休業はInstagramでお知らせします）</dd>
+            <dt>席数</dt><dd>8席（予約は承っていません）</dd>
+            <dt>お支払い</dt><dd>現金・各種QR決済</dd>
+          </dl>
+          <div class="map">ここに Google マップを埋め込みます</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site">© 焼き菓子とコーヒー ことり舎（架空の店舗） — Sample site by オルタ</footer>
+
+  <nav class="fixed-cta" aria-label="クイックリンク">
+    <a href="#info">営業日・地図</a>
+    <a href="instagram.html">Instagram</a>
+  </nav>
+</body>
+</html>

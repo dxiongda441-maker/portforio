@@ -128,6 +128,8 @@ git show 76ace1e:main.js
 
 | 業種 | パス |
 |---|---|
-| 整体院 | `samples/seitai/` |
+| カフェ（サイト） | `samples/cafe/index.html` |
+| カフェ（Instagram運用の見本） | `samples/cafe/instagram.html` |
+| 整体院（旧方針。未使用 → decisions/0005） | `samples/seitai/` |
 
 <!-- ✏️ 新しい作品や構成変更を入れたら、ここを更新してください -->

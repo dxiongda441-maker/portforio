@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instagram運用見本｜制作サンプル</title>
+  <meta name="description" content="個人経営のカフェ向けInstagram運用代行の見本です。投稿計画・投稿文・月次報告の例。店名と数値はすべて架空です。">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="../../assets/favicon.svg">
+  <style>
+    :root {
+      --sumi: #2d2a27;
+      --usuzumi: #756c64;
+      --kinari: #f7f3ee;
+      --line: #e6ddd2;
+      --kogecha: #8a5a3b;
+      --kuchiba: #e0a458;
+      --wakatake: #5f8a6b;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--kinari);
+      color: var(--sumi);
+      font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+      line-height: 1.8;
+    }
+
+    a { color: inherit; }
+
+    .sample-bar {
+      background: var(--sumi);
+      color: var(--kinari);
+      font-size: 12px;
+      text-align: center;
+      padding: 6px 16px;
+    }
+
+    .sample-bar a { color: #f5d29f; }
+
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+
+    .intro { padding: 40px 0 8px; }
+    .intro h1 { font-size: clamp(22px, 5.6vw, 32px); line-height: 1.5; margin: 0 0 8px; }
+    .intro p { margin: 0; color: var(--usuzumi); }
+
+    section { padding: 40px 0; }
+
+    h2 { font-size: 20px; margin: 0 0 4px; }
+    .lead { margin: 0 0 20px; color: var(--usuzumi); font-size: 14px; }
+
+    .num {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--kogecha);
+      color: #fff;
+      font-size: 14px;
+      margin-right: 8px;
+      vertical-align: 2px;
+    }
+
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+
+    /* Profile mock */
+    .phone { max-width: 400px; margin: 0 auto; background: #fff; border: 1px solid var(--line); border-radius: 28px; padding: 20px 12px; }
+    .profile { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: center; padding: 0 8px 12px; }
+    .avatar { width: 76px; height: 76px; border-radius: 50%; background: radial-gradient(circle at 50% 45%, #f0cf9c 0 34%, #8a5a3b 35% 100%); }
+    .profile b { display: block; }
+    .stats { display: flex; gap: 14px; font-size: 13px; color: var(--usuzumi); }
+    .bio { padding: 0 8px 14px; font-size: 13px; line-height: 1.7; }
+    .highlights { display: flex; gap: 12px; padding: 0 8px 14px; font-size: 11px; text-align: center; color: var(--usuzumi); }
+    .highlights span::before { content: ""; display: block; width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--line); background: var(--kinari); margin-bottom: 4px; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+
+    .tile {
+      aspect-ratio: 4 / 5;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 8px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #fff;
+      font-weight: 700;
+      position: relative;
+    }
+
+    .tile small { display: block; font-weight: 400; font-size: 10px; opacity: 0.9; }
+    .tile .tag { position: absolute; top: 6px; left: 6px; font-size: 9px; font-weight: 400; background: rgba(0, 0, 0, 0.35); padding: 0 6px; border-radius: 999px; }
+
+    .photo1 { background: linear-gradient(135deg, #f0cf9c, #d99a56); }
+    .photo2 { background: linear-gradient(135deg, #e9c2a6, #9a6b4b); }
+    .photo3 { background: linear-gradient(135deg, #d9c3a0, #6b4c34); }
+    .text1 { background: #fffaf2; color: var(--kogecha); border: 1px solid var(--line); }
+    .text2 { background: var(--kogecha); }
+    .text3 { background: var(--wakatake); }
+
+    .legend { font-size: 12px; color: var(--usuzumi); margin: 12px 0 0; text-align: center; }
+
+    /* Calendar */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; border-radius: var(--radius); overflow: hidden; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { background: #fbf6ef; font-size: 13px; white-space: nowrap; }
+    td:first-child { white-space: nowrap; font-weight: 700; }
+    .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+
+    .kind { display: inline-block; font-size: 11px; padding: 0 8px; border-radius: 999px; color: #fff; white-space: nowrap; }
+    .k-photo { background: var(--kuchiba); }
+    .k-info { background: var(--kogecha); }
+    .k-story { background: var(--wakatake); }
+
+    /* Captions */
+    .captions { display: grid; gap: 16px; }
+    .caption h3 { margin: 0 0 8px; font-size: 15px; }
+    .caption pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font: 14px/1.8 "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background: var(--kinari);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .caption p { margin: 10px 0 0; font-size: 13px; color: var(--usuzumi); }
+
+    /* Report */
+    .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+    .kpi { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+    .kpi span { display: block; font-size: 12px; color: var(--usuzumi); }
+    .kpi b { font-size: 24px; }
+    .kpi em { font-style: normal; font-size: 12px; color: var(--wakatake); margin-left: 4px; }
+
+    .report ul { margin: 0; padding-left: 20px; }
+    .report li + li { margin-top: 6px; }
+    .report h3 { font-size: 15px; margin: 16px 0 6px; }
+    .report h3:first-child { margin-top: 0; }
+
+    .note { font-size: 12px; color: var(--usuzumi); margin-top: 12px; }
+
+    /* Plan */
+    .plan { display: grid; gap: 12px; }
+    .plan .panel h3 { margin: 0; font-size: 16px; }
+    .plan .price { font-size: 22px; font-weight: 700; color: var(--kogecha); }
+    .plan ul { margin: 8px 0 0; padding-left: 20px; font-size: 14px; }
+
+    footer { text-align: center; font-size: 12px; color: var(--usuzumi); padding: 24px 16px 40px; }
+
+    @media (min-width: 760px) {
+      .two { display: grid; grid-template-columns: 400px 1fr; gap: 32px; align-items: start; }
+      .captions { grid-template-columns: repeat(3, 1fr); }
+      .kpis { grid-template-columns: repeat(4, 1fr); }
+      .plan { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="sample-bar">
+    これは制作サンプルです。店名・アカウント名・数値はすべて架空です。
+    <a href="./">サイトの見本へ</a> / <a href="../../">制作者のポートフォリオへ</a>
+  </div>
+
+  <header class="intro">
+    <div class="wrap">
+      <h1>Instagram運用代行で、毎月お渡しするもの</h1>
+      <p>架空のカフェ「ことり舎」を例にした見本です。店主さんにお願いするのは、<strong>写真を撮って送ること</strong>だけ。企画・文章・投稿・報告はこちらで行います。</p>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="wrap two">
+        <div>
+          <div class="phone" aria-label="Instagramのプロフィール画面のイメージ">
+            <div class="profile">
+              <div class="avatar"></div>
+              <div>
+                <b>kotorisha_sample</b>
+                <div class="stats"><span>投稿 48</span><span>フォロワー 612</span></div>
+              </div>
+            </div>
+            <div class="bio">
+              焼き菓子とコーヒー ことり舎<br>
+              毎朝焼く、小さな焼き菓子の店☕<br>
+              🕚 11:00-18:00（売り切れ次第終了）<br>
+              🗓 月・火 定休／臨時休業はストーリーで<br>
+              📍〇〇駅 徒歩6分
+            </div>
+            <div class="highlights"><span>メニュー</span><span>営業日</span><span>アクセス</span><span>店主</span></div>
+            <div class="grid">
+              <div class="tile photo1"><span class="tag">写真</span>焼きたての<br>フィナンシェ</div>
+              <div class="tile text1">10月の<br>営業日<small>カレンダー</small></div>
+              <div class="tile photo2"><span class="tag">写真</span>かぼちゃの<br>タルト</div>
+              <div class="tile text2">はじめての方へ<small>ことり舎のこと</small></div>
+              <div class="tile photo3"><span class="tag">写真</span>店内の<br>窓際の席</div>
+              <div class="tile text3">人気ベスト3<small>迷ったらこれ</small></div>
+              <div class="tile photo1"><span class="tag">写真</span>朝の<br>仕込み</div>
+              <div class="tile text1">テイクアウト<br>できます<small>箱代無料</small></div>
+              <div class="tile photo2"><span class="tag">写真</span>店主の<br>手もと</div>
+            </div>
+          </div>
+          <p class="legend">「写真」は店主さんが撮った写真。それ以外は文字入りの画像をこちらで作ります。</p>
+        </div>
+
+        <div>
+          <h2><span class="num">1</span>プロフィールを整える（初月のみ）</h2>
+          <p class="lead">初めて見た人が「何の店で、いつ開いていて、どこにあるか」を3秒で分かるようにします。</p>
+          <div class="panel">
+            <ul style="margin:0;padding-left:20px">
+              <li>紹介文を、営業時間・定休日・場所が一目で分かる形に書き直す</li>
+              <li>ハイライト（プロフィール下の丸いボタン）に、メニュー・営業日・アクセスをまとめる</li>
+              <li>サイトや Google マップへのリンクを設定する</li>
+              <li>文字入り画像の色とフォントを、お店の雰囲気に合わせて統一する</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2><span class="num">2</span>投稿カレンダー（月8投稿の例）</h2>
+        <p class="lead">月初にお渡しします。「この週はこの写真をください」まで書くので、撮る物に迷いません。</p>
+        <div class="table-scroll">
+          <table>
+            <tr><th>日付</th><th>種類</th><th>内容</th><th>店主さんにお願いする写真</th></tr>
+            <tr><td>10/1（木）</td><td><span class="kind k-info">お知らせ</span></td><td>10月の営業日カレンダー</td><td>なし（こちらで作成）</td></tr>
+            <tr><td>10/3（土）</td><td><span class="kind k-photo">商品</span></td><td>新作：かぼちゃのタルト</td><td>タルトを真上から1枚・断面1枚</td></tr>
+            <tr><td>10/8（木）</td><td><span class="kind k-story">お店の話</span></td><td>朝の仕込みの様子</td><td>オーブンから出すところ（手元だけでOK）</td></tr>
+            <tr><td>10/10（土）</td><td><span class="kind k-photo">商品</span></td><td>人気No.1 フィナンシェ</td><td>焼きたてを並べたところ</td></tr>
+            <tr><td>10/15（木）</td><td><span class="kind k-info">お知らせ</span></td><td>はじめての方へ（お店の紹介）</td><td>外観1枚</td></tr>
+            <tr><td>10/17（土）</td><td><span class="kind k-photo">商品</span></td><td>テイクアウトの箱詰め</td><td>箱に詰めたところ</td></tr>
+            <tr><td>10/22（木）</td><td><span class="kind k-story">お店の話</span></td><td>窓際の席と午後の光</td><td>店内の席（お客様が写らないように）</td></tr>
+            <tr><td>10/24（土）</td><td><span class="kind k-info">お知らせ</span></td><td>人気ベスト3</td><td>なし（過去の写真を使用）</td></tr>
+          </table>
+        </div>
+        <p class="note">週末前の木・土に投稿する例です。実際は、そのお店のお客様が見ている時間帯に合わせて調整します。</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2><span class="num">3</span>投稿文（こちらで作成）</h2>
+        <p class="lead">お店の言葉づかいに合わせて書きます。公開前に店主さんの確認を取ります。</p>
+        <div class="captions">
+          <article class="panel caption">
+            <h3>10/3 新作のお知らせ</h3>
+            <pre>今月のタルトは「かぼちゃ」です🎃
+
+北海道産のかぼちゃを、ほんの少しのシナモンと合わせました。
+甘さひかえめなので、ブレンドコーヒーとよく合います。
+
+🍰 かぼちゃのタルト 520円
+📅 10月末までの限定です
+☕ テイクアウトもできます
+
+#ことり舎 #〇〇カフェ #〇〇市カフェ #焼き菓子 #かぼちゃのタルト</pre>
+            <p>ねらい：限定の期間を書いて「今月中に行こう」と思ってもらう。</p>
+          </article>
+          <article class="panel caption">
+            <h3>10/8 朝の仕込み</h3>
+            <pre>朝7時、いちばん静かな時間。
+
+フィナンシェの生地は前の晩に仕込んで、朝に焼きます。
+焦がしバターの香りがお店いっぱいに広がるこの瞬間が、
+1日でいちばん好きな時間です。
+
+今日も11時から開けています。
+
+#ことり舎 #〇〇カフェ #朝の仕込み #焼き菓子屋さん</pre>
+            <p>ねらい：店主さんの人柄を伝えて「行ってみたい」を作る。</p>
+          </article>
+          <article class="panel caption">
+            <h3>10/15 はじめての方へ</h3>
+            <pre>はじめての方へ、ことり舎のご紹介です☕
+
+・〇〇駅から歩いて6分
+・8席だけの小さなお店です（予約なし）
+・焼き菓子はすべてテイクアウトできます
+・月・火はお休みです
+
+画像をスワイプすると、人気のメニューが見られます→
+
+#ことり舎 #〇〇カフェ #〇〇市カフェ #〇〇駅</pre>
+            <p>ねらい：保存してもらえる「まとめ」投稿。初めての人の不安を消す。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2><span class="num">4</span>月次報告（月末にお渡し）</h2>
+        <p class="lead">数字と、「来月どうするか」をセットでお伝えします。</p>
+        <div class="kpis">
+          <div class="kpi"><span>フォロワー</span><b>612</b><em>+38</em></div>
+          <div class="kpi"><span>投稿を見た人の数</span><b>4,120</b><em>+22%</em></div>
+          <div class="kpi"><span>保存された数</span><b>96</b><em>+31</em></div>
+          <div class="kpi"><span>プロフィールから地図を開いた数</span><b>54</b><em>+12</em></div>
+        </div>
+        <div class="panel report">
+          <h3>よかったこと</h3>
+          <ul>
+            <li>「はじめての方へ」の保存が最も多かった（41件）。来店前に保存して見返されている</li>
+            <li>新作タルトの投稿のあとに、地図を開いた数が増えた</li>
+          </ul>
+          <h3>来月やること</h3>
+          <ul>
+            <li>11月の新作は、発売の3日前に「予告」を出す</li>
+            <li>「はじめての方へ」を固定表示にする</li>
+            <li>店主さんへのお願い：焼き上がりの写真を、できれば縦長で撮っていただけると助かります</li>
+          </ul>
+        </div>
+        <p class="note">※ 見本用の架空の数値です。フォロワーや来店数の増加をお約束するものではありません。</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>料金（例）</h2>
+        <p class="lead">まずは3か月お試しいただく形をおすすめしています。</p>
+        <div class="plan">
+          <div class="panel">
+            <h3>Instagram運用</h3>
+            <div class="price">月 20,000円〜</div>
+            <ul><li>月8投稿（企画・画像・文章・投稿）</li><li>投稿カレンダー</li><li>月次報告</li></ul>
+          </div>
+          <div class="panel">
+            <h3>ホームページ制作</h3>
+            <div class="price">19,800円〜</div>
+            <ul><li>1ページサイト（スマホ対応）</li><li>メニュー・営業日・地図</li><li>Instagramとの連携</li></ul>
+          </div>
+          <div class="panel">
+            <h3>セット</h3>
+            <div class="price">初月 29,800円</div>
+            <ul><li>ホームページ ＋ 1か月目の運用</li><li>2か月目からは運用のみ 月20,000円</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Sample by オルタ — 店名・アカウント・数値はすべて架空です</footer>
+</body>
+</html>

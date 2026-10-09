@@ -1,6 +1,6 @@
 # チャット別の成果物一覧
 
-> 最終確認: 2026-09-30 / 確認者: Claude
+> 最終確認: 2026-10-09 / 確認者: Claude
 > Claude Code のチャット（セッション）ごとに、何を作って、どこに置いてあり、次に何を決める必要があるかをまとめた表。
 > 新しいチャットで作業したら、ここに1行足してください。
 
@@ -8,19 +8,19 @@
 
 | 日付 | チャット名 | 分類 | 成果物の場所 | 状態 |
 | --- | --- | --- | --- | --- |
-| 2026-09-25 | 家族向けトランプゲームアプリ | 作品（ゲーム） | `projects/family-cards/` | ✅ 整理ブランチに取り込み済み |
-| 2026-09-12 | カフェ向けLP制作 | 作品（LP） | `projects/cafe-lp/` | ✅ 整理ブランチに取り込み済み |
-| 2026-09-24 | CLAUDE.md自己改善 | 設定（Claude 用） | `tools/check.sh`・`tools/screenshot.sh`・`docs/decisions/0006-*` | ✅ 整理ブランチに取り込み済み（記録番号を 0004 → 0006 に変更） |
-| 2026-09-04 | 個人ビジネス構築ガイダンス | 作品（情報収集ツール Scout） | ブランチ `claude/personal-business-guidance-p3145p`（`projects/scout/`・`scout/`） | ⏸ 未取り込み：毎朝自動で動く仕組みを含むため判断待ち |
+| 2026-09-25 | 家族向けトランプゲームアプリ | 作品（ゲーム） | `projects/family-cards/` | ✅ 取り込み済み（2026-10-09、PWA 対応の最終コミットも含む） |
+| 2026-09-12 | カフェ向けLP制作 | 作品（LP） | `projects/cafe-lp/` | ✅ 取り込み済み（2026-10-09） |
+| 2026-09-24 | CLAUDE.md自己改善 | 設定（Claude 用） | `tools/check.sh`・`tools/screenshot.sh`・`docs/decisions/0006-*` | ✅ 取り込み済み（記録番号を 0004 → 0006 に変更。トランプ側の 0006 は 0007 に変更） |
+| 2026-09-04 | 個人ビジネス構築ガイダンス | 作品（情報収集ツール Scout） | ブランチ `claude/personal-business-guidance-p3145p`（`projects/scout/`・`scout/`） | ⏸ 保留（2026-10-09 本人判断）：npm と毎朝の自動実行を含むため |
 | 2026-08-14 | Brain高品質コンテンツ設計 | メモ（教材研究） | ブランチ `claude/brain-content-design-t2axff`（`notes/brain-content-design.md`） | ⚠️ 未取り込み：第三者の原文全文を含むため公開しない |
-| 2026-09-03 | ソフトバンク入社への道 | 就職活動（ポートフォリオの文面変更） | ブランチ `claude/softbank-employment-path-uwalcp`（`index.html`・`README.md`） | ⏸ 未取り込み：トップページの文面を書き換えるため判断待ち |
+| 2026-09-03 | ソフトバンク入社への道 | 就職活動（ポートフォリオの文面変更） | ブランチ `claude/softbank-employment-path-uwalcp`（`index.html`・`README.md`） | ✅ 取り込み済み（2026-10-09）。作品数の記述は 10 作品に更新 |
 | 2026-09-15 | ソフトバンク法人営業エントリー準備 | 就職活動（面接台本） | ブランチ `claude/softbank-corporate-sales-prep-0fgymy`（GitHub 上に存在せず） | 💬 チャット内のみ |
 | 2026-08-28 | 会話の記憶範囲とObsidian活用 | 設定（Claude の記憶） | `CLAUDE.md`・`docs/`・`.claude/commands/` | ✅ main に反映済み（PR #4） |
 | 2026-08-30 | 昨日のレポートと今日のタスク | 設定（Claude の記憶） | 上と同じブランチ | ✅ main に反映済み（PR #4） |
 | 2026-08-15 | これまでのログ確認 | 改善（作品の不具合修正・OGP など） | `projects/*`・`assets/` | ✅ main に反映済み（PR #3） |
 | 2026-08-15 | ログからのタスク抽出とレポート生成 | 調査レポート | Artifact「portforio 次にやること」 | 💬 チャット内のみ |
 | 2026-09-12 | クラウドコード使用方法の改善 | 相談・整理 | ブランチ `claude/cloudcode-usage-review-qqonph`（GitHub 上に存在せず） | 💬 チャット内のみ |
-| 2026-09-28 | ファイルディレクトリの整理 | 整理（このドキュメント） | ブランチ `claude/organize-file-directory-yq7io2` | 🚧 作業中 |
+| 2026-09-28 | ファイルディレクトリの整理 | 整理（このドキュメント） | ブランチ `claude/organize-file-directory-yq7io2` | ✅ 取り込み済み（2026-10-09） |
 
 ### チャット以外で作られたもの
 
@@ -30,14 +30,10 @@
 
 ### 古いブランチ
 
-| ブランチ | 中身 | おすすめ |
-| --- | --- | --- |
-| `alter-portfolio` | 2026-07-06 のトップページ試作。main より 21 コミット古い | 削除してよい（内容は main に後継あり） |
-| `agent/add-portfolio-works-20260712` | 8作品の初回追加。main に同じ作品が入っている | 削除してよい |
-| `tmp-push-test` | 中身のない push テスト | 削除してよい |
-| `claude/review-previous-logs-9ixygf`・`claude/conversation-memory-obsidian-yjdj5q` | main に取り込み済み | 削除してよい |
-
-※ ブランチの削除は、このリポジトリのルール（`CLAUDE.md`）で本人の確認が必要な操作なので、まだ行っていません。
+2026-10-09 に本人の確認を取って削除した: `alter-portfolio`・`agent/add-portfolio-works-20260712`・`tmp-push-test`・
+`claude/review-previous-logs-9ixygf`・`claude/conversation-memory-obsidian-yjdj5q`・
+`claude/cafe-lp-creation-5z5gz9`・`claude/claude-md-self-improvement-7mceld`・`claude/family-card-game-app-fnnysi`。
+中身は main か取り込み済みブランチに入っている。
 
 ## ほかのリポジトリのチャット
 

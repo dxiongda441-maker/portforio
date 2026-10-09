@@ -38,7 +38,8 @@ assets/
   apple-touch-icon.png
   og-cover.jpg      SNSシェア用のOGP画像（1200×630）
   portfolio/        作品カードのサムネイル
-projects/           各作品の実体。1ディレクトリ＝1作品で完結
+projects/           各作品の実体。1ディレクトリ＝1作品で完結（各フォルダに README.md）
+docs/chats.md       チャットごとの成果物と、未取り込みのブランチの一覧
 tools/              メンテナンス用スクリプト
 .github/workflows/  main へのpushでGitHub Pagesへ自動デプロイ
 ```
@@ -100,3 +101,5 @@ GitHub Pagesへ公開されます。手動の操作は不要です。
 | 世界ねこ図鑑クイズ | 図鑑＋クイズ | `projects/cat-quiz/` |
 | ビジネス契約ラーニング | 契約の学習アプリ | `projects/contracts/` |
 | 100円が冒険に出た!? | AIアニメ制作ケーススタディ | `projects/money-anime/` |
+| 年末ファミリートランプ | 家族向けトランプゲーム集（10種） | `projects/family-cards/` |
+| 琥珀 KOHAKU COFFEE | カフェのランディングページ | `projects/cafe-lp/` |

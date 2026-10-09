@@ -58,14 +58,19 @@ keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
 
 ## 確認
 
-自動テストはない。変更したら以下を目視する。
+自動テストはないが、機械的に確かめられる部分はスクリプトにしてある（npm 不要）。
 
 ```bash
-python3 -m http.server 3000   # → http://localhost:3000
+bash tools/check.sh                          # ルール違反・リンク切れ・CACHE_NAME の上げ忘れ
+bash tools/screenshot.sh                     # トップを 375px / 1280px で撮影
+bash tools/screenshot.sh projects/quote/ 375 # 作品ページを指定幅で撮影
 ```
 
-Service Worker を使う作品は `file://` では動かないので、必ずサーバー経由で開くこと。
+Claude は撮った PNG を Read で開いて自分で見てから報告する。
+スクリプトは一時的に `python3 -m http.server 3000` を立てる。手で開くときも同じコマンドで
+http://localhost:3000 を使う。Service Worker を使う作品は `file://` では動かない。
 
+- [ ] `tools/check.sh` が「すべて OK」
 - [ ] トップページの該当セクションが崩れていない
 - [ ] スマホ幅（375px）で崩れていない
 - [ ] 作品カードのリンクが 404 にならない

@@ -30,7 +30,7 @@
 
 ### 古いブランチ
 
-2026-10-09 に本人の確認を取って削除した: `alter-portfolio`・`agent/add-portfolio-works-20260712`・`tmp-push-test`・
+2026-10-09 に本人が削除を承認（Claude のセッションからは権限が無く削除できないため、GitHub の Branches 画面で削除する）: `alter-portfolio`・`agent/add-portfolio-works-20260712`・`tmp-push-test`・
 `claude/review-previous-logs-9ixygf`・`claude/conversation-memory-obsidian-yjdj5q`・
 `claude/cafe-lp-creation-5z5gz9`・`claude/claude-md-self-improvement-7mceld`・`claude/family-card-game-app-fnnysi`。
 中身は main か取り込み済みブランチに入っている。

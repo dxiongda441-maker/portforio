@@ -20,6 +20,7 @@ assets/
   og-cover.jpg              SNSシェア用 OGP（1200×630）
   portfolio/                作品カードのサムネイル（.jpg と同名 .webp を併置）
 projects/<slug>/            各作品の実体。それぞれ独立した静的アプリ
+samples/<業種>/             受託制作の営業用見本（noindex・sitemap 対象外 → decisions/0004）
 tools/fetch-backgrounds.sh  背景写真をローカルに取り込むスクリプト（未実行）
 .github/workflows/deploy.yml  Pages デプロイ
 ```
@@ -119,5 +120,14 @@ git show 76ace1e:main.js
 - OGP 一式（`og:type` `og:locale` `og:site_name` `og:title` `og:description` `og:url` `og:image`）
 - Twitter Card
 - `<a class="portfolio-back" href="../../">` の戻り導線
+
+## samples/ — 営業用の見本サイト
+
+架空店舗の1ページサイト。`index.html` 1枚で完結（`<script>` なし）。
+`noindex` を付け、`sitemap.xml` には載せない。副業の計画と文面は `docs/business/`。
+
+| 業種 | パス |
+|---|---|
+| 整体院 | `samples/seitai/` |
 
 <!-- ✏️ 新しい作品や構成変更を入れたら、ここを更新してください -->

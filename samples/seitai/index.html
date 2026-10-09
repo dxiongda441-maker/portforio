@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>整体院そよぎ｜制作サンプル</title>
+  <meta name="description" content="個人経営の整体院向け1ページサイトの制作サンプルです。店名・住所・電話番号・お客様の声はすべて架空です。">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="../../assets/favicon.svg">
+  <style>
+    :root {
+      --sumi: #2f2a26;
+      --usuzumi: #6b625b;
+      --kinari: #fbf7f0;
+      --shironeri: #fffdf9;
+      --line: #e7ddd0;
+      --wakatake: #5f8a6b;
+      --wakatake-deep: #456a51;
+      --kaki: #d9774a;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--kinari);
+      color: var(--sumi);
+      font-family: "Hiragino Maru Gothic ProN", "Zen Maru Gothic", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      line-height: 1.8;
+      padding-bottom: 72px;
+    }
+
+    a { color: inherit; }
+
+    .sample-bar {
+      background: var(--sumi);
+      color: var(--kinari);
+      font-size: 12px;
+      text-align: center;
+      padding: 6px 16px;
+    }
+
+    .sample-bar a { color: #f3c9b3; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 253, 249, 0.94);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 18px;
+      text-decoration: none;
+      letter-spacing: 0.06em;
+    }
+
+    .logo small {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--usuzumi);
+      letter-spacing: 0.02em;
+    }
+
+    .header-tel {
+      text-decoration: none;
+      font-weight: 700;
+      color: var(--wakatake-deep);
+      font-size: 15px;
+      white-space: nowrap;
+    }
+
+    .header-tel span {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--usuzumi);
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    section { padding: 64px 0; }
+
+    .section-label {
+      display: block;
+      color: var(--wakatake);
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      margin-bottom: 4px;
+    }
+
+    h2 {
+      font-size: clamp(22px, 5vw, 30px);
+      margin: 0 0 28px;
+      line-height: 1.5;
+    }
+
+    /* Hero */
+    .hero {
+      background:
+        radial-gradient(circle at 85% 20%, rgba(217, 119, 74, 0.16), transparent 45%),
+        radial-gradient(circle at 10% 90%, rgba(95, 138, 107, 0.2), transparent 50%),
+        var(--shironeri);
+      padding: 56px 0 64px;
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: var(--wakatake);
+      color: #fff;
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 2px 14px;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 {
+      font-size: clamp(22px, 6.4vw, 38px);
+      line-height: 1.4;
+      margin: 0 0 16px;
+    }
+
+    .hero h1 span,
+    .hero h1 em { white-space: nowrap; }
+
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(transparent 62%, rgba(217, 119, 74, 0.35) 62%);
+    }
+
+    .hero p { margin: 0 0 24px; color: var(--usuzumi); }
+
+    .hero-illust {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 52px;
+      padding: 0 24px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .btn-primary { background: var(--kaki); color: #fff; box-shadow: 0 6px 16px rgba(217, 119, 74, 0.3); }
+    .btn-line { background: #06c755; color: #fff; }
+    .btn-outline { border: 2px solid var(--wakatake); color: var(--wakatake-deep); background: #fff; }
+
+    .offer {
+      margin-top: 20px;
+      font-size: 14px;
+      background: #fff;
+      border: 1px dashed var(--kaki);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+
+    .offer strong { color: var(--kaki); font-size: 18px; }
+
+    /* Worries */
+    .worries {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .worries li {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 14px 16px 14px 48px;
+      position: relative;
+      border: 1px solid var(--line);
+    }
+
+    .worries li::before {
+      content: "";
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      margin-top: -9px;
+      border-radius: 50%;
+      background: var(--wakatake);
+      box-shadow: inset 0 0 0 5px #dfeadf;
+    }
+
+    .worries-after {
+      margin-top: 24px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    /* Reasons */
+    .bg-white { background: var(--shironeri); }
+
+    .cards { display: grid; gap: 16px; }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+    }
+
+    .card-num {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--kaki);
+      line-height: 1;
+    }
+
+    .card h3 { margin: 8px 0; font-size: 18px; }
+    .card p { margin: 0; color: var(--usuzumi); font-size: 15px; }
+
+    /* Flow */
+    .flow { counter-reset: step; list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+
+    .flow li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .flow li::before {
+      content: counter(step);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--wakatake);
+      color: #fff;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+    }
+
+    .flow strong { display: block; }
+    .flow span { color: var(--usuzumi); font-size: 15px; }
+
+    /* Price */
+    .price-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius); overflow: hidden; }
+    .price-table th, .price-table td { padding: 16px; border-bottom: 1px solid var(--line); text-align: left; }
+    .price-table th { font-weight: 700; }
+    .price-table td { text-align: right; white-space: nowrap; font-weight: 700; }
+    .price-table small { display: block; font-weight: 400; color: var(--usuzumi); font-size: 13px; }
+    .price-first { background: #fff4ee; }
+    .price-first td { color: var(--kaki); }
+    .price-note { font-size: 13px; color: var(--usuzumi); margin-top: 12px; }
+
+    /* Voice */
+    .voice {
+      margin: 0;
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--line);
+    }
+
+    .voice p { margin: 0 0 8px; }
+    .voice footer { font-size: 13px; color: var(--usuzumi); }
+
+    .sample-note { font-size: 12px; color: var(--usuzumi); margin-top: 12px; }
+
+    /* Staff */
+    .staff { display: grid; gap: 20px; align-items: center; }
+
+    .staff-photo {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #dfeadf, #f6e2d6);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      color: var(--usuzumi);
+      margin: 0 auto;
+    }
+
+    /* Access */
+    .info { display: grid; gap: 16px; }
+
+    .info dl { margin: 0; background: #fff; border-radius: var(--radius); border: 1px solid var(--line); padding: 8px 20px; }
+    .info dt { font-weight: 700; padding-top: 12px; }
+    .info dd { margin: 0; padding-bottom: 12px; border-bottom: 1px solid var(--line); color: var(--usuzumi); }
+    .info dd:last-child { border-bottom: 0; }
+
+    .map {
+      min-height: 240px;
+      border-radius: var(--radius);
+      background:
+        repeating-linear-gradient(0deg, transparent 0 38px, rgba(47, 42, 38, 0.06) 38px 40px),
+        repeating-linear-gradient(90deg, transparent 0 38px, rgba(47, 42, 38, 0.06) 38px 40px),
+        #eef1ea;
+      display: grid;
+      place-items: center;
+      color: var(--usuzumi);
+      font-size: 14px;
+      text-align: center;
+      padding: 16px;
+    }
+
+    /* CTA */
+    .cta {
+      background: var(--wakatake-deep);
+      color: #fff;
+      text-align: center;
+    }
+
+    .cta h2 { margin-bottom: 12px; }
+    .cta p { margin: 0 0 24px; opacity: 0.9; }
+    .cta .btn-row { justify-content: center; }
+
+    footer.site {
+      text-align: center;
+      font-size: 12px;
+      color: var(--usuzumi);
+      padding: 24px 16px;
+    }
+
+    /* Fixed bottom bar for phones */
+    .fixed-cta {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #fff;
+      border-top: 1px solid var(--line);
+    }
+
+    .fixed-cta a {
+      min-height: 60px;
+      display: grid;
+      place-items: center;
+      text-decoration: none;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .fixed-cta .tel { background: var(--kaki); }
+    .fixed-cta .line { background: #06c755; }
+
+    @media (min-width: 760px) {
+      body { padding-bottom: 0; }
+      .fixed-cta { display: none; }
+      .hero-grid { grid-template-columns: 1.5fr 1fr; }
+      .worries { grid-template-columns: 1fr 1fr; }
+      .cards { grid-template-columns: repeat(3, 1fr); }
+      .flow { grid-template-columns: repeat(4, 1fr); }
+      .flow li { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+      .voices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .staff { grid-template-columns: 180px 1fr; }
+      .staff-photo { width: 180px; height: 180px; }
+      .info { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 759px) {
+      .voices { display: grid; gap: 12px; }
+      .header-tel { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sample-bar">
+    これは制作サンプルです。店名・住所・電話番号・お客様の声はすべて架空です。
+    <a href="../../">制作者のポートフォリオへ</a>
+  </div>
+
+  <header>
+    <div class="header-inner">
+      <a class="logo" href="#top">整体院そよぎ<small>〇〇駅 徒歩3分・完全予約制</small></a>
+      <a class="header-tel" href="tel:000-0000-0000"><span>ご予約・お問い合わせ</span>000-0000-0000</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="hero-tag">肩こり・腰の重さ・姿勢のお悩みに</span>
+          <h1><span>からだの「こわばり」を、</span><br><em>ひとつずつ、ていねいに。</em></h1>
+          <p>1日5名様までの完全予約制。<br>お話をじっくり伺ってから、今のからだに合わせた施術をご提案します。</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="tel:000-0000-0000">電話で予約する</a>
+            <a class="btn btn-line" href="#reserve">LINEで予約する</a>
+          </div>
+          <div class="offer">ホームページを見た方限定 初回 <strong>3,980円</strong>（通常6,600円）</div>
+        </div>
+        <svg class="hero-illust" viewBox="0 0 400 320" role="img" aria-label="ベッドに横になってくつろぐ人のイラスト">
+          <circle cx="300" cy="80" r="56" fill="#f6e2d6"/>
+          <rect x="40" y="200" width="320" height="26" rx="13" fill="#5f8a6b"/>
+          <rect x="70" y="226" width="14" height="60" rx="6" fill="#456a51"/>
+          <rect x="316" y="226" width="14" height="60" rx="6" fill="#456a51"/>
+          <ellipse cx="110" cy="178" rx="34" ry="22" fill="#fff" stroke="#e7ddd0" stroke-width="3"/>
+          <circle cx="112" cy="160" r="24" fill="#e9b99a"/>
+          <path d="M136 172 Q220 140 320 176 L320 200 L132 200 Z" fill="#d9774a"/>
+          <path d="M220 150 Q260 130 300 150" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+          <path d="M70 110 q12 -16 24 0 q12 16 24 0" fill="none" stroke="#5f8a6b" stroke-width="4" stroke-linecap="round"/>
+          <path d="M150 80 q10 -12 20 0 q10 12 20 0" fill="none" stroke="#d9774a" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <span class="section-label">WORRIES</span>
+        <h2>こんなお悩み、ありませんか？</h2>
+        <ul class="worries">
+          <li>デスクワークで夕方になると肩がガチガチ</li>
+          <li>朝起きたときに腰が重い</li>
+          <li>マッサージに行ってもすぐ元に戻る</li>
+          <li>猫背や姿勢の崩れが気になってきた</li>
+          <li>寝ても疲れが抜けない感じがする</li>
+          <li>どこに相談したらいいか分からない</li>
+        </ul>
+        <p class="worries-after">ひとつでも当てはまったら、一度ご相談ください。</p>
+      </div>
+    </section>
+
+    <section class="bg-white">
+      <div class="wrap">
+        <span class="section-label">REASON</span>
+        <h2>そよぎが選ばれる3つの理由</h2>
+        <div class="cards">
+          <article class="card">
+            <div class="card-num">01</div>
+            <h3>最初の20分は「お話」の時間</h3>
+            <p>生活習慣やお仕事の姿勢まで伺い、こわばりの原因を一緒に探します。</p>
+          </article>
+          <article class="card">
+            <div class="card-num">02</div>
+            <h3>ボキボキしない、やさしい施術</h3>
+            <p>強い力に頼らず、筋肉をゆるめながら整えます。初めての方も安心です。</p>
+          </article>
+          <article class="card">
+            <div class="card-num">03</div>
+            <h3>おうちでできるセルフケア</h3>
+            <p>施術のあとに、ご自宅で続けられる簡単なストレッチをお伝えします。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <span class="section-label">FLOW</span>
+        <h2>はじめての方の流れ</h2>
+        <ol class="flow">
+          <li><div><strong>ご予約</strong><span>お電話かLINEで、ご希望の日時をお知らせください。</span></div></li>
+          <li><div><strong>カウンセリング</strong><span>お悩みや生活習慣を伺い、からだの状態を確認します。</span></div></li>
+          <li><div><strong>施術</strong><span>状態に合わせて、約40分の施術を行います。</span></div></li>
+          <li><div><strong>セルフケアのご案内</strong><span>ご自宅でできるケアと、次回の目安をお伝えします。</span></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="bg-white">
+      <div class="wrap">
+        <span class="section-label">PRICE</span>
+        <h2>料金</h2>
+        <table class="price-table">
+          <tr class="price-first"><th>初回体験<small>カウンセリング＋施術 約60分</small></th><td>3,980円</td></tr>
+          <tr><th>通常施術<small>約40分</small></th><td>6,600円</td></tr>
+          <tr><th>ロングコース<small>約70分</small></th><td>9,900円</td></tr>
+          <tr><th>回数券（5回）<small>有効期限6か月</small></th><td>29,700円</td></tr>
+        </table>
+        <p class="price-note">表示はすべて税込みです。お支払いは現金・各種QR決済に対応しています。</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <span class="section-label">VOICE</span>
+        <h2>お客様の声</h2>
+        <div class="voices">
+          <blockquote class="voice">
+            <p>話をしっかり聞いてくれるので安心できました。教えてもらったストレッチを毎朝続けています。</p>
+            <footer>30代・会社員の方</footer>
+          </blockquote>
+          <blockquote class="voice">
+            <p>強く押されるのが苦手でしたが、ここはやさしい施術でリラックスできました。</p>
+            <footer>40代・主婦の方</footer>
+          </blockquote>
+          <blockquote class="voice">
+            <p>完全予約制で待ち時間がないのが助かります。仕事帰りに通いやすいです。</p>
+            <footer>20代・看護師の方</footer>
+          </blockquote>
+        </div>
+        <p class="sample-note">※ サンプル用の架空の文章です。実際のサイトでは、ご本人の了承を得た声を掲載します。感じ方には個人差があります。</p>
+      </div>
+    </section>
+
+    <section class="bg-white">
+      <div class="wrap staff">
+        <div class="staff-photo">院長の写真</div>
+        <div>
+          <span class="section-label">STAFF</span>
+          <h2>院長 山田 そよ</h2>
+          <p>整体の道に入って12年。「その場だけ楽になる」のではなく、ご自身でからだを整えられるようになることを大切にしています。どんな小さなお悩みでも、気軽にお話しください。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <span class="section-label">ACCESS</span>
+        <h2>営業時間・アクセス</h2>
+        <div class="info">
+          <dl>
+            <dt>住所</dt><dd>〇〇県〇〇市〇〇町1-2-3 そよぎビル2F</dd>
+            <dt>アクセス</dt><dd>〇〇駅 東口から徒歩3分。近くにコインパーキングがあります</dd>
+            <dt>営業時間</dt><dd>10:00〜20:00（最終受付 19:00）</dd>
+            <dt>定休日</dt><dd>水曜日・第3日曜日</dd>
+            <dt>電話</dt><dd>000-0000-0000</dd>
+          </dl>
+          <div class="map">ここに Google マップを埋め込みます</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" id="reserve">
+      <div class="wrap">
+        <h2>まずは初回体験から</h2>
+        <p>ホームページを見た方限定で、初回 3,980円。<br>1日5名様までなので、お早めにご予約ください。</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="tel:000-0000-0000">電話で予約する</a>
+          <a class="btn btn-outline" href="#reserve">LINEで予約する</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site">© 整体院そよぎ（架空の店舗） — Sample site by オルタ</footer>
+
+  <nav class="fixed-cta" aria-label="予約">
+    <a class="tel" href="tel:000-0000-0000">電話で予約</a>
+    <a class="line" href="#reserve">LINEで予約</a>
+  </nav>
+</body>
+</html>

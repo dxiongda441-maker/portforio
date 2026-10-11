@@ -132,6 +132,5 @@ git show 76ace1e:main.js
 | カフェ（サイト） | `samples/cafe/index.html` |
 | カフェ（Instagram運用の見本） | `samples/cafe/instagram.html` |
 | カフェ（投稿画像。`tools/insta-post/` から書き出し） | `samples/cafe/posts/*.png` |
-| 整体院（旧方針。未使用 → decisions/0005） | `samples/seitai/` |
 
 <!-- ✏️ 新しい作品や構成変更を入れたら、ここを更新してください -->

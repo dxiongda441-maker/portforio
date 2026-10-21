@@ -21,6 +21,7 @@ assets/
   portfolio/                作品カードのサムネイル（.jpg と同名 .webp を併置）
 projects/<slug>/            各作品の実体。それぞれ独立した静的アプリ
 tools/fetch-backgrounds.sh  背景写真をローカルに取り込むスクリプト（未実行）
+ip-chara/                   IPキャラ設計図と候補一覧（ポートフォリオとは別件。→ docs/decisions/0004）
 .github/workflows/deploy.yml  Pages デプロイ
 ```
 

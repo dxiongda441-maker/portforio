@@ -27,15 +27,27 @@
 8. `batch-NNN.md` を書く（書式は下）。
 9. 報告は、6 体の「名前・組み合わせ・一言」の一覧だけにする。
 
-## 仮のスタイル（全キャラ共通）
+## 仮のスタイル（全キャラ共通）— v2「神秘」
 
-画風の出どころはまだ決まっていない。決まるまでは次の指定で統一する。決まったら採用キャラだけ作り直す。
+画風の出どころはまだ決まっていない。方向性は**神秘的**（2026-10-22 に依頼者が指定）。
+決まるまでは次の指定で統一する。決まったら採用キャラだけ作り直す。
 
 ```
-Soft anime style, clean medium-weight line art, simple two-tone cel shading, warm pastel colors,
-mascot proportions but keep the real animal's silhouette and anatomy recognizable,
-plain off-white background, no text, no logo.
+Mystical anime illustration style: clean fine line art, soft painterly cel shading,
+ethereal and slightly otherworldly mood, muted twilight palette of deep indigo, teal and
+moonlit silver with one softly glowing accent color, the everyday element emits a faint
+magical glow, tiny floating light particles around the character, subtle iridescent sheen
+on the fur, mascot proportions but keep the real animal's silhouette and anatomy
+recognizable, simple dark gradient background with no scenery, no text, no logo.
 ```
+
+- 生き物の英名の後に `like a gentle guardian spirit from folklore`（民話の守り神のような）を添える。
+  役割に合わせて `messenger spirit`（使い）/ `weather spirit`（天気）/ `timekeeper spirit`（時）などに変えてよい。
+- 表情は「穏やか・賢そう・何を考えているか読めない」寄りにする。
+- **服・帽子は付けない**（+α 以外の小物が足されると B と C が崩れる。v1 で探偵帽やオーバーオールが勝手に付いた）。
+  プロンプトに `No clothing, no hat.` を入れる。
+
+v1（パステルのマスコット調）は `claude-trial/batch-002.md` の画風。比較用に残している。
 
 ## プロンプト雛形
 
@@ -43,10 +55,10 @@ plain off-white background, no text, no logo.
 
 ```
 Original character design for manga and anime, single full-body front three-quarter view, centered.
-A <生き物の英名>. Keep its key features clearly visible: <必須特徴1>, <必須特徴2>, <必須特徴3>.
+A <生き物の英名>, like a gentle <役割> spirit from folklore. Keep its key features clearly visible: <必須特徴1>, <必須特徴2>, <必須特徴3>.
 Add one everyday element as a small accent, about 30% of the design: <+α をどこにどう入れるか>.
 The animal must stay instantly recognizable even if the accent is covered.
-Expression and pose: <性格が出る表情・ポーズ>. Palette: <色 3 つ>.
+Expression and pose: <性格が出る表情・ポーズ>. No clothing, no hat.
 <仮のスタイル>
 ```
 
@@ -88,13 +100,6 @@ Consistent proportions and colors. <仮のスタイル>
 
 判定・A〜F の欄は空けておく（人が書く）。
 
-## batch-002 だけの追加作業: 画風の試し描き
+## 画風の試し描き（取りやめ）
 
-画風を決める材料として、**C01（ツチブタ × じょうろ）のキャラクターデザイン**を 3 つの画風で描き、
-`images/style-trial/` に `S1.png` `S2.png` `S3.png` で保存する。`batch-002.md` の末尾に 3 枚を並べる。
-
-| ID | 画風 | 仮のスタイルの代わりに入れる指定 |
-|---|---|---|
-| S1 | いまの仮スタイル | （仮のスタイルのまま） |
-| S2 | 図鑑寄りの水彩 | `Watercolor storybook illustration, soft pencil lines, more realistic animal anatomy, gentle textures, plain paper background, no text.` |
-| S3 | 日常アニメ寄り | `TV slice-of-life anime style, thin clean lines, flat colors with one shadow tone, designed to sit naturally in everyday background art, plain background, no text.` |
+以前は batch-002 で 3 つの画風を試す予定だったが、方向性が「神秘的」に決まったので行わない（2026-10-22）。

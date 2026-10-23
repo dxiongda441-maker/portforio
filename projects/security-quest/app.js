@@ -176,7 +176,7 @@
       else if (value === true) node.setAttribute(key, "");
       else node.setAttribute(key, value);
     }
-    for (const child of children.flat()) {
+    for (const child of children.flat(Infinity)) {
       if (child == null || child === false) continue;
       node.append(child instanceof Node ? child : document.createTextNode(String(child)));
     }

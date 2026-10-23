@@ -88,7 +88,7 @@ git show 76ace1e:main.js
 
 ## projects/ — 各作品
 
-9 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
+10 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
 
 基本構成は `index.html` + `app.js` + `styles.css`。うち 5 件は
 `manifest.webmanifest`(または `manifest.json`) + `sw.js`(または `service-worker.js`) を持つ **PWA**。
@@ -104,6 +104,7 @@ git show 76ace1e:main.js
 | `contracts` | ビジネス契約ラーニング | 静的 | — |
 | `money-anime` | 100円が冒険に出た!? | 静的 | — |
 | `security-quest` | セキュリティ・クエスト | 静的 | — |
+| `stats-quest` | 統計クエスト | 静的 | — |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
@@ -115,6 +116,9 @@ git show 76ace1e:main.js
   （途中に挿すと自動採番の問題IDがずれ、復習リストが別問題を指す）。経緯は `docs/decisions/0004`。
   データを変えたら `node tools/check-learning-game.js security-quest` で検査する（形式エラーと、選択肢の偏り）。
   同じ仕組みで別分野の学習ゲームを作るときは `/learning-game <分野>` コマンド（`.claude/commands/learning-game.md`）を使う。
+- `stats-quest` は `security-quest` と同じエンジン・同じデータ形式の統計学版（全18章）。`app.js` はコピーで、分野固有の部分
+  （`STORAGE_KEY = "stats-quest-v1"`・`SAVE_PREFIX = "ST1."`・称号・文言・参考リンク）だけ書き換えている。
+  **エンジンの不具合を直すときは2作品の `app.js` を両方直すこと。** 検査は `node tools/check-learning-game.js stats-quest`。経緯は `docs/decisions/0005`。
 
 ### 全作品ページに入っている共通要素
 

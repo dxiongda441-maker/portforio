@@ -21,6 +21,7 @@ assets/
   portfolio/                作品カードのサムネイル（.jpg と同名 .webp を併置）
 projects/<slug>/            各作品の実体。それぞれ独立した静的アプリ
 tools/fetch-backgrounds.sh  背景写真をローカルに取り込むスクリプト（未実行）
+tools/check-security-quest.js  セキュリティ・クエストの問題データ検査（node で実行・依存なし）
 .github/workflows/deploy.yml  Pages デプロイ
 ```
 
@@ -112,6 +113,7 @@ git show 76ace1e:main.js
 - `security-quest` は `app.js`（エンジン）＋ `data/acts.js` ＋ `data/ch01.js`〜`ch18.js`（章ごとのデータ）。
   CSP を `<meta>` で設定しており、外部スクリプト・外部通信は不可。問題の追加は各章の `quiz` 配列の**末尾**に
   （途中に挿すと自動採番の問題IDがずれ、復習リストが別問題を指す）。経緯は `docs/decisions/0004`。
+  データを変えたら `node tools/check-security-quest.js` で検査する（形式エラーと、選択肢の偏り）。
 
 ### 全作品ページに入っている共通要素
 

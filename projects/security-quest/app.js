@@ -54,24 +54,56 @@
   }
 
   function load() {
-    const base = defaultState();
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return base;
-      const data = JSON.parse(raw);
-      if (!data || typeof data !== "object") return base;
-      return {
-        ...base,
-        name: typeof data.name === "string" ? data.name.slice(0, 24) : "",
-        xp: Number.isFinite(data.xp) ? data.xp : 0,
-        chapters: isPlainObject(data.chapters) ? data.chapters : {},
-        wrong: isPlainObject(data.wrong) ? data.wrong : {},
-        final: { ...base.final, ...(isPlainObject(data.final) ? data.final : {}) },
-        freeMode: data.freeMode === true
-      };
+      return raw ? sanitize(JSON.parse(raw)) : defaultState();
     } catch {
-      return base;
+      return defaultState();
     }
+  }
+
+  // 保存データは書き換え・持ち込みが可能なので、既知のIDと型だけを通して作り直す
+  function sanitize(data) {
+    const base = defaultState();
+    if (!isPlainObject(data)) return base;
+    const num = (v, min, max) => (Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : min);
+    const chaptersIn = isPlainObject(data.chapters) ? data.chapters : {};
+    for (const ch of chapters) {
+      const p = chaptersIn[ch.id];
+      if (!isPlainObject(p)) continue;
+      const cleared = p.cleared === true;
+      base.chapters[ch.id] = { read: p.read === true || cleared, cleared, best: num(p.best, 0, 1), stars: cleared ? Math.round(num(p.stars, 1, 3)) : 0 };
+    }
+    const wrongIn = isPlainObject(data.wrong) ? data.wrong : {};
+    for (const id of Object.keys(wrongIn)) {
+      if (questionById.has(id) && isPlainObject(wrongIn[id])) base.wrong[id] = { streak: Math.round(num(wrongIn[id].streak, 0, REVIEW_GRADUATE_STREAK - 1)) };
+    }
+    const fin = isPlainObject(data.final) ? data.final : {};
+    const allCleared = chapters.every((ch) => base.chapters[ch.id] && base.chapters[ch.id].cleared);
+    base.final = { cleared: fin.cleared === true && allCleared, best: num(fin.best, 0, 1), date: typeof fin.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fin.date) ? fin.date : "" };
+    base.name = typeof data.name === "string" ? data.name.slice(0, 24) : "";
+    base.xp = Math.round(num(data.xp, 0, 1e7));
+    base.freeMode = data.freeMode === true;
+    return base;
+  }
+
+  const SAVE_PREFIX = "SQ1.";
+
+  function exportCode() {
+    const bytes = new TextEncoder().encode(JSON.stringify(state));
+    let bin = "";
+    bytes.forEach((b) => {
+      bin += String.fromCharCode(b);
+    });
+    return SAVE_PREFIX + btoa(bin);
+  }
+
+  function importCode(code) {
+    const text = String(code).replace(/\s+/g, "");
+    if (!text.startsWith(SAVE_PREFIX) || text.length > 200000) throw new Error("format");
+    const bin = atob(text.slice(SAVE_PREFIX.length));
+    const json = new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+    return sanitize(JSON.parse(json));
   }
 
   function save() {
@@ -863,7 +895,10 @@
               { open: status === "ng" },
               el("summary", {}, el("span", { class: "mark", "aria-label": status === "ok" ? "正解" : status === "ng" ? "不正解" : "未回答" }, mark), el("span", {}, rich(q.q))),
               correctAnswerView(q),
-              el("p", { class: "explain-text" }, rich(q.exp))
+              el("p", { class: "explain-text" }, rich(q.exp)),
+              b.mode !== "chapter" && status !== "ok" && isUnlocked(chapterById.get(q.chapterId))
+                ? el("p", { class: "explain-link" }, el("a", { href: `#/ch/${q.chapterId}` }, `第${chapterById.get(q.chapterId).no}章「${chapterById.get(q.chapterId).title}」の講義を見直す →`))
+                : null
             )
           );
         })
@@ -936,6 +971,7 @@
         el("p", { class: "muted" }, "全章を最初から解放します。経験者が苦手分野だけ攻略したいとき向け。最終試験は全章撃破まで解放されません。"),
         el("label", { class: "toggle", for: "free-mode" }, free, el("span", {}, "全章を解放する"))
       ),
+      renderTransfer(),
       el(
         "section",
         { class: "panel danger" },
@@ -948,6 +984,53 @@
           go("#/");
         }, "btn btn-danger")
       )
+    );
+  }
+
+  function renderTransfer() {
+    const out = el("textarea", { class: "text-input code-box", readonly: true, rows: "3", placeholder: "ここに書き出したコードが表示される", "aria-label": "書き出したセーブコード" });
+    const input = el("textarea", { class: "text-input code-box", rows: "3", placeholder: "SQ1. で始まるコードを貼り付け", "aria-label": "読み込むセーブコード" });
+    const status = el("p", { class: "muted", "aria-live": "polite" });
+    return el(
+      "section",
+      { class: "panel" },
+      el("h2", {}, "セーブデータの引っ越し"),
+      el("p", { class: "muted" }, "スマホとPCなど別の端末で続きを遊ぶとき用。コードを書き出して、移動先の端末の「読み込む」に貼り付ける。通信はせず、コードの中身は進捗データだけ。"),
+      el(
+        "div",
+        { class: "submit-row transfer-row" },
+        button("コードを書き出す", async () => {
+          out.value = exportCode();
+          out.select();
+          try {
+            await navigator.clipboard.writeText(out.value);
+            status.textContent = "コピーしました。移動先の端末に貼り付けてください。";
+          } catch {
+            status.textContent = "表示されたコードを選択してコピーしてください。";
+          }
+        })
+      ),
+      out,
+      input,
+      el(
+        "div",
+        { class: "submit-row" },
+        button("読み込む", () => {
+          let next;
+          try {
+            next = importCode(input.value);
+          } catch {
+            status.textContent = "コードを読み取れませんでした。途中で切れていないか確認してください。";
+            return;
+          }
+          const cleared = chapters.filter((ch) => next.chapters[ch.id] && next.chapters[ch.id].cleared).length;
+          if (!confirm(`撃破${cleared}章・XP ${next.xp} のデータで、今の進捗を上書きします。よろしいですか？`)) return;
+          state = next;
+          save();
+          go("#/");
+        }, "btn btn-primary")
+      ),
+      status
     );
   }
 

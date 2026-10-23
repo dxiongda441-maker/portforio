@@ -1129,3 +1129,19 @@ a.tile:hover {
     color: #000;
   }
 }
+
+.code-box {
+  font-size: 12px;
+  margin-top: 10px;
+  resize: vertical;
+  word-break: break-all;
+}
+
+.transfer-row {
+  justify-content: flex-start;
+}
+
+.explain-link {
+  font-size: 14px;
+  margin: 8px 0 0;
+}

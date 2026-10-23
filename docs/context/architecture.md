@@ -1,6 +1,6 @@
 # 構成の実態
 
-> 最終確認: 2026-09-04 / 確認者: Claude
+> 最終確認: 2026-10-23 / 確認者: Claude
 > ここは「今どうなっているか」を書く場所。「なぜそうしたか」は `docs/decisions/` に書く。
 
 ## 全体像
@@ -10,7 +10,7 @@
 つまり「リポジトリの見た目 = 公開される中身」。生成物や中間ファイルの概念はない。
 
 ```
-index.html                  トップページ（HTML + CSS を1ファイルに同梱・821行）
+index.html                  トップページ（HTML + CSS を1ファイルに同梱・841行）
 404.html                    404 ページ
 robots.txt / sitemap.xml    クローラ向け
 CLAUDE.md / docs/           このプロジェクトの記憶
@@ -88,7 +88,7 @@ git show 76ace1e:main.js
 
 ## projects/ — 各作品
 
-9 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
+10 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
 
 基本構成は `index.html` + `app.js` + `styles.css`。うち 5 件は
 `manifest.webmanifest`(または `manifest.json`) + `sw.js`(または `service-worker.js`) を持つ **PWA**。
@@ -104,6 +104,7 @@ git show 76ace1e:main.js
 | `contracts` | ビジネス契約ラーニング | 静的 | — |
 | `money-anime` | 100円が冒険に出た!? | 静的 | — |
 | `security-quest` | セキュリティ・クエスト | 静的 | — |
+| `psychology-quest` | 心理学クエスト | 静的 | — |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
@@ -115,6 +116,10 @@ git show 76ace1e:main.js
   （途中に挿すと自動採番の問題IDがずれ、復習リストが別問題を指す）。経緯は `docs/decisions/0004`。
   データを変えたら `node tools/check-learning-game.js security-quest` で検査する（形式エラーと、選択肢の偏り）。
   同じ仕組みで別分野の学習ゲームを作るときは `/learning-game <分野>` コマンド（`.claude/commands/learning-game.md`）を使う。
+- `psychology-quest` は security-quest と同じエンジン・同じデータ形式の心理学版（`/learning-game` で作成）。
+  `app.js` は分野固有の部分（`STORAGE_KEY = "psychology-quest-v1"`、`SAVE_PREFIX = "PQ1."`、称号、導入文、遊び方、修了証の参考リンク）だけが違う。
+  エンジンの不具合を直すときは**両方の `app.js` を直す**こと（共通化はしていない）。経緯は `docs/decisions/0005`。
+  検査は `node tools/check-learning-game.js psychology-quest`。
 
 ### 全作品ページに入っている共通要素
 

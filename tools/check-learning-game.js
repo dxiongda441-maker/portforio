@@ -1,13 +1,18 @@
 #!/usr/bin/env node
-// セキュリティ・クエストの問題データを検査する（依存なし）。
-// 使い方: node tools/check-security-quest.js
+// 学習ゲーム（projects/security-quest/ と同じ形式）の問題データを検査する（依存なし）。
+// 使い方: node tools/check-learning-game.js [作品のslug]   ※省略時は security-quest
 // - 形式の誤り（正解の番号が範囲外、** や ` の閉じ忘れ等）を検出する
 // - 「正解が一番長い選択肢」になっている選択問題の割合を出す（当て推量で解けてしまう兆候）
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 
-const dir = path.join(__dirname, "..", "projects", "security-quest", "data");
+const slug = process.argv[2] || "security-quest";
+const dir = path.join(__dirname, "..", "projects", slug, "data");
+if (!fs.existsSync(path.join(dir, "acts.js"))) {
+  console.error(`projects/${slug}/data/acts.js が見つからない`);
+  process.exit(1);
+}
 const ctx = { window: {} };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(dir, "acts.js"), "utf8") + ";SQ=window.SQ;", ctx);

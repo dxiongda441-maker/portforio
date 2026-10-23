@@ -87,7 +87,7 @@ git show 76ace1e:main.js
 
 ## projects/ — 各作品
 
-8 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
+9 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
 
 基本構成は `index.html` + `app.js` + `styles.css`。うち 5 件は
 `manifest.webmanifest`(または `manifest.json`) + `sw.js`(または `service-worker.js`) を持つ **PWA**。
@@ -102,12 +102,16 @@ git show 76ace1e:main.js
 | `cat-quiz` | 世界ねこ図鑑クイズ | 静的 | — |
 | `contracts` | ビジネス契約ラーニング | 静的 | — |
 | `money-anime` | 100円が冒険に出た!? | 静的 | — |
+| `security-quest` | セキュリティ・クエスト | 静的 | — |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
   国データは mledoze/countries 由来（ODbL-1.0）。**ライセンス表記を消さないこと。**
 - `contracts` は `data.js` にデータを分離。
 - `money-anime` はアプリではなくケーススタディ（`index.html` + `cover.jpg` のみ）。
+- `security-quest` は `app.js`（エンジン）＋ `data/acts.js` ＋ `data/ch01.js`〜`ch18.js`（章ごとのデータ）。
+  CSP を `<meta>` で設定しており、外部スクリプト・外部通信は不可。問題の追加は各章の `quiz` 配列の**末尾**に
+  （途中に挿すと自動採番の問題IDがずれ、復習リストが別問題を指す）。経緯は `docs/decisions/0004`。
 
 ### 全作品ページに入っている共通要素
 

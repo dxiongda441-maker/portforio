@@ -23,6 +23,7 @@ for (const file of fs.readdirSync(dir).filter((f) => /^ch\d+\.js$/.test(f)).sort
 const chapters = ctx.window.SQ.chapters;
 const errors = [];
 const longest = [];
+const lengthRank = [0, 0, 0, 0];
 const multiCounts = {};
 let choiceCount = 0;
 const unbalancedMarks = (text) => (text.match(/\*\*/g) || []).length % 2 || (text.match(/`/g) || []).length % 2;
@@ -41,6 +42,7 @@ for (const ch of chapters) {
       const lengths = q.choices.map((c) => c.length);
       const max = Math.max(...lengths);
       if (lengths[q.answer] === max && lengths.filter((l) => l === max).length === 1) longest.push(id);
+      lengthRank[Math.min(3, lengths.filter((l) => l > lengths[q.answer]).length)] += 1;
     } else if (q.type === "multi" || q.type === "spot") {
       if (!q.answer.length || q.answer.some((a) => a < 0 || a >= options.length)) errors.push(`${id}: answer が範囲外`);
       const key = `${q.answer.length}/${options.length}`;
@@ -59,6 +61,7 @@ for (const ch of chapters) {
 const total = chapters.reduce((s, ch) => s + ch.quiz.length, 0);
 console.log(`章 ${chapters.length} / 講義 ${chapters.reduce((s, ch) => s + ch.lessons.length, 0)} / 問題 ${total} / 用語 ${chapters.reduce((s, ch) => s + ch.terms.length, 0)}`);
 console.log(`正解が最長の選択問題: ${longest.length}/${choiceCount}（${Math.round((longest.length / choiceCount) * 100)}%。4択の偶然は25%。30%を超えたら選択肢を見直す）`);
+console.log(`正解の長さの順位（同率は上位扱い）: 1番目 ${lengthRank[0]} / 2番目 ${lengthRank[1]} / 3番目 ${lengthRank[2]} / 4番目以下 ${lengthRank[3]}（最長を避けた結果、どこか1つの順位に5割以上が集まったら見直す）`);
 console.log(`複数選択・発見問題の正解数の分布: ${Object.entries(multiCounts).map(([k, v]) => `${k}×${v}`).join(" ")}`);
 if (errors.length) {
   console.error(errors.join("\n"));

@@ -1080,6 +1080,560 @@ a.tile:hover {
   font-weight: 700;
 }
 
+/* ---------- RPG 演出（メッセージウィンドウ・つよさ・バトル画面） ---------- */
+
+:root {
+  --win-bg: #0b0814;
+  --win-line: #f4f0ff;
+  --chart-bar: #9a6be8;
+}
+
+.msgwin,
+.statuswin {
+  background: var(--win-bg);
+  border: 3px solid var(--win-line);
+  border-radius: 10px;
+  box-shadow: 0 0 0 3px var(--win-bg), 0 10px 28px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  margin: 18px 3px;
+  padding: 14px 18px;
+  position: relative;
+}
+
+.msgwin {
+  cursor: default;
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+.dialog .msgwin {
+  cursor: pointer;
+  min-height: 72px;
+}
+
+.msg-line {
+  margin: 0 0 8px;
+}
+
+.msg-line:last-of-type {
+  margin-bottom: 0;
+}
+
+.msg-line.is-narration {
+  color: #e6def7;
+}
+
+.speaker {
+  color: var(--gold);
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.msg-cursor {
+  animation: blink 1s steps(2, start) infinite;
+  bottom: 4px;
+  font-size: 12px;
+  position: absolute;
+  right: 12px;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.msg-controls[hidden] {
+  display: none;
+}
+
+.msg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin: -6px 3px 12px;
+}
+
+.btn-small {
+  font-size: 13px;
+  min-height: 36px;
+  padding: 6px 12px;
+}
+
+.btn-msg {
+  background: var(--win-bg);
+  border-color: var(--win-line);
+  color: #fff;
+}
+
+.hero-grid {
+  align-items: stretch;
+  display: grid;
+  gap: 4px 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+}
+
+.hero-grid .msgwin,
+.hero-grid .statuswin {
+  margin: 18px 3px 6px;
+}
+
+.msg-objective {
+  align-items: center;
+  display: flex;
+}
+
+.sw-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.sw-rank,
+.sw-next {
+  color: #d9cfee;
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.sw-rank {
+  color: var(--gold);
+}
+
+.sw-grid {
+  display: grid;
+  font-family: var(--mono);
+  gap: 2px 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 0 8px;
+}
+
+.sw-grid div {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.sw-grid dt,
+.sw-grid dd {
+  margin: 0;
+}
+
+.sw-grid dd {
+  font-weight: 700;
+}
+
+.sw-wide {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+.exp-bar,
+.ability-bar {
+  background: #2a2140;
+  border-radius: 4px;
+  display: block;
+  height: 8px;
+  overflow: hidden;
+}
+
+.exp-bar span,
+.ability-bar span {
+  background: linear-gradient(90deg, var(--chart-bar), var(--gold));
+  display: block;
+  height: 100%;
+}
+
+.status-full h2,
+.statuswin h2 {
+  font-size: 16px;
+  margin: 18px 0 10px;
+}
+
+.statuswin > h2:first-child {
+  margin-top: 0;
+}
+
+.abilities {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.ability {
+  align-items: center;
+  display: grid;
+  gap: 4px 12px;
+  grid-template-columns: 7.5em minmax(0, 1fr);
+}
+
+.ability dt {
+  font-weight: 700;
+}
+
+.ability dd {
+  align-items: center;
+  display: grid;
+  gap: 2px 10px;
+  grid-template-columns: 2.4em minmax(0, 1fr);
+  margin: 0;
+}
+
+.ability-num {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.ability-note {
+  color: #cfc5e6;
+  font-size: 12px;
+  grid-column: 2;
+}
+
+.item-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item-list li {
+  display: grid;
+}
+
+.item-list strong {
+  color: var(--gold);
+}
+
+.item-list span {
+  color: #cfc5e6;
+  font-size: 13px;
+}
+
+.item-note {
+  color: var(--gold);
+  font-size: 14px;
+}
+
+.real-world .story {
+  margin-top: 4px;
+}
+
+.tile-place {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.boss-card {
+  align-items: center;
+  display: flex;
+  gap: 18px;
+}
+
+.boss-sprite {
+  animation: bob 2.6s ease-in-out infinite;
+  flex: none;
+  font-size: clamp(48px, 13vw, 76px);
+  line-height: 1;
+}
+
+.boss-body {
+  min-width: 0;
+}
+
+.name-form h2 {
+  font-size: 18px;
+  margin-top: 0;
+}
+
+/* バトル画面：上に敵、下に自分（ポケモン風） */
+
+.battle-scene {
+  background:
+    linear-gradient(180deg, transparent 62%, rgba(242, 193, 78, 0.08) 62%),
+    radial-gradient(ellipse at 75% 55%, rgba(195, 155, 255, 0.25), transparent 45%),
+    linear-gradient(180deg, #241a40, #140e24);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.enemy {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.player {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.info-box {
+  background: rgba(11, 8, 20, 0.88);
+  border: 2px solid var(--win-line);
+  border-radius: 10px;
+  color: #fff;
+  min-width: 0;
+  padding: 8px 12px;
+  width: min(100%, 300px);
+}
+
+.info-box .eyebrow {
+  margin: 0;
+}
+
+.boss-name {
+  display: block;
+  font-size: 17px;
+}
+
+.info-box .hp {
+  margin: 8px 0 4px;
+}
+
+.hp-player span {
+  background: linear-gradient(90deg, #4fd18b, #9be36a);
+}
+
+.qcount {
+  color: #cfc5e6;
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  text-align: right;
+}
+
+.enemy-sprite {
+  animation: bob 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.5));
+  font-size: clamp(56px, 18vw, 104px);
+  line-height: 1;
+  margin: 4px 8px 0 0;
+}
+
+.enemy-sprite.is-hit {
+  animation: hit 0.45s ease;
+}
+
+.battle-scene.is-down .enemy-sprite {
+  animation: none;
+  filter: grayscale(1);
+  opacity: 0.3;
+  transform: rotate(-14deg) translateY(10px);
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes hit {
+  25%,
+  75% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(6px);
+  }
+}
+
+.battle-msg {
+  margin: 14px 3px;
+}
+
+.result-msg .msg-line {
+  margin-bottom: 2px;
+}
+
+/* つよさ画面のグラフ（1系列の棒グラフ） */
+
+.growth h3 {
+  font-size: 15px;
+  margin: 22px 0 8px;
+}
+
+.growth-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.chart {
+  margin: 22px 0 0;
+}
+
+.chart figcaption {
+  margin-bottom: 8px;
+}
+
+.chart-plot {
+  align-items: flex-end;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 2px;
+  height: 140px;
+  padding-top: 22px;
+  position: relative;
+}
+
+.chart-col {
+  align-items: center;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  height: 100%;
+  justify-content: flex-end;
+  min-width: 0;
+  outline-offset: 1px;
+  position: relative;
+}
+
+.chart-col:hover,
+.chart-col:focus-visible {
+  background: rgba(195, 155, 255, 0.1);
+}
+
+.chart-bar {
+  background: var(--chart-bar);
+  border-radius: 4px 4px 0 0;
+  display: block;
+  max-width: 28px;
+  width: 100%;
+}
+
+.chart-label {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+.chart-ref {
+  border-top: 1px dashed var(--muted);
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+
+.chart-axis {
+  color: var(--muted);
+  display: flex;
+  font-family: var(--mono);
+  font-size: 11px;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.chart-axis span {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: visible;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.chart-axis span:first-child {
+  text-align: left;
+}
+
+.chart-axis span:last-child {
+  text-align: right;
+}
+
+.chart-readout {
+  color: #d9cfee;
+  font-size: 13px;
+  margin: 8px 0 4px;
+  min-height: 1.5em;
+}
+
+.chart-table summary,
+.chart-table {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.chart-table table,
+.records {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+
+.chart-table th,
+.chart-table td,
+.records th,
+.records td {
+  border-bottom: 1px solid var(--line);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.records td {
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+.records tr.is-cleared th {
+  color: var(--gold);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.level-log {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.level-log strong {
+  color: var(--gold);
+  font-family: var(--mono);
+}
+
+@media (max-width: 640px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .growth-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ability {
+    grid-template-columns: 1fr;
+  }
+
+  .boss-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .chart-label {
+    font-size: 10px;
+  }
+}
+
 /* ---------- レスポンシブ・配慮 ---------- */
 
 @media (max-width: 600px) {

@@ -118,6 +118,9 @@ git show 76ace1e:main.js
   同じ仕組みで別分野の学習ゲームを作るときは `/learning-game <分野>` コマンド（`.claude/commands/learning-game.md`）を使う。
 - `psychology-quest` は security-quest と同じエンジン・同じデータ形式の心理学版（`/learning-game` で作成）。
   `app.js` は分野固有の部分（`STORAGE_KEY = "psychology-quest-v1"`、`SAVE_PREFIX = "PQ1."`、称号、導入文、遊び方、修了証の参考リンク）だけが違う。
+  さらに RPG 演出を足してある：ストーリーは `data/story.js`（`SQ.story`。章ごとの舞台・会話・ボスの絵文字・入手アイテム、プロローグ・エンディング）、
+  レベル（累計 EXP から計算）と「つよさ」画面（`#/status`。能力値・成長グラフ・章ごとの記録）、`#/prologue` `#/tower` `#/ending`。
+  成長の記録はセーブデータの `log`（直近400戦）・`levels`・`qs`（章ごとの解答数）・`grad` に入り、`sanitize()` で検査する。
   エンジンの不具合を直すときは**両方の `app.js` を直す**こと（共通化はしていない）。経緯は `docs/decisions/0005`。
   検査は `node tools/check-learning-game.js psychology-quest`。
 

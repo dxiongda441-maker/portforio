@@ -399,6 +399,37 @@
     return el("div", { class: "dialog" }, box, controls);
   }
 
+  // ブラウザの confirm()/alert() は埋め込み表示などで出ないことがあるので、画面内のウィンドウで聞く。onYes がなければお知らせだけ
+  function ask(message, onYes, yesLabel = "はい") {
+    closeAsk();
+    const layer = el(
+      "div",
+      { class: "ask-layer", role: "alertdialog", "aria-modal": "true", "aria-label": message },
+      el(
+        "div",
+        { class: "msgwin ask" },
+        el("p", { class: "msg-line" }, message),
+        el(
+          "div",
+          { class: "ask-actions" },
+          onYes
+            ? button(yesLabel, () => {
+                closeAsk();
+                onYes();
+              }, "btn btn-primary")
+            : null,
+          button(onYes ? "いいえ" : "とじる", closeAsk, "btn btn-msg")
+        )
+      )
+    );
+    document.body.append(layer);
+    layer.querySelector("button").focus();
+  }
+
+  function closeAsk() {
+    document.querySelectorAll(".ask-layer").forEach((node) => node.remove());
+  }
+
   function messageWindow(lines, cls = "") {
     return el("div", { class: `msgwin ${cls}`.trim() }, lines.filter(Boolean).map((line) => el("p", { class: "msg-line" }, line)));
   }
@@ -440,6 +471,7 @@
     const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
     const [view, arg, sub] = parts;
     app.replaceChildren();
+    closeAsk();
 
     if (view !== "battle" && battle && !battle.finished) battle = null;
 
@@ -725,7 +757,7 @@
   function startReview() {
     const ids = wrongIds();
     if (!ids.length) {
-      alert("復習待ちの問題はありません。ボス戦で間違えた問題がここに溜まります。");
+      ask("復習待ちの問題は ありません。ボス戦で間違えた問題が ここに たまっていきます。");
       return;
     }
     const questions = shuffle(ids).slice(0, REVIEW_SIZE).map((id) => questionById.get(id));
@@ -819,10 +851,13 @@
   }
 
   function retreat() {
-    if (battle.log.length && !confirm("撤退すると、このバトルの結果は記録されません。よろしいですか？")) return;
-    const ch = battle.chapterId ? chapterById.get(battle.chapterId) : null;
-    battle = null;
-    go(ch ? `#/ch/${ch.id}` : "#/");
+    const leave = () => {
+      const ch = battle.chapterId ? chapterById.get(battle.chapterId) : null;
+      battle = null;
+      go(ch ? `#/ch/${ch.id}` : "#/");
+    };
+    if (battle.log.length) ask("にげると、このバトルの結果は記録されません。にげますか？", leave, "にげる");
+    else leave();
   }
 
   function renderAnswerUI(q) {
@@ -953,7 +988,7 @@
         rows,
         submitButton(() => {
           if (v.picks.some((p) => p === "")) {
-            alert("すべての項目を選んでから決定してください。");
+            ask("すべての項目を選んでから決定してください。");
             return;
           }
           submit(v.picks.map(Number));
@@ -1507,7 +1542,7 @@
         el("div", { class: "submit-row" }, button("保存", () => {
           state.name = name.value.trim().slice(0, 24);
           save();
-          alert("保存しました。");
+          ask(`なまえを「${playerName()}」にしました。`);
         }, "btn btn-primary"))
       ),
       el(
@@ -1524,10 +1559,11 @@
         el("h2", {}, "データの初期化"),
         el("p", { class: "muted" }, "進捗・XP・復習リスト・修了記録をすべて消します。元に戻せません。"),
         button("すべての進捗を消す", () => {
-          if (!confirm("本当にすべての進捗を消しますか？ この操作は取り消せません。")) return;
-          state = defaultState();
-          save();
-          go("#/");
+          ask("ぼうけんのしょが きえてしまいます。本当に すべての進捗を消しますか？（取り消せません）", () => {
+            state = defaultState();
+            save();
+            go("#/");
+          }, "消す");
         }, "btn btn-danger")
       )
     );
@@ -1570,10 +1606,11 @@
             return;
           }
           const cleared = chapters.filter((ch) => next.chapters[ch.id] && next.chapters[ch.id].cleared).length;
-          if (!confirm(`撃破${cleared}章・XP ${next.xp} のデータで、今の進捗を上書きします。よろしいですか？`)) return;
-          state = next;
-          save();
-          go("#/");
+          ask(`撃破${cleared}章・EXP ${next.xp} のデータで、今の進捗を上書きします。よろしいですか？`, () => {
+            state = next;
+            save();
+            go("#/");
+          }, "上書きする");
         }, "btn btn-primary")
       ),
       status
@@ -1669,6 +1706,11 @@
   // ---------- キーボード操作 ----------
 
   document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.querySelector(".ask-layer")) {
+      closeAsk();
+      return;
+    }
+    if (document.querySelector(".ask-layer")) return;
     if (!location.hash.startsWith("#/battle") || !battle) return;
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;

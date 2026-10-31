@@ -1,0 +1,14 @@
+# Cloudflare に配信しないファイル（書き方は .gitignore と同じ）。
+# サイトに必要なのは HTML・CSS・JS・画像・データだけ。メモや作業用の道具は外に出さない。
+.git
+.github
+.claude
+.editorconfig
+.gitignore
+.assetsignore
+wrangler.jsonc
+node_modules
+.wrangler
+docs
+tools
+*.md

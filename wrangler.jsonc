@@ -1,0 +1,13 @@
+// Cloudflare（Workers の静的アセット）でこのサイトを公開するための設定。
+// サーバー側のプログラムは持たず、ファイルを配るだけ。経緯は docs/decisions/0009。
+{
+  "name": "alter-site",
+  "compatibility_date": "2026-10-30",
+  "assets": {
+    // リポジトリ直下をそのまま配信する。配信しないものは .assetsignore に書く
+    "directory": "./",
+    // 存在しない URL では 404.html を返す
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  }
+}

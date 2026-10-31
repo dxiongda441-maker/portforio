@@ -24,6 +24,8 @@
 - GitHub は**コードの置き場**として使い続け、Cloudflare を GitHub に接続して push で自動公開する。
   Cloudflare は非公開リポジトリからも公開できるので、**移行後にリポジトリを非公開にする**。
 - 配信するファイルを限定する（`docs/`・`CLAUDE.md`・`tools/`・`.github/` などは配信しない）。
+- 設定は `wrangler.jsonc`（リポジトリ直下をそのまま配信）と `.assetsignore`（`docs/`・`tools/`・`*.md` などを配信しない）。
+  2026-10-31 に `wrangler dev` で、ページは 200、`CLAUDE.md`・`docs/`・`tools/` は 404 になることを確認済み。
 - セキュリティヘッダーはリポジトリ直下の `_headers` に書く（Cloudflare が読む）。
   トップ・サービス・見本はスクリプトを使わないので `script-src 'none'` で全面禁止。
   それまでの間も効くよう、トップとサービスには同じ CSP を `<meta>` でも入れてある。
@@ -41,3 +43,14 @@
 - 移行したら `CLAUDE.md` の公開URL・デプロイ手順、`canonical`・`og:url`・`sitemap.xml` の URL を新しいドメインに書き換える。
 - GitHub Pages の `deploy.yml` は、移行が済んで新 URL で確認できてから止める。
 - Service Worker を持つ作品は、オリジンが変わると新しいキャッシュで動き直す（利用者のデータは端末の旧 URL 側に残る）。
+
+## 移行の手順（本人の操作）
+
+1. このブランチを `main` に取り込む（`wrangler.jsonc` が `main` にないと、Cloudflare が別の設定を提案してくる）
+2. Cloudflare のダッシュボード → Workers & Pages → 作成 → 「リポジトリをインポート」→ GitHub 連携。
+   リポジトリのアクセスは `portforio` だけに絞る
+3. ビルドコマンドは空欄、デプロイコマンドは既定の `npx wrangler deploy`、ルートは `/` のまま
+4. 発行された `alter-site.<アカウント名>.workers.dev` で表示を確認
+5. 設定 → ビルド → 本番以外のブランチのビルドを有効にすると、作業ブランチごとに確認用 URL が出る
+6. 確認できたら、`canonical`・`og:url`・`sitemap.xml`・`robots.txt` を新 URL に書き換え、
+   GitHub Pages を止めてリポジトリを非公開にする

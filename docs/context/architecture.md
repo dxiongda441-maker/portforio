@@ -14,6 +14,7 @@ index.html                  トップページ（HTML + CSS を1ファイルに�
 service/index.html          サービス紹介（料金・見本・流れ・問い合わせ）。1ファイル完結・script 0 個（0008）
 samples/<業種>/             営業用の見本（架空の店舗）。noindex・sitemap に載せない（0008）
 _headers                    Cloudflare 用の HTTP ヘッダー。GitHub Pages では無視される（0009）
+wrangler.jsonc / .assetsignore  Cloudflare 用の設定と、配信しないファイルの一覧（0009）
 404.html                    404 ページ
 robots.txt / sitemap.xml    クローラ向け
 CLAUDE.md / docs/           このプロジェクトの記憶（docs/chats.md = チャット別の成果物一覧）

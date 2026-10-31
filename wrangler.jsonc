@@ -9,5 +9,7 @@
     // 存在しない URL では 404.html を返す
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
-  }
+  },
+  // 作業ブランチごとの確認用 URL（プレビュー）を作るのに必要。中身は空でよい
+  "previews": {}
 }

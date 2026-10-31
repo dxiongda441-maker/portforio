@@ -3,10 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>オルタ | Creative Developer / Artist</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' https://images.unsplash.com data:; style-src 'unsafe-inline'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>オルタ | 小さなお店のWeb制作・Instagram運用・AI活用</title>
     <meta
       name="description"
-      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくるオルタのポートフォリオ。実際に操作できるPWAと学習アプリ、AIアニメの制作ケーススタディを公開しています。"
+      content="小さなお店の「伝える」と「回す」を、WebとAIで軽くする。ホームページ制作、Instagram運用、AIを使った仕組みづくりを請け負うオルタのサイトです。料金と見本、実際に操作できる作品を公開しています。"
     />
     <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/" />
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
@@ -16,22 +21,22 @@
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ja_JP" />
-    <meta property="og:site_name" content="オルタ Portfolio" />
-    <meta property="og:title" content="オルタ | Creative Developer / Artist" />
+    <meta property="og:site_name" content="オルタ" />
+    <meta property="og:title" content="オルタ | 小さなお店のWeb制作・Instagram運用・AI活用" />
     <meta
       property="og:description"
-      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくっています。操作できるPWA・学習アプリとAIアニメの制作ケーススタディを公開中。"
+      content="ホームページ制作・Instagram運用・AIを使った仕組みづくりを、企画から公開まで1人で。料金と見本、操作できる作品を公開しています。"
     />
     <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/" />
     <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/og-cover.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="オルタ - Creative Developer / Artist のポートフォリオ表紙" />
+    <meta property="og:image:alt" content="オルタ — 小さなお店のホームページ制作・Instagram運用・AIを使った仕組みづくり" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="オルタ | Creative Developer / Artist" />
+    <meta name="twitter:title" content="オルタ | 小さなお店のWeb制作・Instagram運用・AI活用" />
     <meta
       name="twitter:description"
-      content="日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくっています。操作できるPWA・学習アプリとAIアニメの制作ケーススタディを公開中。"
+      content="ホームページ制作・Instagram運用・AIを使った仕組みづくりを、企画から公開まで1人で。料金と見本、操作できる作品を公開しています。"
     />
     <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/og-cover.jpg" />
     <style>
@@ -256,6 +261,16 @@
         color: rgba(255, 250, 241, 0.88);
         font-size: clamp(16px, 1.7vw, 20px);
         line-height: 2;
+      }
+
+      .text-link {
+        border-bottom: 1px solid currentColor;
+        color: var(--gold);
+        font-weight: 700;
+      }
+
+      .text-link:hover {
+        color: #fffaf1;
       }
 
       .season-section {
@@ -530,7 +545,11 @@
         max-width: 760px;
       }
 
-      .story-copy p:last-child {
+      .story-copy h2 {
+        margin-bottom: 28px;
+      }
+
+      .story-copy p {
         font-size: clamp(16px, 1.8vw, 21px);
         line-height: 1.9;
       }
@@ -643,13 +662,13 @@
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#home">Seasonal Portfolio</a>
+      <a class="brand" href="#home">オルタ</a>
       <nav>
-        <a href="#about">About</a>
-        <a href="#works">Works</a>
-        <a href="#skills">Skills</a>
-        <a href="#story">Story</a>
-        <a href="#contact">Contact</a>
+        <a href="./service/">サービス</a>
+        <a href="#works">作品</a>
+        <a href="#skills">できること</a>
+        <a href="#career">本業</a>
+        <a href="./service/#contact">相談する</a>
       </nav>
     </header>
 
@@ -658,13 +677,13 @@
         <div class="hero-media"></div>
         <div class="hero-shade"></div>
         <div class="hero-content">
-          <p class="kicker">Nature / Seasons / Craft</p>
+          <p class="kicker">Web / Instagram / AI</p>
           <h1>オルタ</h1>
-          <p class="role">Creative Developer / Artist</p>
-          <p class="lead">日本の四季と大自然の空気をまといながら、ゲーム、映像、音楽、Web表現をつくっています。</p>
+          <p class="role">小さなお店の「伝える」と「回す」を軽くする</p>
+          <p class="lead">ホームページ制作、Instagram運用、AIを使った仕組みづくりを、企画から公開まで1人で請け負っています。</p>
           <div class="actions">
-            <a class="button primary" href="#works">作品を見る</a>
-            <a class="button secondary" href="#contact">問い合わせ</a>
+            <a class="button primary" href="./service/">サービスと料金を見る</a>
+            <a class="button secondary" href="#works">作品を見る</a>
           </div>
         </div>
       </section>
@@ -674,11 +693,12 @@
         <div class="season-inner split">
           <div>
             <p class="section-label">About / Spring</p>
-            <h2>自然の景色と、手触りのある表現をつなぐ。</h2>
+            <h2>作って終わりにせず、続けられる形で渡す。</h2>
           </div>
           <div class="copy">
-            <p>山、海、森、雪、桜、紅葉。日本の季節が持つ移ろいを、デジタル表現の中に落とし込むことを大切にしています。</p>
-            <p>このサイトは、迫力あるビジュアルを前面に出しながら、作品や考え方を静かに深く見せるポートフォリオとして設計しています。</p>
+            <p>会社員として社内のデータ管理と業務の効率化に取り組みながら、個人でお店のホームページ制作とInstagram運用を請け負っています。</p>
+            <p>企画・文章・デザイン・実装までを、AI（Claude・Codex）と組んで1人で行います。外注を重ねないぶん、早く・安くお届けできます。</p>
+            <p><a class="text-link" href="./service/">メニュー・料金・見本を見る →</a></p>
           </div>
         </div>
       </section>
@@ -689,18 +709,28 @@
           <div class="section-heading works-heading">
             <div>
               <p class="section-label">Works / Summer</p>
-              <h2>制作物と実績</h2>
+              <h2>作品</h2>
             </div>
-            <p>企画、情報設計、実装までをCodexとともに形にした、実際に操作できるアプリと制作ケーススタディ。</p>
+            <p>企画、情報設計、実装までをAI（Claude・Codex）と組んで1人で形にした、実際に操作できるWebページとアプリ。</p>
           </div>
           <div class="works-grid">
+            <article class="project-card">
+              <a class="project-media" href="./projects/cafe-lp/" target="_blank" rel="noreferrer" aria-label="琥珀 KOHAKU COFFEEのLPを開く">
+                <picture>
+                  <source srcset="./assets/portfolio/cafe-lp.webp" type="image/webp" />
+                  <img src="./assets/portfolio/cafe-lp.jpg" alt="カフェ「琥珀」のランディングページのファーストビュー" loading="lazy" decoding="async" width="1280" height="800" />
+                </picture>
+                <span class="project-number">01</span><span class="project-status">Live Demo</span>
+              </a>
+              <div class="project-body"><div class="project-meta"><span>Landing Page / Cafe</span><span>2026</span></div><h3>琥珀 KOHAKU COFFEE</h3><p class="project-description">売れるLPの型に沿って組み立てた、架空のスペシャルティコーヒー店のランディングページ。</p><div class="project-tags"><span>Copywriting</span><span>SVG Art</span><span>Responsive</span></div><a class="project-link" href="./projects/cafe-lp/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
+            </article>
             <article class="project-card">
               <a class="project-media" href="./projects/reading-shelf/" target="_blank" rel="noreferrer" aria-label="Reading Shelfを開く">
                 <picture>
                   <source srcset="./assets/portfolio/reading-shelf.webp" type="image/webp" />
                   <img src="./assets/portfolio/reading-shelf.jpg" alt="Reading Shelfの読書棚画面" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">01</span><span class="project-status">Live Demo</span>
+                <span class="project-number">02</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Reading</span><span>2026</span></div><h3>Reading Shelf</h3><p class="project-description">読んだ本、読む前の期待、進捗を一つの本棚に整理する読書記録PWA。</p><div class="project-tags"><span>PWA</span><span>Local Storage</span><span>Responsive</span></div><a class="project-link" href="./projects/reading-shelf/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
@@ -710,7 +740,7 @@
                   <source srcset="./assets/portfolio/wabisabi.webp" type="image/webp" />
                   <img src="./assets/portfolio/wabisabi.jpg" alt="三分録の録音画面" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">02</span><span class="project-status">Live Demo</span>
+                <span class="project-number">03</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Voice</span><span>2026</span></div><h3>三分録</h3><p class="project-description">毎日3分の録音を習慣化し、記録からX・Substack向けの発信案までつなぐ。</p><div class="project-tags"><span>Audio</span><span>Speech</span><span>PWA</span></div><a class="project-link" href="./projects/wabisabi/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
@@ -720,7 +750,7 @@
                   <source srcset="./assets/portfolio/levellog.webp" type="image/webp" />
                   <img src="./assets/portfolio/levellog.jpg" alt="LevelLogのクエスト管理画面" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">03</span><span class="project-status">Live Demo</span>
+                <span class="project-number">04</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Productivity</span><span>2026</span></div><h3>LevelLog</h3><p class="project-description">行動をEXPに変換し、レベル、時間価値、週次レビューを可視化する習慣アプリ。</p><div class="project-tags"><span>Gamification</span><span>Local Storage</span><span>PWA</span></div><a class="project-link" href="./projects/levellog/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
@@ -730,7 +760,7 @@
                   <source srcset="./assets/portfolio/one-day-one-quote.webp" type="image/webp" />
                   <img src="./assets/portfolio/one-day-one-quote.jpg" alt="1日1名言の日替わり画面" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">04</span><span class="project-status">Live Demo</span>
+                <span class="project-number">05</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Daily</span><span>2026</span></div><h3>1日1名言</h3><p class="project-description">日替わりの名言、今日の行動、振り返りを一画面で続けるモバイルPWA。</p><div class="project-tags"><span>Daily Content</span><span>Notifications</span><span>PWA</span></div><a class="project-link" href="./projects/quote/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
@@ -740,7 +770,7 @@
                   <source srcset="./assets/portfolio/world-country-quiz-cover.webp" type="image/webp" />
                   <img src="./assets/portfolio/world-country-quiz-cover.jpg" alt="地球と国旗を描いた世界の国クイズの表紙" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">05</span><span class="project-status">Live Demo</span>
+                <span class="project-number">06</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>Game / Learning</span><span>2026</span></div><h3>世界の国クイズ</h3><p class="project-description">地図で国を探索し、国旗クイズで知識を確かめるインタラクティブ学習ゲーム。</p><div class="project-tags"><span>Quiz</span><span>SVG Map</span><span>Interactive</span></div><a class="project-link" href="./projects/country-quiz/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
@@ -750,7 +780,7 @@
                   <source srcset="./assets/portfolio/cat-quiz.webp" type="image/webp" />
                   <img src="./assets/portfolio/cat-quiz.jpg" alt="世界ねこ図鑑クイズのトップ画面" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">06</span><span class="project-status">Live Demo</span>
+                <span class="project-number">07</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>Game / Encyclopedia</span><span>2026</span></div><h3>世界ねこ図鑑クイズ</h3><p class="project-description">36種の猫を写真、生態、地域から学べる図鑑と確認クイズの学習体験。</p><div class="project-tags"><span>Data UI</span><span>Quiz</span><span>Responsive</span></div><a class="project-link" href="./projects/cat-quiz/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
@@ -760,7 +790,7 @@
                   <source srcset="./assets/portfolio/business-contracts.webp" type="image/webp" />
                   <img src="./assets/portfolio/business-contracts.jpg" alt="ビジネス契約ラーニングの契約一覧画面" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">07</span><span class="project-status">Live Demo</span>
+                <span class="project-number">08</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>App / Learning</span><span>2026</span></div><h3>ビジネス契約ラーニング</h3><p class="project-description">起業、転職、副業で出会う8種類の契約を学び、16問で確認できる学習アプリ。</p><div class="project-tags"><span>Research</span><span>Quiz</span><span>Information Design</span></div><a class="project-link" href="./projects/contracts/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
@@ -770,7 +800,7 @@
                   <source srcset="./assets/portfolio/money-anime.webp" type="image/webp" />
                   <img src="./assets/portfolio/money-anime.jpg" alt="100円玉が日本の山里から冒険へ出発するAIアニメのキービジュアル" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">08</span><span class="project-status">Case Study</span>
+                <span class="project-number">09</span><span class="project-status">Case Study</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>AI Anime / Production</span><span>2026</span></div><h3>100円が冒険に出た!?</h3><p class="project-description">投資の仕組みを子どもに伝える60秒縦型AIアニメの企画・演出・生成設計。</p><div class="project-tags"><span>Script</span><span>Prompt Design</span><span>Storyboarding</span></div><a class="project-link" href="./projects/money-anime/" target="_blank" rel="noreferrer">ケースを見る <span>↗</span></a></div>
             </article>
@@ -780,7 +810,7 @@
                   <source srcset="./assets/portfolio/security-quest.webp" type="image/webp" />
                   <img src="./assets/portfolio/security-quest.jpg" alt="セキュリティ・クエストの章マップと進行状況の画面" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">09</span><span class="project-status">Live Demo</span>
+                <span class="project-number">10</span><span class="project-status">Live Demo</span>
               </a>
               <div class="project-body"><div class="project-meta"><span>Game / Learning</span><span>2026</span></div><h3>セキュリティ・クエスト</h3><p class="project-description">暗号からクラウド、AI、インシデント対応、法令まで。18章のボス戦で情報セキュリティを体系的に学ぶ学習RPG。</p><div class="project-tags"><span>Game Design</span><span>Quiz</span><span>Security</span></div><a class="project-link" href="./projects/security-quest/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
@@ -790,19 +820,9 @@
                   <source srcset="./assets/portfolio/family-cards.webp" type="image/webp" />
                   <img src="./assets/portfolio/family-cards.jpg" alt="年末ファミリートランプの10種類のゲーム選択画面" loading="lazy" decoding="async" width="1280" height="800" />
                 </picture>
-                <span class="project-number">10</span><span class="project-status">Live Demo</span>
-              </a>
-              <div class="project-body"><div class="project-meta"><span>Game / Family</span><span>2026</span></div><h3>年末ファミリートランプ</h3><p class="project-description">ババ抜き、大富豪、ポーカーなど10種類を、1台の端末で家族と、またはCPU相手に遊べるトランプゲーム集。</p><div class="project-tags"><span>Card Games</span><span>CPU Opponents</span><span>Pass &amp; Play</span></div><a class="project-link" href="./projects/family-cards/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
-            </article>
-            <article class="project-card">
-              <a class="project-media" href="./projects/cafe-lp/" target="_blank" rel="noreferrer" aria-label="琥珀 KOHAKU COFFEEのLPを開く">
-                <picture>
-                  <source srcset="./assets/portfolio/cafe-lp.webp" type="image/webp" />
-                  <img src="./assets/portfolio/cafe-lp.jpg" alt="カフェ「琥珀」のランディングページのファーストビュー" loading="lazy" decoding="async" width="1280" height="800" />
-                </picture>
                 <span class="project-number">11</span><span class="project-status">Live Demo</span>
               </a>
-              <div class="project-body"><div class="project-meta"><span>Landing Page / Cafe</span><span>2026</span></div><h3>琥珀 KOHAKU COFFEE</h3><p class="project-description">売れるLPの型に沿って組み立てた、架空のスペシャルティコーヒー店のランディングページ。</p><div class="project-tags"><span>Copywriting</span><span>SVG Art</span><span>Responsive</span></div><a class="project-link" href="./projects/cafe-lp/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
+              <div class="project-body"><div class="project-meta"><span>Game / Family</span><span>2026</span></div><h3>年末ファミリートランプ</h3><p class="project-description">ババ抜き、大富豪、ポーカーなど10種類を、1台の端末で家族と、またはCPU相手に遊べるトランプゲーム集。</p><div class="project-tags"><span>Card Games</span><span>CPU Opponents</span><span>Pass &amp; Play</span></div><a class="project-link" href="./projects/family-cards/" target="_blank" rel="noreferrer">作品を開く <span>↗</span></a></div>
             </article>
           </div>
         </div>
@@ -816,6 +836,14 @@
             <h2>数字ではなく、作ったもので示す。</h2>
           </div>
           <div class="skill-panel glass">
+            <div class="capability">
+              <h3>Web制作 <small>Web &amp; Landing Pages</small></h3>
+              <p>
+                お店の魅力が伝わり、営業日やメニューがすぐ分かるページを、文章から組み立てる。
+                ログイン画面やサーバーのプログラムを持たない、乗っ取られにくい構成で作る。
+                <span class="evidence">琥珀 KOHAKU COFFEE、焼き菓子とコーヒー ことり舎（制作見本）</span>
+              </p>
+            </div>
             <div class="capability">
               <h3>実装 <small>Implementation</small></h3>
               <p>
@@ -843,27 +871,28 @@
               <p>
                 公開して終わりにしない。同一オリジンで複数の PWA が Cache Storage を共有し、
                 互いのキャッシュを削除していた不具合を、キャッシュ名の名前空間化と既存データの移行で解消した。
-                <span class="evidence">全10作品を GitHub Pages で公開・保守中。push でのデプロイまで自動化</span>
+                <span class="evidence">全11作品を公開・保守中。push でのデプロイまで自動化</span>
               </p>
             </div>
             <div class="capability">
               <h3>速度 <small>Pace</small></h3>
               <p>
                 企画から公開まで、1作品あたり数日。作りながら決めて、出してから直す。
-                <span class="evidence">2026年7月〜9月に10作品を公開</span>
+                <span class="evidence">2026年7月〜10月に11作品を公開</span>
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="story" class="season-section winter">
+      <section id="career" class="season-section winter">
         <div class="season-overlay"></div>
         <div class="season-inner winter-layout">
           <div class="story-copy">
-            <p class="section-label">Story / Philosophy / Winter</p>
-            <h2>速さよりも、長く残る余韻を。</h2>
-            <p>日本の伝統文化が持つ余白、静けさ、素材への敬意。その感覚を、Web、ゲーム、映像、音楽の体験に取り入れます。</p>
+            <p class="section-label">Career / Winter</p>
+            <h2>本業では、業務を仕組みで軽くしています。</h2>
+            <p>製造業の会社で、ノーコードのデータベース（JUST.DB）とBIツール（Power BI）の社内導入を、試験導入の段階から担当しています。</p>
+            <p>あわせて、化学物質の安全データシート（SDS）の作成とリスクアセスメントの実務を扱っています。</p>
           </div>
         </div>
       </section>
@@ -871,19 +900,13 @@
       <section id="contact" class="section contact">
         <div>
           <p class="section-label">Contact</p>
-          <h2>制作の相談やコラボレーションは、GitHubからご連絡ください。</h2>
+          <h2>お仕事のご相談は、サービスページからどうぞ。</h2>
         </div>
         <div class="contact-card">
-          <p class="contact-note">掲載している作品のソースコードと最新の更新は、すべてGitHubで公開しています。</p>
-          <p class="section-label">GitHub</p>
-          <a
-            class="primary-contact"
-            href="https://github.com/dxiongda441-maker"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHubプロフィール dxiongda441-maker を開く"
-          >
-            dxiongda441-maker <span aria-hidden="true">↗</span>
+          <p class="contact-note">メニュー・料金・見本と、ご相談の流れをまとめています。初回の相談は無料です。</p>
+          <p class="section-label">Service</p>
+          <a class="primary-contact" href="./service/#contact" aria-label="サービスと料金、ご相談の窓口を開く">
+            サービスと料金・ご相談 <span aria-hidden="true">→</span>
           </a>
         </div>
       </section>

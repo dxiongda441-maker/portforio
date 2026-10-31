@@ -14,3 +14,6 @@ package-lock.json
 
 # 注意: tools/fetch-backgrounds.sh が作る assets/backgrounds/ は
 # 公開に必要なのでコミットする（ここでは除外しない）。
+
+# Cloudflare（wrangler dev）の一時ファイル
+.wrangler/

@@ -1,6 +1,6 @@
 # 構成の実態
 
-> 最終確認: 2026-09-26 / 確認者: Claude
+> 最終確認: 2026-10-31 / 確認者: Claude
 > ここは「今どうなっているか」を書く場所。「なぜそうしたか」は `docs/decisions/` に書く。
 
 ## 全体像
@@ -10,7 +10,10 @@
 つまり「リポジトリの見た目 = 公開される中身」。生成物や中間ファイルの概念はない。
 
 ```
-index.html                  トップページ（HTML + CSS を1ファイルに同梱・821行）
+index.html                  トップページ（HTML + CSS を1ファイルに同梱）。サービスページへの入口
+service/index.html          サービス紹介（料金・見本・流れ・問い合わせ）。1ファイル完結・script 0 個（0008）
+samples/<業種>/             営業用の見本（架空の店舗）。noindex・sitemap に載せない（0008）
+_headers                    Cloudflare 用の HTTP ヘッダー。GitHub Pages では無視される（0009）
 404.html                    404 ページ
 robots.txt / sitemap.xml    クローラ向け
 CLAUDE.md / docs/           このプロジェクトの記憶（docs/chats.md = チャット別の成果物一覧）

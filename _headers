@@ -1,0 +1,22 @@
+# Cloudflare（Workers の静的アセット / Pages）が読む HTTP ヘッダーの設定。
+# GitHub Pages はこのファイルを読まない（そのまま 1 ファイルとして配信されるだけで害はない）。
+# 経緯と中身の説明: docs/decisions/0009-hosting-and-security-headers.md
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'
+  Permissions-Policy: camera=(), geolocation=(), payment=(), usb=(), microphone=(self)
+  Strict-Transport-Security: max-age=31536000
+  Cross-Origin-Opener-Policy: same-origin
+
+# トップ・サービス・見本はスクリプトを使わないので、外部読み込みもスクリプトも全面的に禁止する
+/
+  Content-Security-Policy: default-src 'self'; img-src 'self' https://images.unsplash.com data:; style-src 'unsafe-inline'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+/index.html
+  Content-Security-Policy: default-src 'self'; img-src 'self' https://images.unsplash.com data:; style-src 'unsafe-inline'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+/service/*
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+/samples/*
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'

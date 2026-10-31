@@ -1,6 +1,8 @@
 # portforio — プロジェクトメモリ
 
-「オルタ」のポートフォリオサイト。GitHub Pages で公開する**静的サイト**（ビルド工程なし）。
+「オルタ」のサイト。**主目的は副業（個人事業）の営業**で、料金・見本は `service/`、作品と本業の事例はトップに置く（`docs/decisions/0008`）。GitHub Pages で公開する**静的サイト**（ビルド工程なし）。本名は出さない。
+
+公開先は Cloudflare へ移す予定（`docs/decisions/0009`）。
 
 - 公開URL: https://dxiongda441-maker.github.io/portforio/
 - デプロイ: `main` に push → GitHub Actions がリポジトリ全体をそのまま Pages へ配信

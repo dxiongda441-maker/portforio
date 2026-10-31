@@ -8,11 +8,13 @@
 
 | 日付 | チャット名 | 分類 | 成果物の場所 | 状態 |
 | --- | --- | --- | --- | --- |
+| 2026-10-31 | ポートフォリオの見直し（副業向けへ） | サイト全体 | `service/`・`samples/`・`index.html`・`_headers` | 🌱 ブランチ `claude/determined-newton-224ltn` |
+| 2026-10-09 | 副業計画（カフェ向けInstagram運用） | 計画・営業文 | 非公開リポジトリ `tsumiage-private` の `archive/portforio/side-business/`（見本だけ `samples/cafe/` に公開） | 🔒 2026-10-31 に非公開側へ退避 |
 | 2026-09-25 | 家族向けトランプゲームアプリ | 作品（ゲーム） | `projects/family-cards/` | ✅ 取り込み済み（2026-10-09、PWA 対応の最終コミットも含む） |
 | 2026-09-12 | カフェ向けLP制作 | 作品（LP） | `projects/cafe-lp/` | ✅ 取り込み済み（2026-10-09） |
 | 2026-09-24 | CLAUDE.md自己改善 | 設定（Claude 用） | `tools/check.sh`・`tools/screenshot.sh`・`docs/decisions/0006-*` | ✅ 取り込み済み（記録番号を 0004 → 0006 に変更。トランプ側の 0006 は 0007 に変更） |
 | 2026-09-04 | 個人ビジネス構築ガイダンス | 作品（情報収集ツール Scout） | ブランチ `claude/personal-business-guidance-p3145p`（`projects/scout/`・`scout/`） | ⏸ 保留（2026-10-09 本人判断）：npm と毎朝の自動実行を含むため |
-| 2026-08-14 | Brain高品質コンテンツ設計 | メモ（教材研究） | ブランチ `claude/brain-content-design-t2axff`（`notes/brain-content-design.md`） | ⚠️ 未取り込み：第三者の原文全文を含むため公開しない |
+| 2026-08-14 | Brain高品質コンテンツ設計 | メモ（教材研究） | 非公開リポジトリ `tsumiage-private` の `archive/portforio/brain/` | 🔒 2026-10-31 に非公開側へ退避（公開側のブランチは削除予定） |
 | 2026-09-03 | ソフトバンク入社への道 | 就職活動（ポートフォリオの文面変更） | ブランチ `claude/softbank-employment-path-uwalcp`（`index.html`・`README.md`） | ✅ 取り込み済み（2026-10-09）。作品数の記述は 10 作品に更新 |
 | 2026-09-15 | ソフトバンク法人営業エントリー準備 | 就職活動（面接台本） | ブランチ `claude/softbank-corporate-sales-prep-0fgymy`（GitHub 上に存在せず） | 💬 チャット内のみ |
 | 2026-08-28 | 会話の記憶範囲とObsidian活用 | 設定（Claude の記憶） | `CLAUDE.md`・`docs/`・`.claude/commands/` | ✅ main に反映済み（PR #4） |

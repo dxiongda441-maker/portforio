@@ -50,7 +50,7 @@
 2. Cloudflare のダッシュボード → Workers & Pages → 作成 → 「リポジトリをインポート」→ GitHub 連携。
    リポジトリのアクセスは `portforio` だけに絞る
 3. ビルドコマンドは空欄、デプロイコマンドは既定の `npx wrangler deploy`、ルートは `/` のまま
-4. 発行された `alter-site.<アカウント名>.workers.dev` で表示を確認
+4. 発行された `portforio.<アカウント名>.workers.dev` で表示を確認
 5. 設定 → ビルド → 本番以外のブランチのビルドを有効にすると、作業ブランチごとに確認用 URL が出る
 6. 確認できたら、`canonical`・`og:url`・`sitemap.xml`・`robots.txt` を新 URL に書き換え、
    GitHub Pages を止めてリポジトリを非公開にする

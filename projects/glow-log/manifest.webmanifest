@@ -1,0 +1,17 @@
+{
+  "name": "Glow Log — 自分磨きの毎日記録",
+  "short_name": "Glow Log",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f1ea",
+  "theme_color": "#2f6f62",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

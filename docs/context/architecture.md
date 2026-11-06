@@ -1,6 +1,6 @@
 # 構成の実態
 
-> 最終確認: 2026-10-31 / 確認者: Claude
+> 最終確認: 2026-11-06 / 確認者: Claude
 > ここは「今どうなっているか」を書く場所。「なぜそうしたか」は `docs/decisions/` に書く。
 
 ## 全体像
@@ -94,9 +94,9 @@ git show 76ace1e:main.js
 
 ## projects/ — 各作品
 
-11 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
+12 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
 
-基本構成は `index.html` + `app.js` + `styles.css`。うち 6 件は
+基本構成は `index.html` + `app.js` + `styles.css`。うち 7 件は
 `manifest.webmanifest`(または `manifest.json`) + `sw.js`(または `service-worker.js`) を持つ **PWA**。
 
 | slug | 表示名 | 構成 | `CACHE_PREFIX` |
@@ -112,6 +112,7 @@ git show 76ace1e:main.js
 | `security-quest` | セキュリティ・クエスト | 静的 | — |
 | `family-cards` | 年末ファミリートランプ | PWA（複数JS） | `family-cards-` |
 | `cafe-lp` | 琥珀 KOHAKU COFFEE | 静的（HTML+CSSのみ） | — |
+| `glow-log` | Glow Log（自分磨き記録） | PWA・IndexedDB・CSP で外部通信禁止 | `glow-log-` |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
@@ -119,6 +120,7 @@ git show 76ace1e:main.js
 - `contracts` は `data.js` にデータを分離。
 - 各作品フォルダに `README.md`（概要・ファイルの役割・編集時の注意）がある。どのチャットで作ったかは `docs/chats.md`。
 - `cafe-lp` は架空のカフェの LP。`index.html` + `styles.css` のみで JS なし。LP の型との対応は同フォルダの `README.md`。
+- `glow-log` は体重・写真・肌の記録 PWA。写真を含む全データを IndexedDB（DB名 `glow-log`）に置き、外部へ送らない。設計図は同フォルダの `README.md`、経緯は `docs/decisions/0010`。
 - `money-anime` はアプリではなくケーススタディ（`index.html` + `cover.jpg` のみ）。
 - `security-quest` は `app.js`（エンジン）＋ `data/acts.js` ＋ `data/ch01.js`〜`ch18.js`（章ごとのデータ）。
   CSP を `<meta>` で設定しており、外部スクリプト・外部通信は不可。問題の追加は各章の `quiz` 配列の**末尾**に

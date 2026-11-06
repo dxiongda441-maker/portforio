@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
+    <meta name="description" content="体重・写真・肌・睡眠を毎日記録し、トレンド体重と改善点を自動で示す自分磨きPWA。写真は端末の中だけに保存。" />
+    <meta name="theme-color" content="#2f6f62" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Glow Log" />
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <title>Glow Log — 自分磨きの毎日記録</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/projects/glow-log/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="オルタ Portfolio" />
+    <meta property="og:title" content="Glow Log — 自分磨きの毎日記録" />
+    <meta property="og:description" content="体重・写真・肌・睡眠を毎日記録し、トレンド体重と改善点を自動で示す自分磨きPWA。写真は端末の中だけに保存。" />
+    <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/projects/glow-log/" />
+    <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/glow-log.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="800" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Glow Log — 自分磨きの毎日記録" />
+    <meta name="twitter:description" content="体重・写真・肌・睡眠を毎日記録し、トレンド体重と改善点を自動で示す自分磨きPWA。" />
+    <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/glow-log.jpg" />
+  </head>
+  <body>
+    <a class="portfolio-back" href="../../"><span aria-hidden="true">←</span> オルタのポートフォリオへ戻る</a>
+
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">G</span>
+        <div>
+          <p class="brand-name">Glow Log</p>
+          <p class="brand-sub">自分磨きの毎日記録</p>
+        </div>
+      </div>
+      <span class="privacy-badge" title="写真も記録も、この端末のブラウザ内（IndexedDB）にだけ保存します。サーバーには送りません。">端末内だけに保存</span>
+    </header>
+
+    <nav class="tabs" aria-label="メインメニュー">
+      <button class="tab" type="button" data-view="today" aria-current="page">今日</button>
+      <button class="tab" type="button" data-view="trends">推移と評価</button>
+      <button class="tab" type="button" data-view="photos">写真</button>
+      <button class="tab" type="button" data-view="compare">比較</button>
+      <button class="tab" type="button" data-view="settings">設定</button>
+    </nav>
+
+    <main class="main">
+      <!-- 今日 -->
+      <section id="view-today" class="view" aria-label="今日の記録">
+        <div class="date-nav">
+          <button type="button" class="icon-btn" id="prevDay" aria-label="前の日">‹</button>
+          <input type="date" id="datePicker" aria-label="記録する日" />
+          <button type="button" class="icon-btn" id="nextDay" aria-label="次の日">›</button>
+          <button type="button" class="ghost-btn" id="goToday">今日へ</button>
+        </div>
+
+        <div class="summary-cards" id="summaryCards"></div>
+
+        <form id="entryForm" class="card" autocomplete="off">
+          <h2>体重と体</h2>
+          <div class="field-row">
+            <label class="field"><span>体重 (kg)</span><input name="weight" type="number" inputmode="decimal" step="0.1" min="20" max="250" placeholder="60.5" /></label>
+            <label class="field"><span>測ったタイミング</span>
+              <select name="timing">
+                <option value="morning">朝・トイレ後・食前</option>
+                <option value="evening">夜</option>
+                <option value="after-bath">入浴後</option>
+                <option value="other">その他</option>
+              </select>
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>ウエスト (cm・任意)</span><input name="waist" type="number" inputmode="decimal" step="0.5" min="30" max="200" placeholder="へその高さ" /></label>
+            <label class="field"><span>睡眠 (時間)</span><input name="sleep" type="number" inputmode="decimal" step="0.25" min="0" max="24" placeholder="7" /></label>
+          </div>
+
+          <h2>トレーニングと食事</h2>
+          <div class="field-row">
+            <label class="field"><span>筋トレ</span>
+              <select name="training">
+                <option value="">記録なし</option>
+                <option value="none">休み</option>
+                <option value="upper">上半身</option>
+                <option value="lower">下半身</option>
+                <option value="full">全身</option>
+                <option value="cardio">有酸素のみ</option>
+              </select>
+            </label>
+            <label class="field"><span>たんぱく質 (g・目安でOK)</span><input name="protein" type="number" inputmode="numeric" step="5" min="0" max="500" placeholder="例: 110" /></label>
+          </div>
+          <fieldset class="chips" id="habitChips"><legend>今日できたこと</legend></fieldset>
+
+          <h2>肌と調子</h2>
+          <fieldset class="scale" id="skinScale"><legend>肌の調子（1 悪い 〜 5 良い）</legend></fieldset>
+          <fieldset class="chips" id="skinTags"><legend>気になったところ</legend></fieldset>
+          <fieldset class="scale" id="energyScale"><legend>体調・気分（1 〜 5）</legend></fieldset>
+          <label class="field"><span>メモ</span><textarea name="note" rows="3" placeholder="例: 散髪した / 飲み会 / 電気シェーバーに変えた"></textarea></label>
+          <p class="save-status" id="saveStatus" aria-live="polite"></p>
+        </form>
+
+        <section class="card">
+          <h2>この日の写真</h2>
+          <p class="hint">同じ場所・同じ光・同じ距離で。カメラでは前回の写真が半透明で重なるので、輪郭を合わせてから撮ります。</p>
+          <div class="slot-grid" id="slotGrid"></div>
+        </section>
+
+        <details class="card guide">
+          <summary>撮影と計測のルール（迷ったらここ）</summary>
+          <h3>体重</h3>
+          <ul>
+            <li><strong>朝起きてトイレの後、食べる前</strong>に、同じ服装（下着のみ）で測る。夜や入浴後は汗で軽く出やすい。</li>
+            <li>毎日 ±1kg 程度は水分で動く。<strong>見るのは「トレンド体重」</strong>（日々の値をならした線）。</li>
+          </ul>
+          <h3>顔の写真（肌を見る用）</h3>
+          <ul>
+            <li>洗顔して<strong>化粧水を塗る前</strong>に撮る（化粧水のツヤでテカリと区別がつかなくなる）。</li>
+            <li>窓に向かって立ち、<strong>直射ではない昼の自然光</strong>で。フラッシュと天井の真上の照明は避ける。</li>
+            <li>内カメラより<strong>外カメラ</strong>が高画質。スマホを目の高さに固定し、腕を伸ばした距離から 2倍 で撮ると顔の歪みが減る。</li>
+            <li>メガネを外す・前髪を上げる・表情は無表情。正面と横（90°）の2枚。</li>
+            <li>毛穴や赤みのアップは、iPhone のマクロ（被写体に近づくと自動で切り替わる）で写真アプリに別途残すとよい。</li>
+          </ul>
+          <h3>体の写真</h3>
+          <ul>
+            <li>鏡越しではなく、スマホを<strong>胸〜へその高さに置いてタイマー撮影</strong>。毎回同じ立ち位置（床に目印）。</li>
+            <li>力を抜いた状態で正面・横。変化はゆっくりなので<strong>体は週1回</strong>で十分。</li>
+          </ul>
+        </details>
+      </section>
+
+      <!-- 推移と評価 -->
+      <section id="view-trends" class="view" aria-label="推移と評価" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h2>体重の推移</h2>
+            <div class="seg" role="group" aria-label="表示期間">
+              <button type="button" data-range="30" aria-pressed="true">30日</button>
+              <button type="button" data-range="90" aria-pressed="false">90日</button>
+              <button type="button" data-range="all" aria-pressed="false">全期間</button>
+            </div>
+          </div>
+          <div class="chart" id="weightChart"></div>
+          <p class="legend"><span class="lg-dot"></span>朝の実測 <span class="lg-dot hollow"></span>朝以外 <span class="lg-line"></span>トレンド <span class="lg-target"></span>目標</p>
+        </div>
+
+        <div class="card">
+          <h2>直近7日の数字</h2>
+          <dl class="stats" id="statsList"></dl>
+        </div>
+
+        <div class="card">
+          <h2>評価と改善点</h2>
+          <p class="hint">記録から自動で判定しています。医療的な診断ではありません。</p>
+          <ul class="insights" id="insightList"></ul>
+        </div>
+
+        <div class="card">
+          <h2>Claude に相談する</h2>
+          <p class="hint">直近14日分を文章にまとめます。コピーして Claude に貼ると、記録を踏まえたアドバイスがもらえます（写真は含みません）。</p>
+          <textarea id="consultText" class="consult" rows="8" readonly></textarea>
+          <div class="btn-row"><button type="button" class="primary-btn" id="copyConsult">コピーする</button></div>
+        </div>
+      </section>
+
+      <!-- 写真 -->
+      <section id="view-photos" class="view" aria-label="写真一覧" hidden>
+        <div class="card">
+          <div class="seg wrap" role="group" aria-label="写真の種類" id="photoFilter"></div>
+          <div class="photo-list" id="photoList"></div>
+        </div>
+      </section>
+
+      <!-- 比較 -->
+      <section id="view-compare" class="view" aria-label="写真の比較" hidden>
+        <div class="card">
+          <div class="field-row three">
+            <label class="field"><span>種類</span><select id="cmpSlot"></select></label>
+            <label class="field"><span>前</span><select id="cmpA"></select></label>
+            <label class="field"><span>後</span><select id="cmpB"></select></label>
+          </div>
+          <div class="seg" role="group" aria-label="比べ方">
+            <button type="button" data-cmp="side" aria-pressed="true">並べる</button>
+            <button type="button" data-cmp="slider" aria-pressed="false">スライダー</button>
+          </div>
+          <p class="cmp-meta" id="cmpMeta"></p>
+          <div id="cmpStage" class="cmp-stage"></div>
+          <input type="range" id="cmpRange" min="0" max="100" value="50" aria-label="前後の境目" hidden />
+        </div>
+      </section>
+
+      <!-- 設定 -->
+      <section id="view-settings" class="view" aria-label="設定" hidden>
+        <form class="card" id="profileForm" autocomplete="off">
+          <h2>プロフィールと目標</h2>
+          <div class="field-row">
+            <label class="field"><span>身長 (cm)</span><input name="height" type="number" inputmode="decimal" step="0.5" min="100" max="230" placeholder="168" /></label>
+            <label class="field"><span>目標体重 (kg・任意)</span><input name="targetWeight" type="number" inputmode="decimal" step="0.5" min="20" max="250" /></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>いまの方針</span>
+              <select name="goal">
+                <option value="lean-bulk">筋肉をつけて増やす（リーンバルク）</option>
+                <option value="maintain">体重は維持して体を整える</option>
+                <option value="cut">脂肪を落とす（減量）</option>
+              </select>
+            </label>
+            <label class="field"><span>たんぱく質の目標 (g / 体重1kg)</span><input name="proteinPerKg" type="number" inputmode="decimal" step="0.1" min="0.8" max="3" /></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>睡眠の目標 (時間)</span><input name="sleepTarget" type="number" inputmode="decimal" step="0.5" min="4" max="12" /></label>
+            <label class="field"><span>週の筋トレ目標 (回)</span><input name="trainingTarget" type="number" inputmode="numeric" step="1" min="0" max="14" /></label>
+          </div>
+        </form>
+
+        <div class="card">
+          <h2>バックアップ</h2>
+          <p class="hint">記録はこの端末のブラウザの中だけにあります。機種変更やブラウザのデータ削除で消えるので、<strong>週1回は書き出して</strong>ファイルアプリ等に保存してください。</p>
+          <div class="btn-row">
+            <button type="button" class="primary-btn" id="exportJson">全データを書き出す（写真込み）</button>
+            <button type="button" class="ghost-btn" id="exportCsv">数値だけCSVで書き出す</button>
+            <label class="ghost-btn file-btn">読み込む<input type="file" id="importJson" accept="application/json,.json" hidden /></label>
+          </div>
+          <p class="hint" id="storageInfo"></p>
+        </div>
+
+        <div class="card danger-zone">
+          <h2>データの削除</h2>
+          <p class="hint">この端末の記録と写真をすべて消します。元に戻せません。</p>
+          <button type="button" class="danger-btn" id="wipeAll">すべて削除する</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- カメラ -->
+    <div class="overlay camera" id="camera" role="dialog" aria-modal="true" aria-labelledby="camTitle" hidden>
+      <div class="cam-top">
+        <p id="camTitle" class="cam-title"></p>
+        <button type="button" class="icon-btn light" id="camClose" aria-label="閉じる">×</button>
+      </div>
+      <div class="cam-stage">
+        <video id="camVideo" playsinline muted></video>
+        <img id="camGhost" alt="" />
+        <div class="cam-grid" aria-hidden="true"></div>
+        <p class="cam-count" id="camCount" aria-live="assertive"></p>
+        <div class="cam-error" id="camError" hidden>
+          <p>カメラを使えませんでした。ブラウザの設定でカメラを許可するか、写真アプリで撮ったものを選んでください。</p>
+          <button type="button" class="primary-btn" id="camPick">写真を選ぶ</button>
+        </div>
+      </div>
+      <div class="cam-controls">
+        <label class="cam-ghost-ctl">前回を重ねる<input type="range" id="ghostOpacity" min="0" max="70" value="35" /></label>
+        <div class="cam-buttons">
+          <button type="button" class="cam-small" id="camFlip">切替</button>
+          <button type="button" class="cam-shutter" id="camShoot" aria-label="撮影"></button>
+          <button type="button" class="cam-small" id="camTimer">タイマー 0秒</button>
+        </div>
+        <button type="button" class="link-btn" id="camFile">写真アプリから選ぶ</button>
+      </div>
+    </div>
+
+    <!-- 写真の拡大 -->
+    <div class="overlay lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lbTitle" hidden>
+      <div class="cam-top">
+        <p id="lbTitle" class="cam-title"></p>
+        <button type="button" class="icon-btn light" id="lbClose" aria-label="閉じる">×</button>
+      </div>
+      <img id="lbImg" alt="" />
+      <div class="btn-row center"><button type="button" class="danger-btn" id="lbDelete">この写真を削除</button></div>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" hidden />
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1097 @@
+"use strict";
+
+/*
+ * Glow Log — 自分磨きの毎日記録
+ *
+ * データはすべてこの端末の IndexedDB（DB名 "glow-log"）に置く。外部通信はしない。
+ *   entries : 1日1件（keyPath = date "YYYY-MM-DD"）
+ *   photos  : 写真1枚1件（date + slot。同じ日・同じ種類は上書き）
+ *   meta    : "profile"（身長・方針・目標）
+ */
+(() => {
+  const DB_NAME = "glow-log";
+  const DB_VERSION = 1;
+  const PHOTO_MAX = 1440; // 長辺 px。1枚 300KB 前後に収める
+  const PHOTO_QUALITY = 0.85;
+
+  const SLOTS = [
+    { id: "face-front", label: "顔・正面", freq: "毎日" },
+    { id: "face-side", label: "顔・横", freq: "毎日" },
+    { id: "body-front", label: "体・正面", freq: "週1" },
+    { id: "body-side", label: "体・横", freq: "週1" },
+  ];
+  const TIMING_LABEL = { morning: "朝", evening: "夜", "after-bath": "入浴後", other: "その他" };
+  const TRAINING_LABEL = { none: "休み", upper: "上半身", lower: "下半身", full: "全身", cardio: "有酸素" };
+  const HABITS = [
+    { id: "sunscreen", label: "日焼け止め" },
+    { id: "skincare", label: "朝晩スキンケア" },
+    { id: "posture", label: "姿勢・ストレッチ" },
+    { id: "grooming", label: "眉・ヒゲの手入れ" },
+    { id: "no-late-snack", label: "寝る前に食べない" },
+  ];
+  const SKIN_TAGS = ["赤み", "ニキビ", "乾燥", "テカリ", "カミソリ負け", "青ヒゲ", "クマ"];
+  const DEFAULT_PROFILE = {
+    height: null,
+    targetWeight: null,
+    goal: "lean-bulk",
+    proteinPerKg: 1.6,
+    sleepTarget: 7,
+    trainingTarget: 3,
+  };
+
+  const state = {
+    entries: new Map(),
+    photos: [],
+    profile: { ...DEFAULT_PROFILE },
+    date: todayStr(),
+    view: "today",
+    range: "30",
+    photoFilter: "all",
+    cmpMode: "side",
+    urls: new Map(),
+  };
+  let db = null;
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+  /* ---------- 日付 ---------- */
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function toStr(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+  function todayStr() { return toStr(new Date()); }
+  function parse(s) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+  function addDays(s, n) { const d = parse(s); d.setDate(d.getDate() + n); return toStr(d); }
+  function dayDiff(a, b) { return Math.round((parse(b) - parse(a)) / 86400000); }
+  function fmtDate(s) { const d = parse(s); return `${d.getMonth() + 1}/${d.getDate()}（${"日月火水木金土"[d.getDay()]}）`; }
+  function fmtShort(s) { const d = parse(s); return `${d.getMonth() + 1}/${d.getDate()}`; }
+
+  /* ---------- 数値 ---------- */
+  const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+  const round = (v, d = 1) => (isNum(v) ? Math.round(v * 10 ** d) / 10 ** d : null);
+  const fmt = (v, d = 1) => (isNum(v) ? v.toFixed(d) : "—");
+  const signed = (v, d = 1) => (isNum(v) ? `${v > 0 ? "+" : v < 0 ? "−" : "±"}${Math.abs(v).toFixed(d)}` : "—");
+  const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
+
+  /* ---------- IndexedDB ---------- */
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = () => {
+        const d = req.result;
+        if (!d.objectStoreNames.contains("entries")) d.createObjectStore("entries", { keyPath: "date" });
+        if (!d.objectStoreNames.contains("photos")) {
+          const p = d.createObjectStore("photos", { keyPath: "id", autoIncrement: true });
+          p.createIndex("date", "date");
+        }
+        if (!d.objectStoreNames.contains("meta")) d.createObjectStore("meta");
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  function run(storeName, mode, fn) {
+    return new Promise((resolve, reject) => {
+      const t = db.transaction(storeName, mode);
+      const store = t.objectStore(storeName);
+      let result;
+      const req = fn(store);
+      if (req) req.onsuccess = () => { result = req.result; };
+      t.oncomplete = () => resolve(result);
+      t.onerror = () => reject(t.error);
+      t.onabort = () => reject(t.error);
+    });
+  }
+
+  async function loadAll() {
+    const [entries, photos, profile] = await Promise.all([
+      run("entries", "readonly", (s) => s.getAll()),
+      run("photos", "readonly", (s) => s.getAll()),
+      run("meta", "readonly", (s) => s.get("profile")),
+    ]);
+    state.entries = new Map(entries.map((e) => [e.date, e]));
+    state.photos = photos;
+    state.profile = { ...DEFAULT_PROFILE, ...(profile || {}) };
+  }
+
+  async function putEntry(entry) {
+    if (isEmptyEntry(entry)) {
+      await run("entries", "readwrite", (s) => s.delete(entry.date));
+      state.entries.delete(entry.date);
+    } else {
+      await run("entries", "readwrite", (s) => s.put(entry));
+      state.entries.set(entry.date, entry);
+    }
+  }
+
+  async function saveProfile() {
+    await run("meta", "readwrite", (s) => s.put(state.profile, "profile"));
+  }
+
+  async function savePhoto(date, slot, blob, width, height) {
+    const old = state.photos.filter((p) => p.date === date && p.slot === slot);
+    for (const p of old) await deletePhoto(p.id, true);
+    const record = { date, slot, blob, width, height, createdAt: Date.now() };
+    const id = await run("photos", "readwrite", (s) => s.add(record));
+    record.id = id;
+    state.photos.push(record);
+    requestPersist();
+    return record;
+  }
+
+  async function deletePhoto(id, silent) {
+    await run("photos", "readwrite", (s) => s.delete(id));
+    state.photos = state.photos.filter((p) => p.id !== id);
+    const url = state.urls.get(id);
+    if (url) { URL.revokeObjectURL(url); state.urls.delete(id); }
+    if (!silent) toast("写真を削除しました");
+  }
+
+  function photoUrl(p) {
+    if (!state.urls.has(p.id)) state.urls.set(p.id, URL.createObjectURL(p.blob));
+    return state.urls.get(p.id);
+  }
+
+  let persistAsked = false;
+  function requestPersist() {
+    if (persistAsked || !navigator.storage || !navigator.storage.persist) return;
+    persistAsked = true;
+    navigator.storage.persist().catch(() => {});
+  }
+
+  /* ---------- 計算 ---------- */
+  function isEmptyEntry(e) {
+    return !isNum(e.weight) && !isNum(e.waist) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
+      !(e.habits && e.habits.length) && !isNum(e.skin) && !(e.skinTags && e.skinTags.length) && !isNum(e.energy) && !e.note;
+  }
+
+  // トレンド体重：Hacker's Diet 方式の指数平滑（1日あたり10%ずつ実測に寄せる）。日が空いたら空いた分だけ寄せる。
+  function weightSeries() {
+    const list = [...state.entries.values()].filter((e) => isNum(e.weight)).sort((a, b) => (a.date < b.date ? -1 : 1));
+    let trend = null;
+    let prevDate = null;
+    return list.map((e) => {
+      if (trend === null) trend = e.weight;
+      else {
+        const gap = Math.max(1, dayDiff(prevDate, e.date));
+        trend += (1 - Math.pow(0.9, gap)) * (e.weight - trend);
+      }
+      prevDate = e.date;
+      return { date: e.date, weight: e.weight, timing: e.timing || "other", trend };
+    });
+  }
+
+  function trendAt(series, date) {
+    let last = null;
+    for (const p of series) { if (p.date <= date) last = p; else break; }
+    return last;
+  }
+
+  // 週あたりの変化：直近28日の実測に回帰直線を引く。朝の記録が4件以上あれば朝だけで計算する（条件をそろえる）。
+  function weeklyRate(series, ref) {
+    const recent = series.filter((p) => { const d = dayDiff(p.date, ref); return d >= 0 && d < 28; });
+    const morning = recent.filter((p) => p.timing === "morning");
+    const pts = morning.length >= 4 ? morning : recent;
+    if (pts.length < 4) return null;
+    const span = dayDiff(pts[0].date, pts[pts.length - 1].date);
+    if (span < 6) return null;
+    const xs = pts.map((p) => dayDiff(pts[0].date, p.date));
+    const ys = pts.map((p) => p.weight);
+    const mx = avg(xs);
+    const my = avg(ys);
+    let num = 0;
+    let den = 0;
+    xs.forEach((x, i) => { num += (x - mx) * (ys[i] - my); den += (x - mx) ** 2; });
+    if (!den) return null;
+    return { perWeek: (num / den) * 7, n: pts.length, morningOnly: pts === morning };
+  }
+
+  function lastNDays(ref, n) {
+    const out = [];
+    for (let i = 0; i < n; i += 1) {
+      const d = addDays(ref, -i);
+      if (state.entries.has(d)) out.push(state.entries.get(d));
+    }
+    return out;
+  }
+
+  function streak(ref) {
+    let n = 0;
+    let d = ref;
+    if (!state.entries.has(d)) d = addDays(d, -1); // 今日まだ書いていなくても昨日までの連続は数える
+    while (state.entries.has(d) || state.photos.some((p) => p.date === d)) { n += 1; d = addDays(d, -1); }
+    return n;
+  }
+
+  function computeStats(ref = todayStr()) {
+    const series = weightSeries().filter((p) => p.date <= ref);
+    const latest = series[series.length - 1] || null;
+    const week = lastNDays(ref, 7);
+    const prevWeek = lastNDays(addDays(ref, -7), 7);
+    const h = isNum(state.profile.height) ? state.profile.height / 100 : null;
+    const trend = latest ? latest.trend : null;
+    const weekAgo = trendAt(series, addDays(ref, -7));
+    const pick = (list, key) => list.map((e) => e[key]).filter(isNum);
+    return {
+      series,
+      latest,
+      trend,
+      bmi: h && trend ? trend / (h * h) : null,
+      stdWeight: h ? 22 * h * h : null,
+      rate: weeklyRate(series, ref),
+      change7: latest && weekAgo && weekAgo.date !== latest.date ? latest.trend - weekAgo.trend : null,
+      sleepAvg: avg(pick(week, "sleep")),
+      sleepN: pick(week, "sleep").length,
+      proteinAvg: avg(pick(week, "protein")),
+      proteinN: pick(week, "protein").length,
+      trainingCount: week.filter((e) => e.training && !["none", "cardio"].includes(e.training)).length,
+      trainingLogged: week.filter((e) => e.training).length,
+      skinAvg: avg(pick(week, "skin")),
+      skinPrev: avg(pick(prevWeek, "skin")),
+      energyAvg: avg(pick(week, "energy")),
+      habitCount: (id) => week.filter((e) => (e.habits || []).includes(id)).length,
+      tagCount: (tag) => week.filter((e) => (e.skinTags || []).includes(tag)).length,
+      timings7: new Set(series.filter((p) => dayDiff(p.date, ref) < 7).map((p) => p.timing)),
+      waist: (() => { const w = [...state.entries.values()].filter((e) => isNum(e.waist) && e.date <= ref).sort((a, b) => (a.date < b.date ? -1 : 1)); return w; })(),
+      days: week.length,
+      streak: streak(ref),
+    };
+  }
+
+  /* ---------- 評価と改善点 ---------- */
+  function buildInsights(st) {
+    const out = [];
+    const add = (level, title, body) => out.push({ level, title, body });
+    const p = state.profile;
+
+    if (!st.latest) {
+      add("info", "まずは1週間、朝に体重を測る", "トレンドと週あたりの変化は、朝の記録が4日分以上たまると出ます。");
+    } else {
+      if (st.latest.timing !== "morning") {
+        add("info", `最新の体重は「${TIMING_LABEL[st.latest.timing] || "その他"}」に測った値`, "夜や入浴後は汗と食事の影響で、朝より0.5〜1.5kgずれやすいです。比べるのは朝どうしで。");
+      }
+      if (st.timings7.size > 1) {
+        add("warn", "測るタイミングがばらついています", "朝・夜・入浴後が混ざると、増減が水分の差なのか本当の変化なのか分かりません。朝のトイレ後・食前にそろえましょう。");
+      }
+    }
+
+    if (!isNum(p.height)) {
+      add("info", "設定で身長を入れてください", "BMI と標準体重の判定に使います。");
+    } else if (isNum(st.bmi)) {
+      const b = st.bmi;
+      if (b < 18.5) add("warn", `BMI ${fmt(b)}：低体重`, "筋肉も脂肪も足りていない状態。食事量を増やし、筋トレで増やした分を筋肉に回しましょう。");
+      else if (b < 20) add("info", `BMI ${fmt(b)}：やや細め`, "健康面の問題はない範囲。見た目を変えたいなら、体重を少しずつ増やしながら筋トレするのが近道です。");
+      else if (b < 25) add("good", `BMI ${fmt(b)}：普通体重`, `標準体重（BMI22）は ${fmt(st.stdWeight)}kg。体重の数字より、筋肉と脂肪の比率（写真とウエスト）で判断する段階です。`);
+      else add("warn", `BMI ${fmt(b)}：肥満（1度以上）`, "ウエストの推移と合わせて、ゆるやかな減量を検討しましょう。");
+    }
+
+    if (st.rate) {
+      const r = st.rate.perWeek;
+      const pct = st.trend ? (r / st.trend) * 100 : 0;
+      const basis = st.rate.morningOnly ? "朝の記録" : "全記録";
+      if (p.goal === "lean-bulk") {
+        if (r < 0.05) add("warn", `増えていません（週 ${signed(r, 2)}kg）`, `筋肉をつけるには少しの余剰カロリーが必要。1日 +200〜300kcal（ご飯軽く1杯、またはプロテイン＋バナナ）を足してみましょう。（${basis}から計算）`);
+        else if (r <= 0.35) add("good", `ちょうどいいペース（週 ${signed(r, 2)}kg）`, `リーンバルクの目安は週 +0.1〜0.3kg 前後。このまま筋トレの重量が伸びているかも確認を。（${basis}から計算）`);
+        else add("warn", `増え方が速め（週 ${signed(r, 2)}kg）`, "速すぎると脂肪の比率が上がります。ウエストが増えていたら、1日100〜200kcal減らしましょう。");
+      } else if (p.goal === "cut") {
+        if (r > -0.1) add("info", `ほぼ減っていません（週 ${signed(r, 2)}kg）`, "1日 −300〜500kcal を目安に。たんぱく質と筋トレは減量中も維持します。");
+        else if (pct < -1) add("warn", `減り方が速すぎます（週 ${signed(pct, 1)}%）`, "体重の1%/週を超えると筋肉も落ちやすい。食事を少し戻しましょう。");
+        else add("good", `順調に減っています（週 ${signed(r, 2)}kg）`, "週に体重の0.5〜1%が目安です。");
+      } else if (Math.abs(r) > 0.25) {
+        add("info", `維持のつもりで週 ${signed(r, 2)}kg 動いています`, "食事量を少し調整しましょう。");
+      } else {
+        add("good", "体重は安定しています", "体重を維持しつつ筋トレを続けると、少しずつ体脂肪が減り筋肉が増えます（リコンプ）。写真とウエストで確認を。");
+      }
+      if (isNum(p.targetWeight) && st.trend) {
+        const diff = p.targetWeight - st.trend;
+        if (Math.abs(diff) < 0.3) add("good", "目標体重に到達", "次の目標（見た目・重量・ウエスト）を決めましょう。");
+        else if (Math.sign(diff) === Math.sign(r) && Math.abs(r) > 0.02) {
+          const weeks = Math.ceil(diff / r);
+          add("info", `目標 ${fmt(p.targetWeight)}kg まで あと ${signed(diff)}kg`, `今のペースだと約${weeks}週（${Math.round(weeks / 4.3)}か月）。`);
+        }
+      }
+    }
+
+    if (st.sleepN >= 3) {
+      if (st.sleepAvg < p.sleepTarget) add("warn", `睡眠が平均 ${fmt(st.sleepAvg)}時間`, `目標 ${p.sleepTarget}時間に届いていません。睡眠不足は肌荒れ・目の充血・筋肉の回復の遅れ・食欲の乱れに直結します。`);
+      else add("good", `睡眠は平均 ${fmt(st.sleepAvg)}時間`, "回復の土台はできています。");
+    }
+
+    const proteinGoal = st.trend ? Math.round(st.trend * p.proteinPerKg) : null;
+    if (st.proteinN >= 3 && proteinGoal) {
+      if (st.proteinAvg < proteinGoal) add("warn", `たんぱく質が平均 ${Math.round(st.proteinAvg)}g`, `目標は ${proteinGoal}g/日（体重×${p.proteinPerKg}g）。卵・鶏むね・納豆・ギリシャヨーグルト・プロテインで1日あと${Math.round(proteinGoal - st.proteinAvg)}g。`);
+      else add("good", `たんぱく質は平均 ${Math.round(st.proteinAvg)}g`, `目標 ${proteinGoal}g/日を満たしています。`);
+    } else if (proteinGoal) {
+      add("info", `たんぱく質の目標は1日 ${proteinGoal}g`, "ざっくりでいいので記録すると、足りているか判定できます。");
+    }
+
+    if (st.trainingLogged >= 2 || st.trainingCount > 0) {
+      if (st.trainingCount >= p.trainingTarget) add("good", `筋トレ ${st.trainingCount}回／7日`, "目標回数を達成。重量か回数を少しずつ伸ばすことを意識しましょう。");
+      else add("warn", `筋トレ ${st.trainingCount}回／7日`, `目標は週${p.trainingTarget}回。体型を変える一番の要素なので、短時間でも回数を優先。`);
+    }
+
+    const sun = st.habitCount("sunscreen");
+    if (st.days >= 3 && sun < Math.min(5, st.days)) {
+      add("info", `日焼け止めは7日中 ${sun}日`, "肌の老化（シミ・くすみ・毛穴の目立ち）の最大要因は紫外線。曇りの日も毎朝。");
+    }
+
+    if (isNum(st.skinAvg)) {
+      if (isNum(st.skinPrev) && st.skinAvg - st.skinPrev >= 0.5) add("good", `肌の調子が上向き（${fmt(st.skinPrev)} → ${fmt(st.skinAvg)}）`, "今週変えたことをメモに残しておくと再現できます。");
+      else if (isNum(st.skinPrev) && st.skinPrev - st.skinAvg >= 0.5) add("warn", `肌の調子が下向き（${fmt(st.skinPrev)} → ${fmt(st.skinAvg)}）`, "睡眠・食事・新しく使い始めた物・ヒゲ剃りの方法をメモと照らし合わせてください。");
+    }
+    if (st.tagCount("カミソリ負け") >= 2 || st.tagCount("青ヒゲ") >= 3) {
+      add("info", "ヒゲの悩みが続いています", "T字カミソリならシェービング剤＋毛の流れに沿って。電気シェーバーへの切り替えや、医療脱毛（ヒゲ）も選択肢です。");
+    }
+    if (st.tagCount("ニキビ") >= 3 || st.tagCount("赤み") >= 4) {
+      add("warn", "ニキビ・赤みが続いています", "2〜3週間続くなら皮膚科へ。保険診療で外用薬（アダパレンなど）を出してもらえます。");
+    }
+
+    SLOTS.forEach((s) => {
+      const last = state.photos.filter((ph) => ph.slot === s.id).map((ph) => ph.date).sort().pop();
+      const limit = s.freq === "週1" ? 8 : 3;
+      if (last && dayDiff(last, todayStr()) > limit) add("info", `「${s.label}」の写真が${dayDiff(last, todayStr())}日空いています`, s.freq === "週1" ? "体は週1回、同じ曜日・同じ条件で撮ると変化が比べやすいです。" : "顔は毎日撮ると肌の波が見えます。");
+    });
+
+    if (st.streak >= 7) add("good", `${st.streak}日連続で記録中`, "続いていること自体が一番の成果です。");
+
+    const order = { warn: 0, info: 1, good: 2 };
+    return out.sort((a, b) => order[a.level] - order[b.level]);
+  }
+
+  /* ---------- 共通 UI ---------- */
+  let toastTimer = null;
+  function toast(msg) {
+    const el = $("#toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 2000);
+  }
+
+  function el(tag, attrs = {}, children = []) {
+    const node = document.createElement(tag);
+    Object.entries(attrs).forEach(([k, v]) => {
+      if (v === null || v === undefined || v === false) return;
+      if (k === "class") node.className = v;
+      else if (k === "text") node.textContent = v;
+      else node.setAttribute(k, v === true ? "" : v);
+    });
+    [].concat(children).forEach((c) => { if (c) node.append(c); });
+    return node;
+  }
+
+  function showView(view) {
+    state.view = view;
+    $$(".tab").forEach((t) => t.toggleAttribute("aria-current", false));
+    const tab = $(`.tab[data-view="${view}"]`);
+    if (tab) tab.setAttribute("aria-current", "page");
+    $$(".view").forEach((v) => { v.hidden = v.id !== `view-${view}`; });
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function render() {
+    if (state.view === "today") renderToday();
+    if (state.view === "trends") renderTrends();
+    if (state.view === "photos") renderPhotos();
+    if (state.view === "compare") renderCompare();
+    if (state.view === "settings") renderSettings();
+  }
+
+  /* ---------- 今日 ---------- */
+  function buildFormControls() {
+    const habitBox = $("#habitChips");
+    HABITS.forEach((h) => habitBox.append(el("label", { class: "chip" }, [el("input", { type: "checkbox", name: "habits", value: h.id }), el("span", { text: h.label })])));
+    const tagBox = $("#skinTags");
+    SKIN_TAGS.forEach((t) => tagBox.append(el("label", { class: "chip" }, [el("input", { type: "checkbox", name: "skinTags", value: t }), el("span", { text: t })])));
+    [["#skinScale", "skin"], ["#energyScale", "energy"]].forEach(([sel, name]) => {
+      const box = $(sel);
+      for (let i = 1; i <= 5; i += 1) {
+        box.append(el("label", { class: "scale-item" }, [el("input", { type: "radio", name, value: String(i) }), el("span", { text: String(i) })]));
+      }
+    });
+  }
+
+  function fillForm() {
+    const f = $("#entryForm");
+    const e = state.entries.get(state.date) || {};
+    const setNum = (name, v) => { f.elements[name].value = isNum(v) ? String(v) : ""; };
+    setNum("weight", e.weight);
+    setNum("waist", e.waist);
+    setNum("sleep", e.sleep);
+    setNum("protein", e.protein);
+    f.elements.timing.value = e.timing || defaultTiming();
+    f.elements.training.value = e.training || "";
+    f.elements.note.value = e.note || "";
+    $$('#habitChips input').forEach((i) => { i.checked = (e.habits || []).includes(i.value); });
+    $$('#skinTags input').forEach((i) => { i.checked = (e.skinTags || []).includes(i.value); });
+    $$('input[name="skin"]').forEach((i) => { i.checked = Number(i.value) === e.skin; });
+    $$('input[name="energy"]').forEach((i) => { i.checked = Number(i.value) === e.energy; });
+    $("#saveStatus").textContent = e.updatedAt ? `保存済み ${new Date(e.updatedAt).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}` : "";
+  }
+
+  function defaultTiming() {
+    if (state.date !== todayStr()) return "morning";
+    const h = new Date().getHours();
+    return h >= 4 && h < 11 ? "morning" : "evening";
+  }
+
+  function collectForm() {
+    const f = $("#entryForm");
+    const num = (name, min, max) => {
+      const raw = f.elements[name].value;
+      if (raw === "") return null;
+      const v = Number(raw);
+      return isNum(v) && v >= min && v <= max ? v : null;
+    };
+    const radio = (name) => { const c = $(`input[name="${name}"]:checked`); return c ? Number(c.value) : null; };
+    const weight = num("weight", 20, 250);
+    return {
+      date: state.date,
+      weight: weight === null ? null : round(weight, 2),
+      timing: f.elements.timing.value,
+      waist: num("waist", 30, 200),
+      sleep: num("sleep", 0, 24),
+      training: f.elements.training.value,
+      protein: num("protein", 0, 500),
+      habits: $$('#habitChips input:checked').map((i) => i.value),
+      skin: radio("skin"),
+      skinTags: $$('#skinTags input:checked').map((i) => i.value),
+      energy: radio("energy"),
+      note: f.elements.note.value.trim(),
+      updatedAt: Date.now(),
+    };
+  }
+
+  let saveTimer = null;
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    $("#saveStatus").textContent = "入力中…";
+    saveTimer = setTimeout(async () => {
+      try {
+        const entry = collectForm();
+        await putEntry(entry);
+        requestPersist();
+        $("#saveStatus").textContent = `保存済み ${new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}`;
+        renderSummary();
+      } catch (err) {
+        $("#saveStatus").textContent = "保存できませんでした（容量不足やプライベートブラウズの可能性）";
+      }
+    }, 400);
+  }
+
+  function renderSummary() {
+    const st = computeStats(state.date);
+    const box = $("#summaryCards");
+    box.replaceChildren();
+    const card = (label, value, unit, sub) => el("div", { class: "summary" }, [
+      el("p", { class: "label", text: label }),
+      el("p", { class: "value" }, [document.createTextNode(value), unit ? el("small", { text: unit }) : null]),
+      sub ? el("p", { class: "sub", text: sub }) : null,
+    ]);
+    box.append(
+      card("トレンド体重", fmt(st.trend), "kg", st.latest ? `実測 ${fmt(st.latest.weight)}（${fmtShort(st.latest.date)}）` : "記録なし"),
+      card("BMI", fmt(st.bmi), "", isNum(st.stdWeight) ? `標準体重 ${fmt(st.stdWeight)}kg` : "身長は設定から"),
+      card("週あたりの変化", st.rate ? signed(st.rate.perWeek, 2) : "—", st.rate ? "kg" : "", st.rate ? (st.rate.morningOnly ? "朝の記録から" : "全記録から") : "朝の記録4日分〜"),
+      card("連続記録", String(st.streak), "日", `7日中 ${st.days}日記録`),
+    );
+  }
+
+  function renderSlots() {
+    const grid = $("#slotGrid");
+    grid.replaceChildren();
+    SLOTS.forEach((s) => {
+      const photo = state.photos.find((p) => p.date === state.date && p.slot === s.id);
+      const btn = el("button", { type: "button", class: "slot", "aria-label": `${s.label}を${photo ? "撮り直す・見る" : "撮る"}` });
+      if (photo) {
+        btn.append(el("img", { src: photoUrl(photo), alt: `${fmtDate(state.date)}の${s.label}` }), el("span", { class: "slot-label", text: s.label }));
+        btn.addEventListener("click", () => openLightbox(photo));
+      } else {
+        btn.append(el("span", { class: "slot-empty" }, [el("b", { text: "+" }), el("span", { text: s.label }), el("span", { class: "slot-freq", text: `目安：${s.freq}` })]));
+        btn.addEventListener("click", () => openCamera(s.id));
+      }
+      grid.append(btn);
+    });
+  }
+
+  function renderToday() {
+    $("#datePicker").value = state.date;
+    $("#datePicker").max = todayStr();
+    $("#nextDay").disabled = state.date >= todayStr();
+    fillForm();
+    renderSummary();
+    renderSlots();
+  }
+
+  /* ---------- 推移と評価 ---------- */
+  function renderChart(series) {
+    const box = $("#weightChart");
+    box.replaceChildren();
+    const ref = todayStr();
+    const pts = state.range === "all" ? series : series.filter((p) => dayDiff(p.date, ref) < Number(state.range));
+    if (!pts.length) { box.append(el("p", { class: "chart-empty", text: "この期間の体重の記録はまだありません。" })); return; }
+
+    // 実際の表示幅で描く（viewBox を縮めると目盛りの文字が小さくなりすぎるため）
+    const W = Math.max(300, Math.round(box.clientWidth || 640));
+    const H = W < 500 ? 220 : 250, pl = 40, pr = 14, pt = 14, pb = 28;
+    const startDate = state.range === "all" ? pts[0].date : addDays(ref, -(Number(state.range) - 1));
+    const span = Math.max(6, dayDiff(startDate, ref));
+    const vals = pts.flatMap((p) => [p.weight, p.trend]);
+    const target = state.profile.targetWeight;
+    let lo = Math.min(...vals);
+    let hi = Math.max(...vals);
+    const showTarget = isNum(target) && target > lo - 3 && target < hi + 3;
+    if (showTarget) { lo = Math.min(lo, target); hi = Math.max(hi, target); }
+    lo -= 0.4; hi += 0.4;
+    if (hi - lo < 2) { const mid = (hi + lo) / 2; lo = mid - 1; hi = mid + 1; }
+    const x = (d) => pl + (dayDiff(startDate, d) / span) * (W - pl - pr);
+    const y = (v) => pt + ((hi - v) / (hi - lo)) * (H - pt - pb);
+
+    const NS = "http://www.w3.org/2000/svg";
+    const s = (tag, attrs) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `体重の推移。最新のトレンド体重は ${fmt(pts[pts.length - 1].trend)}kg` });
+
+    const range = hi - lo;
+    const step = range > 12 ? 5 : range > 6 ? 2 : range > 3 ? 1 : 0.5;
+    for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
+      svg.append(s("line", { class: "grid", x1: pl, x2: W - pr, y1: y(v), y2: y(v) }));
+      const t = s("text", { class: "axis-label", x: pl - 6, y: y(v) + 4, "text-anchor": "end" });
+      t.textContent = step < 1 ? v.toFixed(1) : String(v);
+      svg.append(t);
+    }
+    [startDate, addDays(startDate, Math.round(span / 2)), addDays(startDate, span)].forEach((d, i) => {
+      const t = s("text", { class: "axis-label", x: x(d), y: H - 8, "text-anchor": ["start", "middle", "end"][i] });
+      t.textContent = fmtShort(d);
+      svg.append(t);
+    });
+    if (showTarget) svg.append(s("line", { class: "target", x1: pl, x2: W - pr, y1: y(target), y2: y(target) }));
+    svg.append(s("polyline", { class: "trend", points: pts.map((p) => `${x(p.date).toFixed(1)},${y(p.trend).toFixed(1)}`).join(" ") }));
+    pts.forEach((p) => {
+      const c = s("circle", { class: p.timing === "morning" ? "dot" : "dot hollow", cx: x(p.date), cy: y(p.weight), r: pts.length > 60 ? 2.5 : 3.5 });
+      const title = s("title", {});
+      title.textContent = `${fmtDate(p.date)} ${fmt(p.weight)}kg（${TIMING_LABEL[p.timing] || "その他"}）／トレンド ${fmt(p.trend)}kg`;
+      c.append(title);
+      svg.append(c);
+    });
+    box.append(svg);
+  }
+
+  function renderStats(st) {
+    const list = $("#statsList");
+    list.replaceChildren();
+    const p = state.profile;
+    const proteinGoal = st.trend ? Math.round(st.trend * p.proteinPerKg) : null;
+    const waist = st.waist;
+    const waistLast = waist[waist.length - 1];
+    const waistFirst = waist.find((w) => dayDiff(w.date, waistLast ? waistLast.date : todayStr()) <= 30);
+    const rows = [
+      ["トレンド体重", st.trend ? `${fmt(st.trend)} kg` : "—"],
+      ["7日間の変化（トレンド）", st.change7 !== null ? `${signed(st.change7, 2)} kg` : "—"],
+      ["週あたりの変化（回帰）", st.rate ? `${signed(st.rate.perWeek, 2)} kg` : "—"],
+      ["BMI ／ 標準体重", isNum(st.bmi) ? `${fmt(st.bmi)} ／ ${fmt(st.stdWeight)} kg` : "—"],
+      ["ウエスト（30日の変化）", waistLast ? `${fmt(waistLast.waist)} cm${waistFirst && waistFirst !== waistLast ? `（${signed(waistLast.waist - waistFirst.waist)}）` : ""}` : "—"],
+      ["睡眠 平均", isNum(st.sleepAvg) ? `${fmt(st.sleepAvg)} 時間` : "—"],
+      ["たんぱく質 平均 ／ 目標", `${isNum(st.proteinAvg) ? Math.round(st.proteinAvg) : "—"} ／ ${proteinGoal || "—"} g`],
+      ["筋トレ回数 ／ 目標", `${st.trainingCount} ／ ${p.trainingTarget} 回`],
+      ["日焼け止め", `${st.habitCount("sunscreen")} ／ 7 日`],
+      ["肌の調子 平均（前週）", isNum(st.skinAvg) ? `${fmt(st.skinAvg)}（${fmt(st.skinPrev)}）` : "—"],
+      ["体調・気分 平均", isNum(st.energyAvg) ? fmt(st.energyAvg) : "—"],
+    ];
+    rows.forEach(([k, v]) => list.append(el("dt", { text: k }), el("dd", { text: v })));
+  }
+
+  function renderInsights(st) {
+    const list = $("#insightList");
+    list.replaceChildren();
+    buildInsights(st).forEach((i) => list.append(el("li", { class: `insight ${i.level}` }, [el("p", { class: "ttl", text: i.title }), el("p", { class: "body", text: i.body })])));
+  }
+
+  function consultText(st) {
+    const p = state.profile;
+    const goalLabel = { "lean-bulk": "筋肉をつけて増やす（リーンバルク）", maintain: "維持して体を整える", cut: "減量" }[p.goal];
+    const lines = [];
+    lines.push("自分磨きの記録です。この内容から、体・肌・生活習慣の評価と、来週やるべき改善点を3つに絞って教えてください。");
+    lines.push("");
+    lines.push(`身長: ${isNum(p.height) ? `${p.height}cm` : "未設定"} / 方針: ${goalLabel} / 目標体重: ${isNum(p.targetWeight) ? `${p.targetWeight}kg` : "未設定"}`);
+    lines.push(`トレンド体重: ${fmt(st.trend)}kg / BMI: ${fmt(st.bmi)} / 週あたり: ${st.rate ? `${signed(st.rate.perWeek, 2)}kg` : "不明"}`);
+    lines.push("");
+    lines.push("日付 | 体重(測定) | トレンド | 睡眠h | たんぱく質g | 筋トレ | 肌1-5 | 気になる所 | 体調 | できたこと | メモ");
+    const series = weightSeries();
+    for (let i = 13; i >= 0; i -= 1) {
+      const d = addDays(todayStr(), -i);
+      const e = state.entries.get(d);
+      if (!e) continue;
+      const tr = series.find((s) => s.date === d);
+      lines.push([
+        fmtShort(d),
+        isNum(e.weight) ? `${fmt(e.weight)}(${TIMING_LABEL[e.timing] || "-"})` : "-",
+        tr ? fmt(tr.trend) : "-",
+        isNum(e.sleep) ? e.sleep : "-",
+        isNum(e.protein) ? e.protein : "-",
+        e.training ? TRAINING_LABEL[e.training] : "-",
+        isNum(e.skin) ? e.skin : "-",
+        (e.skinTags || []).join("・") || "-",
+        isNum(e.energy) ? e.energy : "-",
+        (e.habits || []).map((h) => (HABITS.find((x) => x.id === h) || {}).label).filter(Boolean).join("・") || "-",
+        e.note ? e.note.replace(/\s+/g, " ") : "-",
+      ].join(" | "));
+    }
+    return lines.join("\n");
+  }
+
+  function renderTrends() {
+    const st = computeStats();
+    $$("[data-range]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.range === state.range)));
+    renderChart(st.series);
+    renderStats(st);
+    renderInsights(st);
+    $("#consultText").value = consultText(st);
+  }
+
+  /* ---------- 写真一覧 ---------- */
+  function renderPhotos() {
+    const filter = $("#photoFilter");
+    filter.replaceChildren();
+    [{ id: "all", label: "すべて" }, ...SLOTS].forEach((s) => {
+      const b = el("button", { type: "button", "aria-pressed": String(state.photoFilter === s.id), text: s.label });
+      b.addEventListener("click", () => { state.photoFilter = s.id; renderPhotos(); });
+      filter.append(b);
+    });
+    const list = $("#photoList");
+    list.replaceChildren();
+    const photos = state.photos.filter((p) => state.photoFilter === "all" || p.slot === state.photoFilter);
+    if (!photos.length) { list.append(el("p", { class: "empty", text: "まだ写真がありません。「今日」タブの写真枠から撮れます。" })); return; }
+    const dates = [...new Set(photos.map((p) => p.date))].sort().reverse();
+    dates.forEach((d) => {
+      const row = el("div", { class: "photo-row" });
+      SLOTS.forEach((s) => {
+        const p = photos.find((ph) => ph.date === d && ph.slot === s.id);
+        if (!p) return;
+        const b = el("button", { type: "button", class: "photo-thumb", "aria-label": `${fmtDate(d)} ${s.label}を拡大` }, [el("img", { src: photoUrl(p), alt: "", loading: "lazy" }), el("span", { text: s.label })]);
+        b.addEventListener("click", () => openLightbox(p));
+        row.append(b);
+      });
+      const e = state.entries.get(d);
+      list.append(el("section", { class: "photo-day" }, [el("h3", { text: `${fmtDate(d)}${e && isNum(e.weight) ? `　${fmt(e.weight)}kg` : ""}` }), row]));
+    });
+  }
+
+  /* ---------- 比較 ---------- */
+  function renderCompare() {
+    const slotSel = $("#cmpSlot");
+    if (!slotSel.options.length) SLOTS.forEach((s) => slotSel.append(el("option", { value: s.id, text: s.label })));
+    const slot = slotSel.value;
+    const dates = [...new Set(state.photos.filter((p) => p.slot === slot).map((p) => p.date))].sort();
+    const fillSel = (sel, def) => {
+      const prev = sel.value;
+      sel.replaceChildren(...dates.map((d) => el("option", { value: d, text: fmtDate(d) })));
+      sel.value = dates.includes(prev) ? prev : def || "";
+    };
+    fillSel($("#cmpA"), dates[0]);
+    fillSel($("#cmpB"), dates[dates.length - 1]);
+    $$("[data-cmp]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cmp === state.cmpMode)));
+
+    const stage = $("#cmpStage");
+    stage.replaceChildren();
+    stage.className = "cmp-stage";
+    $("#cmpRange").hidden = true;
+    if (dates.length < 2) {
+      $("#cmpMeta").textContent = "";
+      stage.append(el("p", { class: "empty", text: "この種類の写真が2日分以上たまると比べられます。" }));
+      stage.style.gridTemplateColumns = "1fr";
+      return;
+    }
+    stage.style.gridTemplateColumns = "";
+    const a = state.photos.find((p) => p.slot === slot && p.date === $("#cmpA").value);
+    const b = state.photos.find((p) => p.slot === slot && p.date === $("#cmpB").value);
+    if (!a || !b) return;
+    const series = weightSeries();
+    const ta = trendAt(series, a.date);
+    const tb = trendAt(series, b.date);
+    const days = dayDiff(a.date, b.date);
+    $("#cmpMeta").textContent = `${Math.abs(days)}日の差` + (ta && tb ? `／トレンド体重 ${fmt(ta.trend)} → ${fmt(tb.trend)}kg（${signed(tb.trend - ta.trend)}）` : "");
+
+    if (state.cmpMode === "side") {
+      stage.append(
+        el("figure", {}, [el("img", { src: photoUrl(a), alt: `${fmtDate(a.date)}の写真` }), el("figcaption", { text: `前 ${fmtDate(a.date)}` })]),
+        el("figure", {}, [el("img", { src: photoUrl(b), alt: `${fmtDate(b.date)}の写真` }), el("figcaption", { text: `後 ${fmtDate(b.date)}` })]),
+      );
+    } else {
+      stage.classList.add("slider");
+      const top = el("div", { class: "cmp-top" }, [el("img", { src: photoUrl(a), alt: `${fmtDate(a.date)}の写真` })]);
+      const line = el("div", { class: "cmp-line" });
+      stage.append(el("img", { src: photoUrl(b), alt: `${fmtDate(b.date)}の写真` }), top, line);
+      const range = $("#cmpRange");
+      range.hidden = false;
+      const apply = () => {
+        const v = Number(range.value);
+        top.style.clipPath = `inset(0 ${100 - v}% 0 0)`;
+        line.style.left = `calc(${v}% - 1px)`;
+      };
+      range.oninput = apply;
+      apply();
+    }
+  }
+
+  /* ---------- 設定 ---------- */
+  function renderSettings() {
+    const f = $("#profileForm");
+    const p = state.profile;
+    ["height", "targetWeight", "proteinPerKg", "sleepTarget", "trainingTarget"].forEach((k) => { f.elements[k].value = isNum(p[k]) ? String(p[k]) : ""; });
+    f.elements.goal.value = p.goal;
+    updateStorageInfo();
+  }
+
+  async function updateStorageInfo() {
+    const info = $("#storageInfo");
+    const parts = [`記録 ${state.entries.size}日分・写真 ${state.photos.length}枚`];
+    try {
+      if (navigator.storage && navigator.storage.estimate) {
+        const est = await navigator.storage.estimate();
+        parts.push(`使用量 約${Math.round((est.usage || 0) / 1024 / 1024)}MB`);
+      }
+      if (navigator.storage && navigator.storage.persisted) {
+        parts.push((await navigator.storage.persisted()) ? "消えにくい保存：有効" : "消えにくい保存：未許可（ホーム画面に追加すると有効になりやすい）");
+      }
+    } catch (err) { /* 取得できなくても表示は続ける */ }
+    info.textContent = parts.join("／");
+  }
+
+  function onProfileInput() {
+    const f = $("#profileForm");
+    const num = (k, min, max, fallback) => {
+      const raw = f.elements[k].value;
+      if (raw === "") return fallback;
+      const v = Number(raw);
+      return isNum(v) && v >= min && v <= max ? v : fallback;
+    };
+    state.profile = {
+      ...state.profile,
+      height: num("height", 100, 230, null),
+      targetWeight: num("targetWeight", 20, 250, null),
+      proteinPerKg: num("proteinPerKg", 0.8, 3, DEFAULT_PROFILE.proteinPerKg),
+      sleepTarget: num("sleepTarget", 4, 12, DEFAULT_PROFILE.sleepTarget),
+      trainingTarget: num("trainingTarget", 0, 14, DEFAULT_PROFILE.trainingTarget),
+      goal: f.elements.goal.value,
+    };
+    clearTimeout(onProfileInput.t);
+    onProfileInput.t = setTimeout(() => saveProfile().then(() => toast("設定を保存しました")), 500);
+  }
+
+  function download(name, blob) {
+    const url = URL.createObjectURL(blob);
+    const a = el("a", { href: url, download: name });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(blob);
+    });
+  }
+
+  // fetch(dataURL) は CSP の connect-src で止まるので、自前でデコードする
+  function dataUrlToBlob(url) {
+    const [head, body] = url.split(",");
+    const type = (head.match(/^data:([^;]+)/) || [])[1] || "image/jpeg";
+    const bin = atob(body);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type });
+  }
+
+  async function exportJson() {
+    toast("書き出しています…");
+    const photos = [];
+    for (const p of state.photos) {
+      photos.push({ date: p.date, slot: p.slot, width: p.width, height: p.height, createdAt: p.createdAt, dataUrl: await blobToDataUrl(p.blob) });
+    }
+    const data = { app: "glow-log", version: 1, exportedAt: new Date().toISOString(), profile: state.profile, entries: [...state.entries.values()], photos };
+    download(`glow-log-${todayStr()}.json`, new Blob([JSON.stringify(data)], { type: "application/json" }));
+  }
+
+  function exportCsv() {
+    const series = weightSeries();
+    const header = ["date", "weight", "timing", "trend", "waist", "sleep", "protein", "training", "skin", "skin_tags", "energy", "habits", "note"];
+    const q = (v) => {
+      const s = v === null || v === undefined ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = [...state.entries.values()].sort((a, b) => (a.date < b.date ? -1 : 1)).map((e) => {
+      const t = series.find((s) => s.date === e.date);
+      return [e.date, e.weight, e.timing, t ? round(t.trend, 2) : "", e.waist, e.sleep, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.note].map(q).join(",");
+    });
+    download(`glow-log-${todayStr()}.csv`, new Blob(["﻿" + [header.join(","), ...rows].join("\n")], { type: "text/csv" }));
+  }
+
+  async function importJson(file) {
+    let data;
+    try { data = JSON.parse(await file.text()); } catch (err) { toast("JSONとして読めませんでした"); return; }
+    if (!data || data.app !== "glow-log" || !Array.isArray(data.entries)) { toast("Glow Log の書き出しファイルではありません"); return; }
+    if (!window.confirm(`記録 ${data.entries.length}日分・写真 ${(data.photos || []).length}枚を読み込みます。同じ日付の記録・写真は上書きされます。`)) return;
+    for (const e of data.entries) {
+      if (e && /^\d{4}-\d{2}-\d{2}$/.test(e.date)) await putEntry(e);
+    }
+    for (const p of data.photos || []) {
+      if (!p || !SLOTS.some((s) => s.id === p.slot) || !/^\d{4}-\d{2}-\d{2}$/.test(p.date) || !/^data:image\//.test(p.dataUrl || "")) continue;
+      await savePhoto(p.date, p.slot, dataUrlToBlob(p.dataUrl), p.width, p.height);
+    }
+    if (data.profile) { state.profile = { ...DEFAULT_PROFILE, ...data.profile }; await saveProfile(); }
+    toast("読み込みました");
+    render();
+  }
+
+  async function wipeAll() {
+    if (!window.confirm("この端末の記録と写真をすべて削除します。よろしいですか？")) return;
+    if (!window.confirm("本当に削除しますか？ 元に戻せません。先にバックアップを書き出すことをおすすめします。")) return;
+    await Promise.all(["entries", "photos", "meta"].map((n) => run(n, "readwrite", (s) => s.clear())));
+    state.urls.forEach((u) => URL.revokeObjectURL(u));
+    state.urls.clear();
+    state.entries.clear();
+    state.photos = [];
+    state.profile = { ...DEFAULT_PROFILE };
+    toast("すべて削除しました");
+    render();
+  }
+
+  /* ---------- カメラ ---------- */
+  const cam = { stream: null, facing: "user", slot: null, timer: 0, busy: false };
+
+  function ghostFor(slot) {
+    const prev = state.photos.filter((p) => p.slot === slot && p.date !== state.date).sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+    return prev || null;
+  }
+
+  async function openCamera(slot) {
+    cam.slot = slot;
+    const s = SLOTS.find((x) => x.id === slot);
+    cam.facing = slot.startsWith("face") ? "user" : "environment";
+    $("#camTitle").textContent = `${fmtDate(state.date)}　${s.label}`;
+    const ghost = ghostFor(slot);
+    const g = $("#camGhost");
+    if (ghost) { g.src = photoUrl(ghost); g.hidden = false; } else { g.removeAttribute("src"); g.hidden = true; }
+    $("#ghostOpacity").parentElement.hidden = !ghost;
+    $("#camera").hidden = false;
+    document.body.style.overflow = "hidden";
+    await startStream();
+  }
+
+  async function startStream() {
+    stopStream();
+    const video = $("#camVideo");
+    $("#camError").hidden = true;
+    $("#camShoot").disabled = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $("#camError").hidden = false; return; }
+    try {
+      cam.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: cam.facing, width: { ideal: 1920 }, height: { ideal: 1920 } },
+        audio: false,
+      });
+      video.srcObject = cam.stream;
+      video.classList.toggle("mirror", cam.facing === "user");
+      await video.play();
+      $("#camShoot").disabled = false;
+    } catch (err) {
+      $("#camError").hidden = false;
+    }
+  }
+
+  function stopStream() {
+    if (cam.stream) cam.stream.getTracks().forEach((t) => t.stop());
+    cam.stream = null;
+    $("#camVideo").srcObject = null;
+  }
+
+  function closeCamera() {
+    stopStream();
+    cam.busy = false;
+    $("#camCount").textContent = "";
+    $("#camera").hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+  async function shoot() {
+    if (cam.busy) return;
+    cam.busy = true;
+    const count = $("#camCount");
+    for (let i = cam.timer; i > 0; i -= 1) {
+      if ($("#camera").hidden) return;
+      count.textContent = String(i);
+      await wait(1000);
+    }
+    count.textContent = "";
+    const video = $("#camVideo");
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    if (!vw || !vh) { cam.busy = false; return; }
+    const scale = Math.min(1, PHOTO_MAX / Math.max(vw, vh));
+    const w = Math.round(vw * scale);
+    const h = Math.round(vh * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    // 画面で見たまま（内カメラは鏡像）で保存する。前回写真との重ね合わせがずれないようにするため。
+    if (cam.facing === "user") { ctx.translate(w, 0); ctx.scale(-1, 1); }
+    ctx.drawImage(video, 0, 0, w, h);
+    const blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg", PHOTO_QUALITY));
+    const slot = cam.slot;
+    closeCamera();
+    if (!blob) { toast("撮影に失敗しました"); return; }
+    await savePhoto(state.date, slot, blob, w, h);
+    toast("保存しました");
+    render();
+  }
+
+  function fileToJpeg(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, PHOTO_MAX / Math.max(img.naturalWidth, img.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.naturalWidth * scale);
+        canvas.height = Math.round(img.naturalHeight * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((b) => {
+          URL.revokeObjectURL(url);
+          if (b) resolve({ blob: b, width: canvas.width, height: canvas.height });
+          else reject(new Error("toBlob failed"));
+        }, "image/jpeg", PHOTO_QUALITY);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("decode failed")); };
+      img.src = url;
+    });
+  }
+
+  let pendingSlot = null;
+  function pickFile(slot) {
+    pendingSlot = slot;
+    closeCamera();
+    $("#fileInput").value = "";
+    $("#fileInput").click();
+  }
+
+  /* ---------- 拡大 ---------- */
+  let lightboxPhoto = null;
+  function openLightbox(photo) {
+    lightboxPhoto = photo;
+    const s = SLOTS.find((x) => x.id === photo.slot);
+    $("#lbTitle").textContent = `${fmtDate(photo.date)}　${s ? s.label : ""}`;
+    $("#lbImg").src = photoUrl(photo);
+    $("#lbImg").alt = `${fmtDate(photo.date)}の${s ? s.label : "写真"}`;
+    $("#lightbox").hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function closeLightbox() {
+    $("#lightbox").hidden = true;
+    document.body.style.overflow = "";
+    lightboxPhoto = null;
+  }
+
+  /* ---------- イベント ---------- */
+  function bind() {
+    $$(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
+
+    $("#prevDay").addEventListener("click", () => { state.date = addDays(state.date, -1); renderToday(); });
+    $("#nextDay").addEventListener("click", () => { if (state.date < todayStr()) { state.date = addDays(state.date, 1); renderToday(); } });
+    $("#goToday").addEventListener("click", () => { state.date = todayStr(); renderToday(); });
+    $("#datePicker").addEventListener("change", (e) => {
+      const v = e.target.value;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v) && v <= todayStr()) { state.date = v; renderToday(); }
+    });
+
+    const form = $("#entryForm");
+    form.addEventListener("input", scheduleSave);
+    form.addEventListener("change", scheduleSave);
+    form.addEventListener("submit", (e) => e.preventDefault());
+
+    $$("[data-range]").forEach((b) => b.addEventListener("click", () => { state.range = b.dataset.range; renderTrends(); }));
+    $("#copyConsult").addEventListener("click", async () => {
+      const text = $("#consultText").value;
+      try { await navigator.clipboard.writeText(text); toast("コピーしました"); } catch (err) { $("#consultText").select(); toast("選択しました。長押しでコピーしてください"); }
+    });
+
+    $("#cmpSlot").addEventListener("change", renderCompare);
+    $("#cmpA").addEventListener("change", renderCompare);
+    $("#cmpB").addEventListener("change", renderCompare);
+    $$("[data-cmp]").forEach((b) => b.addEventListener("click", () => { state.cmpMode = b.dataset.cmp; renderCompare(); }));
+
+    $("#profileForm").addEventListener("input", onProfileInput);
+    $("#profileForm").addEventListener("change", onProfileInput);
+    $("#profileForm").addEventListener("submit", (e) => e.preventDefault());
+    $("#exportJson").addEventListener("click", exportJson);
+    $("#exportCsv").addEventListener("click", exportCsv);
+    $("#importJson").addEventListener("change", (e) => { const f = e.target.files[0]; if (f) importJson(f); e.target.value = ""; });
+    $("#wipeAll").addEventListener("click", wipeAll);
+
+    $("#camClose").addEventListener("click", closeCamera);
+    $("#camShoot").addEventListener("click", shoot);
+    $("#camFlip").addEventListener("click", () => { cam.facing = cam.facing === "user" ? "environment" : "user"; startStream(); });
+    $("#camTimer").addEventListener("click", () => {
+      cam.timer = cam.timer === 0 ? 3 : cam.timer === 3 ? 10 : 0;
+      $("#camTimer").textContent = `タイマー ${cam.timer}秒`;
+    });
+    $("#ghostOpacity").addEventListener("input", (e) => { $("#camGhost").style.opacity = String(Number(e.target.value) / 100); });
+    $("#camFile").addEventListener("click", () => pickFile(cam.slot));
+    $("#camPick").addEventListener("click", () => pickFile(cam.slot));
+    $("#fileInput").addEventListener("change", async (e) => {
+      const f = e.target.files[0];
+      if (!f || !pendingSlot) return;
+      try {
+        const { blob, width, height } = await fileToJpeg(f);
+        await savePhoto(state.date, pendingSlot, blob, width, height);
+        toast("保存しました");
+        render();
+      } catch (err) { toast("この画像は読み込めませんでした"); }
+      pendingSlot = null;
+    });
+
+    $("#lbClose").addEventListener("click", closeLightbox);
+    $("#lbDelete").addEventListener("click", async () => {
+      if (!lightboxPhoto) return;
+      if (!window.confirm("この写真を削除しますか？")) return;
+      await deletePhoto(lightboxPhoto.id);
+      closeLightbox();
+      render();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (!$("#camera").hidden) closeCamera();
+      if (!$("#lightbox").hidden) closeLightbox();
+    });
+    document.addEventListener("visibilitychange", () => {
+      // 日付をまたいでアプリを開き直したとき、「今日」を更新する
+      if (document.visibilityState === "visible" && state.view === "today" && !state.entries.has(state.date) && state.date < todayStr()) {
+        state.date = todayStr();
+        renderToday();
+      }
+    });
+  }
+
+  async function init() {
+    buildFormControls();
+    bind();
+    try {
+      db = await openDB();
+      await loadAll();
+    } catch (err) {
+      $("#saveStatus").textContent = "このブラウザでは保存できません（プライベートブラウズを解除してください）";
+    }
+    render();
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    }
+  }
+
+  init();
+})();

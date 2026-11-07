@@ -100,7 +100,7 @@
           <h2>睡眠と心拍</h2>
           <p class="hint">スマートウォッチ・リングの値をそのまま入れます。</p>
           <div class="field-row">
-            <label class="field"><span>寝た時刻</span><input name="bedTime" type="time" /><small class="help"></small><small class="goal">目標：毎日ほぼ同じ時刻（±1時間）</small></label>
+            <label class="field"><span>寝た時刻</span><input name="bedTime" type="time" /><small class="goal">目標：毎日ほぼ同じ時刻（±1時間）</small></label>
             <label class="field"><span>起きた時刻</span><input name="wakeTime" type="time" /></label>
           </div>
           <div class="field-row">
@@ -121,42 +121,28 @@
                 <option value="full">全身</option>
                 <option value="cardio">有酸素のみ</option>
               </select>
-              <small class="help"></small><small class="goal">目標：週3回（健康維持の最低ラインは週2回）</small>
+              <small class="goal">目標：週3回（健康維持の最低ラインは週2回）</small>
             </label>
-            <label class="field"><span>有酸素運動 (分)</span><input name="cardio" type="number" inputmode="numeric" step="5" min="0" max="600" /><small class="help">早歩き・自転車・ジョギングなど、少し息が弾む運動</small><small class="goal">目標：週150分（1日約20分）</small></label>
+            <label class="field"><span>有酸素運動 (分)</span><input name="cardio" type="number" inputmode="numeric" step="5" min="0" max="600" /><small class="help">少し息が弾む運動の合計。<strong>通勤の早歩き（時速5km以上）も含めてOK</strong></small><small class="goal">目標：週150分（1日約20分）</small></label>
           </div>
           <div class="field-row">
-            <label class="field"><span>歩数</span><input name="steps" type="number" inputmode="numeric" step="100" min="0" max="100000" /><small class="help"></small><small class="goal">目標：1日8,000歩以上</small></label>
-            <label class="field"><span>たんぱく質 (g・目安でOK)</span><input name="protein" type="number" inputmode="numeric" step="5" min="0" max="500" placeholder="例: 100" /><small class="help"></small><small class="goal">目標：体重×1.6g（今なら約100g）</small></label>
+            <label class="field"><span>歩数</span><input name="steps" type="number" inputmode="numeric" step="100" min="0" max="100000" /><small class="goal">目標：1日8,000歩以上</small></label>
+            <label class="field"><span>たんぱく質 (g・目安でOK)</span><input name="protein" type="number" inputmode="numeric" step="5" min="0" max="500" placeholder="例: 100" /><small class="goal">目標：体重×1.6g（今なら約100g）</small></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>歩く速さ (km/時)</span><input name="walkSpeed" type="number" inputmode="decimal" step="0.1" min="1" max="10" /><small class="help">スマートウォッチの歩行速度（平均）</small><small class="goal">目標：時速5km以上（有酸素運動に数えられる速さ）</small></label>
+            <label class="field"><span>歩いた距離 (km)</span><input name="walkKm" type="number" inputmode="decimal" step="0.1" min="0" max="100" /><small class="help">わかる日だけ</small></label>
           </div>
           <fieldset class="chips" id="habitChips"><legend>今日できたこと</legend></fieldset>
 
           <h2>肌と調子</h2>
           <fieldset class="scale" id="skinScale"><legend>肌の調子（朝、洗顔後に鏡で）</legend></fieldset>
-          <p class="scale-desc" id="skinDesc"></p>
-          <details class="rubric">
-            <summary>肌の点数のつけ方</summary>
-            <dl>
-              <dt>5</dt><dd>新しいニキビ・赤みが無い。つっぱりもテカリもほぼ無い</dd>
-              <dt>4</dt><dd>小さく気になる所が1つ程度。ほかは良い</dd>
-              <dt>3</dt><dd>ニキビ1〜2個、または赤み・乾燥・テカリのどれかが目立つ</dd>
-              <dt>2</dt><dd>ニキビ3個以上、または赤み・カミソリ負けが広い。ヒリヒリする</dd>
-              <dt>1</dt><dd>炎症が広い・痛い・皮がむける（続くなら皮膚科へ）</dd>
-            </dl>
-          </details>
+          
+          <div class="rubric" data-for="skin"><p class="rubric-title">点数の基準（朝、洗顔後に鏡で見て）</p><ol><li data-v="5"><b>5</b><span>新しいニキビ・赤みが無い。つっぱりもテカリもほぼ無い</span></li><li data-v="4"><b>4</b><span>小さく気になる所が1つ程度。ほかは良い</span></li><li data-v="3"><b>3</b><span>ニキビ1〜2個、または赤み・乾燥・テカリのどれかが目立つ</span></li><li data-v="2"><b>2</b><span>ニキビ3個以上、または赤み・カミソリ負けが広い。ヒリヒリする</span></li><li data-v="1"><b>1</b><span>炎症が広い・痛い・皮がむける（続くなら皮膚科へ）</span></li></ol></div>
           <fieldset class="chips" id="skinTags"><legend>気になったところ</legend></fieldset>
           <fieldset class="scale" id="energyScale"><legend>体調・気分（その日の終わりに）</legend></fieldset>
-          <p class="scale-desc" id="energyDesc"></p>
-          <details class="rubric">
-            <summary>体調・気分の点数のつけ方</summary>
-            <dl>
-              <dt>5</dt><dd>すっきり起きられ、日中の眠気もなく、やる気がある</dd>
-              <dt>4</dt><dd>ほぼ良い。少し眠い時間があった</dd>
-              <dt>3</dt><dd>普通。だるさや眠気がときどきあった</dd>
-              <dt>2</dt><dd>疲れが抜けない、集中できない</dd>
-              <dt>1</dt><dd>体調不良（熱・頭痛など）、何もしたくない</dd>
-            </dl>
-          </details>
+          
+          <div class="rubric" data-for="energy"><p class="rubric-title">点数の基準（その日の終わりに振り返って）</p><ol><li data-v="5"><b>5</b><span>すっきり起きられ、日中の眠気もなく、やる気がある</span></li><li data-v="4"><b>4</b><span>ほぼ良い。少し眠い時間があった</span></li><li data-v="3"><b>3</b><span>普通。だるさや眠気がときどきあった</span></li><li data-v="2"><b>2</b><span>疲れが抜けない、集中できない</span></li><li data-v="1"><b>1</b><span>体調不良（熱・頭痛など）、何もしたくない</span></li></ol></div>
           <label class="field"><span>メモ</span><textarea name="note" rows="3" placeholder="例: 散髪した / 飲み会 / 電気シェーバーに変えた"></textarea></label>
           <p class="save-status" id="saveStatus" aria-live="polite"></p>
         </form>

@@ -43,8 +43,6 @@
     ["MCV", "fL"], ["MCH", "pg"], ["MCHC", "g/dL"], ["血小板数", "×10⁴/μL"],
     ["好中球", "%"], ["リンパ球", "%"], ["単球", "%"], ["好酸球", "%"], ["好塩基球", "%"],
   ];
-  const SKIN_RUBRIC = ["", "炎症が広い・痛い・皮がむける", "ニキビ3個以上、または赤み・カミソリ負けが広い", "ニキビ1〜2個、または赤み・乾燥・テカリのどれかが目立つ", "小さく気になる所が1つ程度", "新しいニキビ・赤みが無く、つっぱりもテカリもほぼ無い"];
-  const ENERGY_RUBRIC = ["", "体調不良、何もしたくない", "疲れが抜けない、集中できない", "普通。だるさや眠気がときどき", "ほぼ良い。少し眠い時間があった", "すっきり起きられ、眠気もなく、やる気がある"];
   const DEFAULT_PROFILE = {
     height: null,
     targetWeight: null,
@@ -185,7 +183,7 @@
 
   /* ---------- 計算 ---------- */
   function isEmptyEntry(e) {
-    return !isNum(e.weight) && !isNum(e.waist) && !isNum(e.restingHr) && !isNum(e.steps) && !isNum(e.cardio) && !e.bedTime && !e.wakeTime && !BODY_FIELDS.some((f) => isNum(e[f.key])) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
+    return !isNum(e.weight) && !isNum(e.waist) && !isNum(e.restingHr) && !isNum(e.steps) && !isNum(e.cardio) && !isNum(e.walkSpeed) && !isNum(e.walkKm) && !e.bedTime && !e.wakeTime && !BODY_FIELDS.some((f) => isNum(e[f.key])) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
       !(e.habits && e.habits.length) && !isNum(e.skin) && !(e.skinTags && e.skinTags.length) && !isNum(e.energy) && !e.note;
   }
 
@@ -279,6 +277,10 @@
       stepsAvg: avg(pick(week, "steps")),
       stepsN: pick(week, "steps").length,
       cardioSum: pick(week, "cardio").reduce((a, b) => a + b, 0),
+      // 有酸素の記録が無い日は、時速5km以上の歩行（距離÷速さ）を早歩きとして数える
+      cardioEst: Math.round(week.reduce((sum, e) => sum + (isNum(e.cardio) ? e.cardio : isNum(e.walkSpeed) && e.walkSpeed >= 5 && isNum(e.walkKm) ? (e.walkKm / e.walkSpeed) * 60 : 0), 0)),
+      cardioEstN: week.filter((e) => !isNum(e.cardio) && isNum(e.walkSpeed) && e.walkSpeed >= 5 && isNum(e.walkKm)).length,
+      walkSpeedAvg: avg(pick(week, "walkSpeed")),
       cardioN: pick(week, "cardio").length,
       rhrAvg: avg(pick(week, "restingHr")),
       rhrN: pick(week, "restingHr").length,
@@ -372,9 +374,15 @@
       if (st.stepsAvg < p.stepsTarget) add("info", `歩数は平均 ${Math.round(st.stepsAvg).toLocaleString()}歩`, `目標 ${p.stepsTarget.toLocaleString()}歩。通勤で1駅歩く・休憩中に10分歩くなど、日常で足すのが続けやすい方法です。`);
       else add("good", `歩数は平均 ${Math.round(st.stepsAvg).toLocaleString()}歩`, "日常の活動量は十分です。");
     }
-    if (st.cardioN >= 1 || st.days >= 5) {
-      if (st.cardioSum < p.cardioTarget) add("info", `有酸素運動 ${st.cardioSum}分／7日`, `健康寿命の目安は週${p.cardioTarget}分（少し息が弾む程度）。心肺の強さは長生きと強く結びつく指標なので、筋トレと別に入れましょう。`);
-      else add("good", `有酸素運動 ${st.cardioSum}分／7日`, "心肺の目安を満たしています。");
+    if (st.cardioN >= 1 || st.cardioEstN >= 1 || st.days >= 5) {
+      const est = st.cardioEstN ? `（うち${st.cardioEstN}日は歩いた距離÷速さで推定）` : "";
+      if (st.cardioEst >= p.cardioTarget) add("good", `有酸素運動 約${st.cardioEst}分／7日`, `週${p.cardioTarget}分の目安を満たしています${est}。心肺をもう一段強くしたいなら、週1回20分ほど「会話がきつい」強さ（坂道・ジョギング）を足すと効果的です。`);
+      else if (st.cardioEst === 0 && isNum(st.stepsAvg) && st.stepsAvg >= 10000) add("info", "歩数は多いので、早歩きなら有酸素の目安を満たしている可能性が高い", "スマートウォッチの「歩く速さ」と「距離」を入れると判定できます。時速5km以上が早歩き（有酸素運動）の目安です。");
+      else add("info", `有酸素運動 約${st.cardioEst}分／7日`, `健康寿命の目安は週${p.cardioTarget}分（少し息が弾む程度）${est}。心肺の強さは長生きと強く結びつく指標です。`);
+    }
+    if (isNum(st.walkSpeedAvg)) {
+      if (st.walkSpeedAvg >= 5) add("good", `歩く速さは平均 時速${fmt(st.walkSpeedAvg)}km`, "早歩き（中くらいの強さの有酸素運動）に入る速さです。");
+      else add("info", `歩く速さは平均 時速${fmt(st.walkSpeedAvg)}km`, "時速5km（1分あたり約85m）を超えると有酸素運動として数えられます。通勤の一部だけでも速めに。");
     }
     if (isNum(st.rhrLatest) && isNum(st.rhrBase) && st.rhrLatest - st.rhrBase >= 5) {
       add("warn", `安静時心拍がいつもより高め（${st.rhrLatest} ／ 普段 ${Math.round(st.rhrBase)}）`, "睡眠不足・疲れ・飲酒・体調不良のサインのことが多いです。筋トレは軽めにして、早めに寝ましょう。");
@@ -405,9 +413,12 @@
         else add("good", `内臓脂肪レベル ${fmt(b.visceralFat)}：標準`, "多くの体組成計で1〜9が標準です。");
       }
       if (isNum(b.bmr)) {
-        const keep = Math.round((b.bmr * 1.55) / 50) * 50;
+        // 活動係数は歩数で決める（筋トレ週2〜3回を含む目安）
+        const steps = st.stepsAvg;
+        const factor = !isNum(steps) ? 1.55 : steps < 5000 ? 1.4 : steps < 8000 ? 1.5 : steps < 12000 ? 1.6 : 1.7;
+        const keep = Math.round((b.bmr * factor) / 50) * 50;
         const plan = { "lean-bulk": [keep + 200, keep + 300, "増量なら"], cut: [keep - 500, keep - 300, "減量なら"], maintain: [keep - 100, keep + 100, "維持なら"] }[p.goal] || [keep, keep, ""];
-        add("info", `1日の食事の目安：約${plan[0]}〜${plan[1]}kcal`, `基礎代謝 ${b.bmr}kcal × 1.55（週3回ほど運動する人の係数）≒ 維持 ${keep}kcal。${plan[2]}この範囲で始め、週あたりの体重変化を見て100〜200kcalずつ調整します。`);
+        add("info", `1日の食事の目安：約${plan[0]}〜${plan[1]}kcal`, `基礎代謝 ${b.bmr}kcal × ${factor}（${isNum(steps) ? `1日 約${Math.round(steps).toLocaleString()}歩＋筋トレの人の係数` : "週3回ほど運動する人の係数。歩数を入れると精度が上がります"}）≒ 維持 ${keep}kcal。${plan[2]}この範囲で始め、週あたりの体重変化を見て100〜200kcalずつ調整します。`);
       }
     }
 
@@ -433,7 +444,8 @@
 
     if (st.trainingLogged >= 2 || st.trainingCount > 0) {
       if (st.trainingCount >= p.trainingTarget) add("good", `筋トレ ${st.trainingCount}回／7日`, "目標回数を達成。重量か回数を少しずつ伸ばすことを意識しましょう。");
-      else add("warn", `筋トレ ${st.trainingCount}回／7日`, `目標は週${p.trainingTarget}回。体型を変える一番の要素なので、短時間でも回数を優先。`);
+      else if (st.trainingCount >= 2) add("info", `筋トレ ${st.trainingCount}回／7日`, `最低ラインの週2回は達成。目標の週${p.trainingTarget}回に届くと、体の変化が早くなります。`);
+      else add("warn", `筋トレ ${st.trainingCount}回／7日`, `最低ラインは週2回、目標は週${p.trainingTarget}回。体型を変える一番の要素なので、短時間でも回数を優先。`);
     }
 
     const sun = st.habitCount("sunscreen");
@@ -529,6 +541,8 @@
     setNum("restingHr", e.restingHr);
     setNum("steps", e.steps);
     setNum("cardio", e.cardio);
+    setNum("walkSpeed", e.walkSpeed);
+    setNum("walkKm", e.walkKm);
     setNum("sleep", e.sleep);
     setNum("protein", e.protein);
     BODY_FIELDS.forEach((b) => setNum(b.key, e[b.key]));
@@ -579,8 +593,9 @@
 
   function updateScaleDesc() {
     const v = (n) => { const c = $(`input[name="${n}"]:checked`); return c ? Number(c.value) : 0; };
-    $("#skinDesc").textContent = v("skin") ? `${v("skin")}：${SKIN_RUBRIC[v("skin")]}` : "";
-    $("#energyDesc").textContent = v("energy") ? `${v("energy")}：${ENERGY_RUBRIC[v("energy")]}` : "";
+    ["skin", "energy"].forEach((n) => {
+      $$(`.rubric[data-for="${n}"] li`).forEach((li) => li.classList.toggle("on", Number(li.dataset.v) === v(n)));
+    });
   }
 
   function collectForm() {
@@ -603,6 +618,8 @@
       restingHr: num("restingHr", 25, 140),
       steps: num("steps", 0, 100000),
       cardio: num("cardio", 0, 600),
+      walkSpeed: num("walkSpeed", 1, 10),
+      walkKm: num("walkKm", 0, 100),
       sleep: num("sleep", 0, 24),
       training: f.elements.training.value,
       protein: num("protein", 0, 500),
@@ -742,7 +759,8 @@
       ["睡眠 平均 ／ 目標", `${isNum(st.sleepAvg) ? fmt(st.sleepAvg) : "—"} ／ ${p.sleepTarget}〜9 時間`],
       ["安静時心拍 平均", isNum(st.rhrAvg) ? `${Math.round(st.rhrAvg)} 拍/分` : "—"],
       ["歩数 平均 ／ 目標", `${isNum(st.stepsAvg) ? Math.round(st.stepsAvg).toLocaleString() : "—"} ／ ${p.stepsTarget.toLocaleString()} 歩`],
-      ["有酸素運動 合計 ／ 目標", `${st.cardioSum} ／ ${p.cardioTarget} 分`],
+      ["有酸素運動（早歩き含む）／ 目標", `約${st.cardioEst} ／ ${p.cardioTarget} 分`],
+      ["歩く速さ 平均", isNum(st.walkSpeedAvg) ? `時速 ${fmt(st.walkSpeedAvg)} km` : "—"],
       ["たんぱく質 平均 ／ 目標", `${isNum(st.proteinAvg) ? Math.round(st.proteinAvg) : "—"} ／ ${proteinGoal || "—"} g`],
       ["筋トレ回数 ／ 目標", `${st.trainingCount} ／ ${p.trainingTarget} 回`],
       ["日焼け止め", `${st.habitCount("sunscreen")} ／ 7 日`],
@@ -781,7 +799,7 @@
       lines.push(`血液検査（${st.lab.date}）: ${out.length ? `基準外 ${out.map((it) => `${it.name} ${it.value}${it.unit || ""}（基準 ${isNum(it.low) ? it.low : ""}〜${isNum(it.high) ? it.high : ""}）`).join("、")}` : "記録した項目はすべて基準内"}`);
     }
     lines.push("");
-    lines.push("日付 | 体重(時刻・タイミング) | ならした体重 | 睡眠h | 安静時心拍 | 歩数 | 有酸素分 | たんぱく質g | 筋トレ | 肌1-5 | 気になる所 | 体調 | できたこと | メモ");
+    lines.push("日付 | 体重(時刻・タイミング) | ならした体重 | 睡眠h | 安静時心拍 | 歩数 | 有酸素分 | 歩行(速さ 距離) | たんぱく質g | 筋トレ | 肌1-5 | 気になる所 | 体調 | できたこと | メモ");
     const series = weightSeries();
     for (let i = 13; i >= 0; i -= 1) {
       const d = addDays(todayStr(), -i);
@@ -796,6 +814,7 @@
         isNum(e.restingHr) ? e.restingHr : "-",
         isNum(e.steps) ? e.steps : "-",
         isNum(e.cardio) ? e.cardio : "-",
+        isNum(e.walkSpeed) ? `${e.walkSpeed}km/h${isNum(e.walkKm) ? ` ${e.walkKm}km` : ""}` : "-",
         isNum(e.protein) ? e.protein : "-",
         e.training ? TRAINING_LABEL[e.training] : "-",
         isNum(e.skin) ? e.skin : "-",
@@ -1062,14 +1081,14 @@
 
   function exportCsv() {
     const series = weightSeries();
-    const header = ["date", "weight", "time", "timing", "trend", "bed_time", "wake_time", "sleep", "resting_hr", "steps", "cardio_min", "protein", "training", "skin", "skin_tags", "energy", "habits", "body_fat", "muscle_mass", "visceral_fat", "bmr", "note"];
+    const header = ["date", "weight", "time", "timing", "trend", "bed_time", "wake_time", "sleep", "resting_hr", "steps", "cardio_min", "walk_speed_kmh", "walk_km", "protein", "training", "skin", "skin_tags", "energy", "habits", "body_fat", "muscle_mass", "visceral_fat", "bmr", "note"];
     const q = (v) => {
       const s = v === null || v === undefined ? "" : String(v);
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const rows = [...state.entries.values()].sort((a, b) => (a.date < b.date ? -1 : 1)).map((e) => {
       const t = series.find((s) => s.date === e.date);
-      return [e.date, e.weight, e.time, e.timing, t ? round(t.trend, 2) : "", e.bedTime, e.wakeTime, e.sleep, e.restingHr, e.steps, e.cardio, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.bodyFat, e.muscleMass, e.visceralFat, e.bmr, e.note].map(q).join(",");
+      return [e.date, e.weight, e.time, e.timing, t ? round(t.trend, 2) : "", e.bedTime, e.wakeTime, e.sleep, e.restingHr, e.steps, e.cardio, e.walkSpeed, e.walkKm, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.bodyFat, e.muscleMass, e.visceralFat, e.bmr, e.note].map(q).join(",");
     });
     download(`glow-log-${todayStr()}.csv`, new Blob(["﻿" + [header.join(","), ...rows].join("\n")], { type: "text/csv" }));
   }

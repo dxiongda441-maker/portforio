@@ -311,12 +311,12 @@ legend { color: var(--muted); font-size: 12px; font-weight: 700; margin-bottom: 
 .field .help { color: var(--muted); font-size: 11px; line-height: 1.5; }
 .field .goal { color: var(--accent); font-size: 11px; font-weight: 700; line-height: 1.5; }
 .goal-box { align-self: end; background: var(--accent-soft); border-radius: 10px; color: var(--ink); font-size: 12px; line-height: 1.5; margin: 0; padding: 8px 10px; }
-.scale-desc { color: var(--accent); font-size: 12px; font-weight: 700; margin: -6px 0 6px; min-height: 1.2em; }
-.rubric { margin: 0 0 12px; }
-.rubric summary { color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700; }
-.rubric dl { display: grid; font-size: 12px; gap: 4px 10px; grid-template-columns: 1.5em 1fr; margin: 6px 0 0; }
-.rubric dt { font-weight: 800; text-align: center; }
-.rubric dd { margin: 0; }
+.rubric { background: var(--bg); border-radius: 10px; margin: -4px 0 12px; padding: 8px 10px; }
+.rubric-title { color: var(--muted); font-size: 11px; font-weight: 700; margin: 0 0 4px; }
+.rubric ol { display: grid; gap: 2px; list-style: none; margin: 0; padding: 0; }
+.rubric li { border-radius: 6px; color: var(--muted); display: grid; font-size: 12px; gap: 8px; grid-template-columns: 1.2em 1fr; line-height: 1.5; padding: 2px 6px; }
+.rubric li b { color: var(--ink); text-align: center; }
+.rubric li.on { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
 .explain summary { cursor: pointer; font-size: 13px; font-weight: 800; }
 .explain p { font-size: 13px; margin: 8px 0 0; }
 

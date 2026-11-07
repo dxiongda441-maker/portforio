@@ -20,8 +20,8 @@
     { id: "body-front", label: "体・正面", freq: "週1" },
     { id: "body-side", label: "体・横", freq: "週1" },
   ];
-  const TIMING_LABEL = { morning: "朝", evening: "夜", "after-bath": "入浴後", other: "その他" };
-  const TRAINING_LABEL = { none: "休み", upper: "上半身", lower: "下半身", full: "全身", cardio: "有酸素" };
+  const TIMING_LABEL = { morning: "朝", noon: "昼", evening: "夜", "after-bath": "入浴後", other: "その他" };
+  const TRAINING_LABEL = { none: "休み", a: "メニューA", b: "メニューB", upper: "上半身", lower: "下半身", full: "全身", cardio: "有酸素" };
   const HABITS = [
     { id: "sunscreen", label: "日焼け止め" },
     { id: "skincare", label: "朝晩スキンケア" },
@@ -43,6 +43,8 @@
     ["MCV", "fL"], ["MCH", "pg"], ["MCHC", "g/dL"], ["血小板数", "×10⁴/μL"],
     ["好中球", "%"], ["リンパ球", "%"], ["単球", "%"], ["好酸球", "%"], ["好塩基球", "%"],
   ];
+  const SKIN_RUBRIC = ["", "炎症が広い・痛い・皮がむける", "ニキビ3個以上、または赤み・カミソリ負けが広い", "ニキビ1〜2個、または赤み・乾燥・テカリのどれかが目立つ", "小さく気になる所が1つ程度", "新しいニキビ・赤みが無く、つっぱりもテカリもほぼ無い"];
+  const ENERGY_RUBRIC = ["", "体調不良、何もしたくない", "疲れが抜けない、集中できない", "普通。だるさや眠気がときどき", "ほぼ良い。少し眠い時間があった", "すっきり起きられ、眠気もなく、やる気がある"];
   const DEFAULT_PROFILE = {
     height: null,
     targetWeight: null,
@@ -50,6 +52,8 @@
     proteinPerKg: 1.6,
     sleepTarget: 7,
     trainingTarget: 3,
+    stepsTarget: 8000, // 身体活動・運動ガイド2023（成人の目安 約8,000歩）
+    cardioTarget: 150, // WHO 2020：中強度の有酸素 週150〜300分
   };
 
   const state = {
@@ -181,7 +185,7 @@
 
   /* ---------- 計算 ---------- */
   function isEmptyEntry(e) {
-    return !isNum(e.weight) && !isNum(e.waist) && !BODY_FIELDS.some((f) => isNum(e[f.key])) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
+    return !isNum(e.weight) && !isNum(e.waist) && !isNum(e.restingHr) && !isNum(e.steps) && !isNum(e.cardio) && !e.bedTime && !e.wakeTime && !BODY_FIELDS.some((f) => isNum(e[f.key])) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
       !(e.habits && e.habits.length) && !isNum(e.skin) && !(e.skinTags && e.skinTags.length) && !isNum(e.energy) && !e.note;
   }
 
@@ -197,7 +201,7 @@
         trend += (1 - Math.pow(0.9, gap)) * (e.weight - trend);
       }
       prevDate = e.date;
-      return { date: e.date, weight: e.weight, timing: e.timing || "other", trend };
+      return { date: e.date, weight: e.weight, timing: e.timing || "other", time: e.time || "", trend };
     });
   }
 
@@ -272,7 +276,14 @@
       habitCount: (id) => week.filter((e) => (e.habits || []).includes(id)).length,
       tagCount: (tag) => week.filter((e) => (e.skinTags || []).includes(tag)).length,
       timings7: new Set(series.filter((p) => dayDiff(p.date, ref) < 7).map((p) => p.timing)),
-      waist: (() => { const w = [...state.entries.values()].filter((e) => isNum(e.waist) && e.date <= ref).sort((a, b) => (a.date < b.date ? -1 : 1)); return w; })(),
+      stepsAvg: avg(pick(week, "steps")),
+      stepsN: pick(week, "steps").length,
+      cardioSum: pick(week, "cardio").reduce((a, b) => a + b, 0),
+      cardioN: pick(week, "cardio").length,
+      rhrAvg: avg(pick(week, "restingHr")),
+      rhrN: pick(week, "restingHr").length,
+      rhrLatest: (() => { const e = week.find((x) => isNum(x.restingHr)); return e ? e.restingHr : null; })(),
+      rhrBase: avg(pick(lastNDays(addDays(ref, -7), 21), "restingHr")),
       days: week.length,
       streak: streak(ref),
       body: latestBody(ref),
@@ -306,7 +317,7 @@
     const p = state.profile;
 
     if (!st.latest) {
-      add("info", "まずは1週間、朝に体重を測る", "トレンドと週あたりの変化は、朝の記録が4日分以上たまると出ます。");
+      add("info", "まずは1週間、朝に体重を測る", "ならした体重の増減（週あたりの変化）は、朝の記録が4日分以上たまると出ます。");
     } else {
       if (st.latest.timing !== "morning") {
         add("info", `最新の体重は「${TIMING_LABEL[st.latest.timing] || "その他"}」に測った値`, "夜や入浴後は汗と食事の影響で、朝より0.5〜1.5kgずれやすいです。比べるのは朝どうしで。");
@@ -322,8 +333,8 @@
       const b = st.bmi;
       if (b < 18.5) add("warn", `BMI ${fmt(b)}：低体重`, "筋肉も脂肪も足りていない状態。食事量を増やし、筋トレで増やした分を筋肉に回しましょう。");
       else if (b < 20) add("info", `BMI ${fmt(b)}：やや細め`, "健康面の問題はない範囲。見た目を変えたいなら、体重を少しずつ増やしながら筋トレするのが近道です。");
-      else if (b < 25) add("good", `BMI ${fmt(b)}：普通体重`, `標準体重（BMI22）は ${fmt(st.stdWeight)}kg。体重の数字より、筋肉と脂肪の比率（写真とウエスト）で判断する段階です。`);
-      else add("warn", `BMI ${fmt(b)}：肥満（1度以上）`, "ウエストの推移と合わせて、ゆるやかな減量を検討しましょう。");
+      else if (b < 25) add("good", `BMI ${fmt(b)}：普通体重`, `BMI＝体重÷身長²の肥満度。標準体重（BMI22）は ${fmt(st.stdWeight)}kg。ここから先は体重の数字より、筋肉と脂肪の比率（体脂肪率と写真）で判断する段階です。`);
+      else add("warn", `BMI ${fmt(b)}：肥満（1度以上）`, "体脂肪率の推移と合わせて、ゆるやかな減量を検討しましょう。");
     }
 
     if (st.rate) {
@@ -333,7 +344,7 @@
       if (p.goal === "lean-bulk") {
         if (r < 0.05) add("warn", `増えていません（週 ${signed(r, 2)}kg）`, `筋肉をつけるには少しの余剰カロリーが必要。1日 +200〜300kcal（ご飯軽く1杯、またはプロテイン＋バナナ）を足してみましょう。（${basis}から計算）`);
         else if (r <= 0.35) add("good", `ちょうどいいペース（週 ${signed(r, 2)}kg）`, `リーンバルクの目安は週 +0.1〜0.3kg 前後。このまま筋トレの重量が伸びているかも確認を。（${basis}から計算）`);
-        else add("warn", `増え方が速め（週 ${signed(r, 2)}kg）`, "速すぎると脂肪の比率が上がります。ウエストが増えていたら、1日100〜200kcal減らしましょう。");
+        else add("warn", `増え方が速め（週 ${signed(r, 2)}kg）`, "速すぎると脂肪の比率が上がります。お腹まわりや体脂肪率が増えていたら、1日100〜200kcal減らしましょう。");
       } else if (p.goal === "cut") {
         if (r > -0.1) add("info", `ほぼ減っていません（週 ${signed(r, 2)}kg）`, "1日 −300〜500kcal を目安に。たんぱく質と筋トレは減量中も維持します。");
         else if (pct < -1) add("warn", `減り方が速すぎます（週 ${signed(pct, 1)}%）`, "体重の1%/週を超えると筋肉も落ちやすい。食事を少し戻しましょう。");
@@ -341,11 +352,11 @@
       } else if (Math.abs(r) > 0.25) {
         add("info", `維持のつもりで週 ${signed(r, 2)}kg 動いています`, "食事量を少し調整しましょう。");
       } else {
-        add("good", "体重は安定しています", "体重を維持しつつ筋トレを続けると、少しずつ体脂肪が減り筋肉が増えます（リコンプ）。写真とウエストで確認を。");
+        add("good", "体重は安定しています", "体重を維持しつつ筋トレを続けると、少しずつ体脂肪が減り筋肉が増えます（リコンプ）。写真と体脂肪率で確認を。");
       }
       if (isNum(p.targetWeight) && st.trend) {
         const diff = p.targetWeight - st.trend;
-        if (Math.abs(diff) < 0.3) add("good", "目標体重に到達", "次の目標（見た目・重量・ウエスト）を決めましょう。");
+        if (Math.abs(diff) < 0.3) add("good", "目標体重に到達", "次の目標（見た目・筋トレの重量・体脂肪率）を決めましょう。");
         else if (Math.sign(diff) === Math.sign(r) && Math.abs(r) > 0.02) {
           const weeks = Math.ceil(diff / r);
           add("info", `目標 ${fmt(p.targetWeight)}kg まで あと ${signed(diff)}kg`, `今のペースだと約${weeks}週（${Math.round(weeks / 4.3)}か月）。`);
@@ -356,6 +367,19 @@
     if (st.sleepN >= 3) {
       if (st.sleepAvg < p.sleepTarget) add("warn", `睡眠が平均 ${fmt(st.sleepAvg)}時間`, `目標 ${p.sleepTarget}時間に届いていません。睡眠不足は肌荒れ・目の充血・筋肉の回復の遅れ・食欲の乱れに直結します。`);
       else add("good", `睡眠は平均 ${fmt(st.sleepAvg)}時間`, "回復の土台はできています。");
+    }
+    if (st.stepsN >= 3) {
+      if (st.stepsAvg < p.stepsTarget) add("info", `歩数は平均 ${Math.round(st.stepsAvg).toLocaleString()}歩`, `目標 ${p.stepsTarget.toLocaleString()}歩。通勤で1駅歩く・休憩中に10分歩くなど、日常で足すのが続けやすい方法です。`);
+      else add("good", `歩数は平均 ${Math.round(st.stepsAvg).toLocaleString()}歩`, "日常の活動量は十分です。");
+    }
+    if (st.cardioN >= 1 || st.days >= 5) {
+      if (st.cardioSum < p.cardioTarget) add("info", `有酸素運動 ${st.cardioSum}分／7日`, `健康寿命の目安は週${p.cardioTarget}分（少し息が弾む程度）。心肺の強さは長生きと強く結びつく指標なので、筋トレと別に入れましょう。`);
+      else add("good", `有酸素運動 ${st.cardioSum}分／7日`, "心肺の目安を満たしています。");
+    }
+    if (isNum(st.rhrLatest) && isNum(st.rhrBase) && st.rhrLatest - st.rhrBase >= 5) {
+      add("warn", `安静時心拍がいつもより高め（${st.rhrLatest} ／ 普段 ${Math.round(st.rhrBase)}）`, "睡眠不足・疲れ・飲酒・体調不良のサインのことが多いです。筋トレは軽めにして、早めに寝ましょう。");
+    } else if (st.rhrN >= 3) {
+      add(st.rhrAvg <= 65 ? "good" : "info", `安静時心拍は平均 ${Math.round(st.rhrAvg)}拍/分`, st.rhrAvg <= 65 ? "心肺の状態は良好な範囲です。" : "有酸素運動を続けると、少しずつ下がっていきます。");
     }
 
     const b = st.body;
@@ -499,7 +523,12 @@
     const e = state.entries.get(state.date) || {};
     const setNum = (name, v) => { f.elements[name].value = isNum(v) ? String(v) : ""; };
     setNum("weight", e.weight);
-    setNum("waist", e.waist);
+    f.elements.time.value = e.time || "";
+    f.elements.bedTime.value = e.bedTime || "";
+    f.elements.wakeTime.value = e.wakeTime || "";
+    setNum("restingHr", e.restingHr);
+    setNum("steps", e.steps);
+    setNum("cardio", e.cardio);
     setNum("sleep", e.sleep);
     setNum("protein", e.protein);
     BODY_FIELDS.forEach((b) => setNum(b.key, e[b.key]));
@@ -511,13 +540,47 @@
     $$('#skinTags input').forEach((i) => { i.checked = (e.skinTags || []).includes(i.value); });
     $$('input[name="skin"]').forEach((i) => { i.checked = Number(i.value) === e.skin; });
     $$('input[name="energy"]').forEach((i) => { i.checked = Number(i.value) === e.energy; });
+    updateScaleDesc();
     $("#saveStatus").textContent = e.updatedAt ? `保存済み ${new Date(e.updatedAt).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}` : "";
   }
 
   function defaultTiming() {
     if (state.date !== todayStr()) return "morning";
-    const h = new Date().getHours();
-    return h >= 4 && h < 11 ? "morning" : "evening";
+    return timingFromHour(new Date().getHours());
+  }
+
+  function timingFromHour(h) {
+    if (h >= 4 && h < 11) return "morning";
+    if (h >= 11 && h < 16) return "noon";
+    return "evening";
+  }
+
+  function nowHHMM() { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  // 体重を入れたら時刻を自動で入れる。寝た・起きた時刻から睡眠時間の空欄を埋める（あとで実測値に直せる）。
+  function onFormInput(ev) {
+    const f = $("#entryForm");
+    const name = ev.target && ev.target.name;
+    if (name === "weight" && f.elements.weight.value && !f.elements.time.value && state.date === todayStr()) {
+      f.elements.time.value = nowHHMM();
+    }
+    if (name === "time" && f.elements.time.value && !state.entries.get(state.date)) {
+      f.elements.timing.value = timingFromHour(Number(f.elements.time.value.slice(0, 2)));
+    }
+    if ((name === "bedTime" || name === "wakeTime") && f.elements.bedTime.value && f.elements.wakeTime.value && !f.elements.sleep.value) {
+      const toMin = (v) => Number(v.slice(0, 2)) * 60 + Number(v.slice(3, 5));
+      let diff = toMin(f.elements.wakeTime.value) - toMin(f.elements.bedTime.value);
+      if (diff <= 0) diff += 24 * 60;
+      f.elements.sleep.value = String(Math.round((diff / 60) * 4) / 4);
+    }
+    if (name === "skin" || name === "energy") updateScaleDesc();
+    scheduleSave();
+  }
+
+  function updateScaleDesc() {
+    const v = (n) => { const c = $(`input[name="${n}"]:checked`); return c ? Number(c.value) : 0; };
+    $("#skinDesc").textContent = v("skin") ? `${v("skin")}：${SKIN_RUBRIC[v("skin")]}` : "";
+    $("#energyDesc").textContent = v("energy") ? `${v("energy")}：${ENERGY_RUBRIC[v("energy")]}` : "";
   }
 
   function collectForm() {
@@ -534,7 +597,12 @@
       date: state.date,
       weight: weight === null ? null : round(weight, 2),
       timing: f.elements.timing.value,
-      waist: num("waist", 30, 200),
+      time: /^\d{2}:\d{2}$/.test(f.elements.time.value) ? f.elements.time.value : "",
+      bedTime: /^\d{2}:\d{2}$/.test(f.elements.bedTime.value) ? f.elements.bedTime.value : "",
+      wakeTime: /^\d{2}:\d{2}$/.test(f.elements.wakeTime.value) ? f.elements.wakeTime.value : "",
+      restingHr: num("restingHr", 25, 140),
+      steps: num("steps", 0, 100000),
+      cardio: num("cardio", 0, 600),
       sleep: num("sleep", 0, 24),
       training: f.elements.training.value,
       protein: num("protein", 0, 500),
@@ -575,8 +643,8 @@
       sub ? el("p", { class: "sub", text: sub }) : null,
     ]);
     box.append(
-      card("トレンド体重", fmt(st.trend), "kg", st.latest ? `実測 ${fmt(st.latest.weight)}（${fmtShort(st.latest.date)}）` : "記録なし"),
-      card("BMI", fmt(st.bmi), "", isNum(st.stdWeight) ? `標準体重 ${fmt(st.stdWeight)}kg` : "身長は設定から"),
+      card("ならした体重", fmt(st.trend), "kg", st.latest ? `実測 ${fmt(st.latest.weight)}（${fmtShort(st.latest.date)}${st.latest.time ? ` ${st.latest.time}` : ""}）` : "記録なし"),
+      card("BMI（肥満度）", fmt(st.bmi), "", isNum(st.stdWeight) ? "体重÷身長²。18.5〜25未満が普通、目標21〜23" : "身長は設定から"),
       card("週あたりの変化", st.rate ? signed(st.rate.perWeek, 2) : "—", st.rate ? "kg" : "", st.rate ? (st.rate.morningOnly ? "朝の記録から" : "全記録から") : "朝の記録4日分〜"),
       card("連続記録", String(st.streak), "日", `7日中 ${st.days}日記録`),
     );
@@ -634,7 +702,7 @@
 
     const NS = "http://www.w3.org/2000/svg";
     const s = (tag, attrs) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
-    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `体重の推移。最新のトレンド体重は ${fmt(pts[pts.length - 1].trend)}kg` });
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `体重の推移。最新のならした体重は ${fmt(pts[pts.length - 1].trend)}kg` });
 
     const range = hi - lo;
     const step = range > 12 ? 5 : range > 6 ? 2 : range > 3 ? 1 : 0.5;
@@ -654,7 +722,7 @@
     pts.forEach((p) => {
       const c = s("circle", { class: p.timing === "morning" ? "dot" : "dot hollow", cx: x(p.date), cy: y(p.weight), r: pts.length > 60 ? 2.5 : 3.5 });
       const title = s("title", {});
-      title.textContent = `${fmtDate(p.date)} ${fmt(p.weight)}kg（${TIMING_LABEL[p.timing] || "その他"}）／トレンド ${fmt(p.trend)}kg`;
+      title.textContent = `${fmtDate(p.date)}${p.time ? ` ${p.time}` : ""} ${fmt(p.weight)}kg（${TIMING_LABEL[p.timing] || "その他"}）／ならした体重 ${fmt(p.trend)}kg`;
       c.append(title);
       svg.append(c);
     });
@@ -666,16 +734,15 @@
     list.replaceChildren();
     const p = state.profile;
     const proteinGoal = st.trend ? Math.round(st.trend * p.proteinPerKg) : null;
-    const waist = st.waist;
-    const waistLast = waist[waist.length - 1];
-    const waistFirst = waist.find((w) => dayDiff(w.date, waistLast ? waistLast.date : todayStr()) <= 30);
     const rows = [
-      ["トレンド体重", st.trend ? `${fmt(st.trend)} kg` : "—"],
-      ["7日間の変化（トレンド）", st.change7 !== null ? `${signed(st.change7, 2)} kg` : "—"],
-      ["週あたりの変化（回帰）", st.rate ? `${signed(st.rate.perWeek, 2)} kg` : "—"],
-      ["BMI ／ 標準体重", isNum(st.bmi) ? `${fmt(st.bmi)} ／ ${fmt(st.stdWeight)} kg` : "—"],
-      ["ウエスト（30日の変化）", waistLast ? `${fmt(waistLast.waist)} cm${waistFirst && waistFirst !== waistLast ? `（${signed(waistLast.waist - waistFirst.waist)}）` : ""}` : "—"],
-      ["睡眠 平均", isNum(st.sleepAvg) ? `${fmt(st.sleepAvg)} 時間` : "—"],
+      ["ならした体重", st.trend ? `${fmt(st.trend)} kg` : "—"],
+      ["7日間の変化（ならした体重）", st.change7 !== null ? `${signed(st.change7, 2)} kg` : "—"],
+      ["週あたりの変化", st.rate ? `${signed(st.rate.perWeek, 2)} kg` : "—"],
+      ["BMI（体重÷身長²）／ 標準体重", isNum(st.bmi) ? `${fmt(st.bmi)} ／ ${fmt(st.stdWeight)} kg` : "—"],
+      ["睡眠 平均 ／ 目標", `${isNum(st.sleepAvg) ? fmt(st.sleepAvg) : "—"} ／ ${p.sleepTarget}〜9 時間`],
+      ["安静時心拍 平均", isNum(st.rhrAvg) ? `${Math.round(st.rhrAvg)} 拍/分` : "—"],
+      ["歩数 平均 ／ 目標", `${isNum(st.stepsAvg) ? Math.round(st.stepsAvg).toLocaleString() : "—"} ／ ${p.stepsTarget.toLocaleString()} 歩`],
+      ["有酸素運動 合計 ／ 目標", `${st.cardioSum} ／ ${p.cardioTarget} 分`],
       ["たんぱく質 平均 ／ 目標", `${isNum(st.proteinAvg) ? Math.round(st.proteinAvg) : "—"} ／ ${proteinGoal || "—"} g`],
       ["筋トレ回数 ／ 目標", `${st.trainingCount} ／ ${p.trainingTarget} 回`],
       ["日焼け止め", `${st.habitCount("sunscreen")} ／ 7 日`],
@@ -684,7 +751,7 @@
     ];
     const b = st.body;
     if (b) {
-      rows.push([`体組成（${fmtShort(b.date)}）体脂肪率 ／ 筋肉量`, `${isNum(b.bodyFat) ? `${fmt(b.bodyFat)}%` : "—"} ／ ${isNum(b.muscleMass) ? `${fmt(b.muscleMass)}kg` : "—"}`]);
+      rows.push([`体組成（${fmtShort(b.date)}）体脂肪率 ／ 筋肉量 （目標 12〜17%）`, `${isNum(b.bodyFat) ? `${fmt(b.bodyFat)}%` : "—"} ／ ${isNum(b.muscleMass) ? `${fmt(b.muscleMass)}kg` : "—"}`]);
       rows.push(["除脂肪量 ／ FFMI", `${isNum(b.lbm) ? `${fmt(b.lbm)}kg` : "—"} ／ ${isNum(b.ffmi) ? fmt(b.ffmi) : "—"}`]);
       rows.push(["内臓脂肪レベル ／ 基礎代謝", `${isNum(b.visceralFat) ? fmt(b.visceralFat) : "—"} ／ ${isNum(b.bmr) ? `${b.bmr}kcal` : "—"}`]);
     }
@@ -704,7 +771,7 @@
     lines.push("自分磨きの記録です。この内容から、体・肌・生活習慣の評価と、来週やるべき改善点を3つに絞って教えてください。");
     lines.push("");
     lines.push(`身長: ${isNum(p.height) ? `${p.height}cm` : "未設定"} / 方針: ${goalLabel} / 目標体重: ${isNum(p.targetWeight) ? `${p.targetWeight}kg` : "未設定"}`);
-    lines.push(`トレンド体重: ${fmt(st.trend)}kg / BMI: ${fmt(st.bmi)} / 週あたり: ${st.rate ? `${signed(st.rate.perWeek, 2)}kg` : "不明"}`);
+    lines.push(`ならした体重（日々のブレをならした値）: ${fmt(st.trend)}kg / BMI: ${fmt(st.bmi)} / 週あたり: ${st.rate ? `${signed(st.rate.perWeek, 2)}kg` : "不明"}`);
     if (st.body) {
       const b = st.body;
       lines.push(`体組成（${b.date}・${TIMING_LABEL[b.timing] || "-"}）: 体脂肪率 ${fmt(b.bodyFat)}% / 筋肉量 ${fmt(b.muscleMass)}kg / 内臓脂肪 ${fmt(b.visceralFat)} / 基礎代謝 ${isNum(b.bmr) ? b.bmr : "-"}kcal / FFMI ${fmt(b.ffmi)}`);
@@ -714,7 +781,7 @@
       lines.push(`血液検査（${st.lab.date}）: ${out.length ? `基準外 ${out.map((it) => `${it.name} ${it.value}${it.unit || ""}（基準 ${isNum(it.low) ? it.low : ""}〜${isNum(it.high) ? it.high : ""}）`).join("、")}` : "記録した項目はすべて基準内"}`);
     }
     lines.push("");
-    lines.push("日付 | 体重(測定) | トレンド | 睡眠h | たんぱく質g | 筋トレ | 肌1-5 | 気になる所 | 体調 | できたこと | メモ");
+    lines.push("日付 | 体重(時刻・タイミング) | ならした体重 | 睡眠h | 安静時心拍 | 歩数 | 有酸素分 | たんぱく質g | 筋トレ | 肌1-5 | 気になる所 | 体調 | できたこと | メモ");
     const series = weightSeries();
     for (let i = 13; i >= 0; i -= 1) {
       const d = addDays(todayStr(), -i);
@@ -723,9 +790,12 @@
       const tr = series.find((s) => s.date === d);
       lines.push([
         fmtShort(d),
-        isNum(e.weight) ? `${fmt(e.weight)}(${TIMING_LABEL[e.timing] || "-"})` : "-",
+        isNum(e.weight) ? `${fmt(e.weight)}(${e.time ? `${e.time} ` : ""}${TIMING_LABEL[e.timing] || "-"})` : "-",
         tr ? fmt(tr.trend) : "-",
         isNum(e.sleep) ? e.sleep : "-",
+        isNum(e.restingHr) ? e.restingHr : "-",
+        isNum(e.steps) ? e.steps : "-",
+        isNum(e.cardio) ? e.cardio : "-",
         isNum(e.protein) ? e.protein : "-",
         e.training ? TRAINING_LABEL[e.training] : "-",
         isNum(e.skin) ? e.skin : "-",
@@ -881,7 +951,7 @@
     const ta = trendAt(series, a.date);
     const tb = trendAt(series, b.date);
     const days = dayDiff(a.date, b.date);
-    $("#cmpMeta").textContent = `${Math.abs(days)}日の差` + (ta && tb ? `／トレンド体重 ${fmt(ta.trend)} → ${fmt(tb.trend)}kg（${signed(tb.trend - ta.trend)}）` : "");
+    $("#cmpMeta").textContent = `${Math.abs(days)}日の差` + (ta && tb ? `／ならした体重 ${fmt(ta.trend)} → ${fmt(tb.trend)}kg（${signed(tb.trend - ta.trend)}）` : "");
 
     if (state.cmpMode === "side") {
       stage.append(
@@ -909,7 +979,7 @@
   function renderSettings() {
     const f = $("#profileForm");
     const p = state.profile;
-    ["height", "targetWeight", "proteinPerKg", "sleepTarget", "trainingTarget"].forEach((k) => { f.elements[k].value = isNum(p[k]) ? String(p[k]) : ""; });
+    ["height", "targetWeight", "proteinPerKg", "sleepTarget", "trainingTarget", "stepsTarget", "cardioTarget"].forEach((k) => { f.elements[k].value = isNum(p[k]) ? String(p[k]) : ""; });
     f.elements.goal.value = p.goal;
     updateStorageInfo();
   }
@@ -944,6 +1014,8 @@
       proteinPerKg: num("proteinPerKg", 0.8, 3, DEFAULT_PROFILE.proteinPerKg),
       sleepTarget: num("sleepTarget", 4, 12, DEFAULT_PROFILE.sleepTarget),
       trainingTarget: num("trainingTarget", 0, 14, DEFAULT_PROFILE.trainingTarget),
+      stepsTarget: num("stepsTarget", 1000, 30000, DEFAULT_PROFILE.stepsTarget),
+      cardioTarget: num("cardioTarget", 0, 1000, DEFAULT_PROFILE.cardioTarget),
       goal: f.elements.goal.value,
     };
     clearTimeout(onProfileInput.t);
@@ -990,14 +1062,14 @@
 
   function exportCsv() {
     const series = weightSeries();
-    const header = ["date", "weight", "timing", "trend", "waist", "sleep", "protein", "training", "skin", "skin_tags", "energy", "habits", "body_fat", "muscle_mass", "visceral_fat", "bmr", "note"];
+    const header = ["date", "weight", "time", "timing", "trend", "bed_time", "wake_time", "sleep", "resting_hr", "steps", "cardio_min", "protein", "training", "skin", "skin_tags", "energy", "habits", "body_fat", "muscle_mass", "visceral_fat", "bmr", "note"];
     const q = (v) => {
       const s = v === null || v === undefined ? "" : String(v);
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const rows = [...state.entries.values()].sort((a, b) => (a.date < b.date ? -1 : 1)).map((e) => {
       const t = series.find((s) => s.date === e.date);
-      return [e.date, e.weight, e.timing, t ? round(t.trend, 2) : "", e.waist, e.sleep, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.bodyFat, e.muscleMass, e.visceralFat, e.bmr, e.note].map(q).join(",");
+      return [e.date, e.weight, e.time, e.timing, t ? round(t.trend, 2) : "", e.bedTime, e.wakeTime, e.sleep, e.restingHr, e.steps, e.cardio, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.bodyFat, e.muscleMass, e.visceralFat, e.bmr, e.note].map(q).join(",");
     });
     download(`glow-log-${todayStr()}.csv`, new Blob(["﻿" + [header.join(","), ...rows].join("\n")], { type: "text/csv" }));
   }
@@ -1199,8 +1271,8 @@
     });
 
     const form = $("#entryForm");
-    form.addEventListener("input", scheduleSave);
-    form.addEventListener("change", scheduleSave);
+    form.addEventListener("input", onFormInput);
+    form.addEventListener("change", onFormInput);
     form.addEventListener("submit", (e) => e.preventDefault());
 
     $$("[data-range]").forEach((b) => b.addEventListener("click", () => { state.range = b.dataset.range; renderTrends(); }));

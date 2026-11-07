@@ -56,8 +56,9 @@
 
 ```text
 entries（1日1件、key = "YYYY-MM-DD"）
-  weight, timing(morning|evening|after-bath|other), waist, sleep,
-  training(none|upper|lower|full|cardio), protein,
+  weight, time("HH:MM"), timing(morning|noon|evening|after-bath|other),
+  bedTime, wakeTime, sleep(実睡眠の時間), restingHr(安静時心拍), steps, cardio(有酸素の分),
+  training(none|a|b|upper|lower|full|cardio), protein,
   habits[], skin(1-5), skinTags[], energy(1-5), note, updatedAt,
   bodyFat(%), muscleMass(kg), visceralFat, bmr(kcal)   ← 体組成計の値（任意）
 photos（1枚1件、同じ日・同じ種類は上書き）
@@ -71,7 +72,7 @@ meta["profile"]
 
 ### 4. 計算と判定
 
-- **トレンド体重**：`trend += (1 − 0.9^経過日数) × (実測 − trend)`
+- **ならした体重**（画面上の呼び名。英語圏の「トレンド体重」）：`trend += (1 − 0.9^経過日数) × (実測 − trend)`
 - **週あたりの変化**：直近28日の回帰直線の傾き×7。朝の記録が4件以上あれば朝だけで計算（条件をそろえる）
 - **BMI・標準体重**：トレンド体重から。標準体重は BMI22
 - **体組成**：除脂肪量＝体重×(1−体脂肪率)、FFMI＝除脂肪量÷身長²。食事の目安＝基礎代謝×1.55（週3回運動）を維持量とし、方針ごとに増減
@@ -87,6 +88,7 @@ meta["profile"]
 
 ### 6. 今後の候補（未実装）
 
+- 画面の各項目に「説明」と「目標」を併記している（目標は健康寿命・若さを保つ観点。出典は WHO 2020 の身体活動指針、厚労省の身体活動・運動ガイド2023 など）。ウエストの欄は 2026-11-07 に廃止（古いデータは残るが表示しない）
 - 毎日の通知（iOS はホーム画面に追加した PWA のみ Web Push 可。サーバーが必要になるため保留）
 - 写真のタイムラプス書き出し
 - 筋トレの種目・重量の記録（今は「部位」だけ）

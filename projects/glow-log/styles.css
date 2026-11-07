@@ -220,7 +220,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .field-row { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 12px; }
 .field-row.three { grid-template-columns: 1fr; }
 @media (min-width: 560px) { .field-row.three { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.field { display: grid; gap: 4px; min-width: 0; }
+.field { align-content: start; display: grid; gap: 4px; min-width: 0; }
 .field > span { color: var(--muted); font-size: 12px; font-weight: 700; }
 .field input, .field select, .field textarea, .consult {
   background: var(--bg);
@@ -306,6 +306,19 @@ legend { color: var(--muted); font-size: 12px; font-weight: 700; margin-bottom: 
   padding: 0 12px;
 }
 .seg button[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow); color: var(--accent); }
+
+/* 項目の説明と目標 */
+.field .help { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.field .goal { color: var(--accent); font-size: 11px; font-weight: 700; line-height: 1.5; }
+.goal-box { align-self: end; background: var(--accent-soft); border-radius: 10px; color: var(--ink); font-size: 12px; line-height: 1.5; margin: 0; padding: 8px 10px; }
+.scale-desc { color: var(--accent); font-size: 12px; font-weight: 700; margin: -6px 0 6px; min-height: 1.2em; }
+.rubric { margin: 0 0 12px; }
+.rubric summary { color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700; }
+.rubric dl { display: grid; font-size: 12px; gap: 4px 10px; grid-template-columns: 1.5em 1fr; margin: 6px 0 0; }
+.rubric dt { font-weight: 800; text-align: center; }
+.rubric dd { margin: 0; }
+.explain summary { cursor: pointer; font-size: 13px; font-weight: 800; }
+.explain p { font-size: 13px; margin: 8px 0 0; }
 
 /* 体組成（折りたたみ） */
 .sub-fields { border: 1px dashed var(--line); border-radius: 10px; margin-bottom: 12px; padding: 10px 12px 0; }

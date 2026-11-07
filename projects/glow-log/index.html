@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
-    <meta name="description" content="体重・写真・肌・睡眠を毎日記録し、トレンド体重と改善点を自動で示す自分磨きPWA。写真は端末の中だけに保存。" />
+    <meta name="description" content="体重・写真・肌・睡眠を毎日記録し、ならした体重と改善点を自動で示す自分磨きPWA。写真は端末の中だけに保存。" />
     <meta name="theme-color" content="#2f6f62" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Glow Log" />
@@ -18,14 +18,14 @@
     <meta property="og:locale" content="ja_JP" />
     <meta property="og:site_name" content="オルタ Portfolio" />
     <meta property="og:title" content="Glow Log — 自分磨きの毎日記録" />
-    <meta property="og:description" content="体重・写真・肌・睡眠を毎日記録し、トレンド体重と改善点を自動で示す自分磨きPWA。写真は端末の中だけに保存。" />
+    <meta property="og:description" content="体重・写真・肌・睡眠を毎日記録し、ならした体重と改善点を自動で示す自分磨きPWA。写真は端末の中だけに保存。" />
     <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/projects/glow-log/" />
     <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/glow-log.jpg" />
     <meta property="og:image:width" content="1280" />
     <meta property="og:image:height" content="800" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Glow Log — 自分磨きの毎日記録" />
-    <meta name="twitter:description" content="体重・写真・肌・睡眠を毎日記録し、トレンド体重と改善点を自動で示す自分磨きPWA。" />
+    <meta name="twitter:description" content="体重・写真・肌・睡眠を毎日記録し、ならした体重と改善点を自動で示す自分磨きPWA。" />
     <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/glow-log.jpg" />
   </head>
   <body>
@@ -61,56 +61,102 @@
         </div>
 
         <div class="summary-cards" id="summaryCards"></div>
+        <details class="card explain">
+          <summary>「ならした体重」とは？</summary>
+          <p>体重は水分・食事・トイレで毎日 ±1kg ほど上下するので、1日の値だけでは太ったのか痩せたのか分かりません。そこで、<strong>毎日の値を少しずつ平均に取り込んで「ブレをならした体重」</strong>を出しています（その日の実測を1割、それまでの値を9割で混ぜる計算。だいたい直近1〜2週間の平均に近い）。</p>
+          <p>増えた・減ったの判断は、実測ではなくこちらで行います。グラフでは点が実測、線がならした体重です。</p>
+        </details>
 
         <form id="entryForm" class="card" autocomplete="off">
           <h2>体重と体</h2>
           <div class="field-row">
-            <label class="field"><span>体重 (kg)</span><input name="weight" type="number" inputmode="decimal" step="0.1" min="20" max="250" placeholder="60.5" /></label>
-            <label class="field"><span>測ったタイミング</span>
+            <label class="field"><span>体重 (kg)</span><input name="weight" type="number" inputmode="decimal" step="0.1" min="20" max="250" placeholder="60.5" /><small class="help">入力すると時刻が自動で入ります</small></label>
+            <label class="field"><span>測った時刻</span><input name="time" type="time" /></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>タイミング</span>
               <select name="timing">
                 <option value="morning">朝・トイレ後・食前</option>
+                <option value="noon">昼</option>
                 <option value="evening">夜</option>
                 <option value="after-bath">入浴後</option>
                 <option value="other">その他</option>
               </select>
             </label>
-          </div>
-          <div class="field-row">
-            <label class="field"><span>ウエスト (cm・任意)</span><input name="waist" type="number" inputmode="decimal" step="0.5" min="30" max="200" placeholder="へその高さ" /></label>
-            <label class="field"><span>睡眠 (時間)</span><input name="sleep" type="number" inputmode="decimal" step="0.25" min="0" max="24" placeholder="7" /></label>
+            <p class="goal-box">比べるのは<strong>朝・トイレ後・食前</strong>の値どうし。昼や入浴後は水分で0.5〜1.5kgずれます。</p>
           </div>
           <details class="sub-fields" id="bodyCompBox">
-            <summary>体組成計の値（任意）</summary>
+            <summary>体組成計の値（体重と同じ時に）</summary>
             <div class="field-row">
-              <label class="field"><span>体脂肪率 (%)</span><input name="bodyFat" type="number" inputmode="decimal" step="0.1" min="2" max="60" /></label>
-              <label class="field"><span>筋肉量 (kg)</span><input name="muscleMass" type="number" inputmode="decimal" step="0.1" min="10" max="150" /></label>
+              <label class="field"><span>体脂肪率 (%)</span><input name="bodyFat" type="number" inputmode="decimal" step="0.1" min="2" max="60" /><small class="help">体重のうち脂肪が占める割合。20代男性の標準はおよそ10〜20%</small><small class="goal">目標：12〜17%</small></label>
+              <label class="field"><span>筋肉量 (kg)</span><input name="muscleMass" type="number" inputmode="decimal" step="0.1" min="10" max="150" /><small class="help">体重から脂肪と骨を除いた量（水分も含む）</small><small class="goal">目標：少しずつ増やす（約53kg＝FFMI 20前後）</small></label>
             </div>
             <div class="field-row">
-              <label class="field"><span>内臓脂肪レベル</span><input name="visceralFat" type="number" inputmode="decimal" step="0.5" min="1" max="30" /></label>
-              <label class="field"><span>基礎代謝 (kcal)</span><input name="bmr" type="number" inputmode="numeric" step="10" min="600" max="4000" /></label>
+              <label class="field"><span>内臓脂肪レベル</span><input name="visceralFat" type="number" inputmode="decimal" step="0.5" min="1" max="30" /><small class="help">お腹の内側（内臓のまわり）の脂肪の目安</small><small class="goal">目標：9以下（今の5前後を保つ）</small></label>
+              <label class="field"><span>基礎代謝 (kcal)</span><input name="bmr" type="number" inputmode="numeric" step="10" min="600" max="4000" /><small class="help">何もしなくても1日に使うカロリー。筋肉が増えると上がる</small><small class="goal">目標：同年代男性の平均 約1,500以上</small></label>
             </div>
           </details>
 
-          <h2>トレーニングと食事</h2>
+          <h2>睡眠と心拍</h2>
+          <p class="hint">スマートウォッチ・リングの値をそのまま入れます。</p>
+          <div class="field-row">
+            <label class="field"><span>寝た時刻</span><input name="bedTime" type="time" /><small class="help"></small><small class="goal">目標：毎日ほぼ同じ時刻（±1時間）</small></label>
+            <label class="field"><span>起きた時刻</span><input name="wakeTime" type="time" /></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>睡眠時間 (時間)</span><input name="sleep" type="number" inputmode="decimal" step="0.05" min="0" max="24" placeholder="7" /><small class="help">実際に眠っていた時間（布団にいた時間ではなく）</small><small class="goal">目標：7〜9時間</small></label>
+            <label class="field"><span>安静時心拍数 (拍/分)</span><input name="restingHr" type="number" inputmode="numeric" step="1" min="25" max="140" /><small class="help">寝ている間・起きてすぐの心拍。低いほど心肺が強い傾向</small><small class="goal">目標：60前後以下。いつもより+5以上なら疲れのサイン</small></label>
+          </div>
+
+          <h2>運動と食事</h2>
           <div class="field-row">
             <label class="field"><span>筋トレ</span>
               <select name="training">
                 <option value="">記録なし</option>
                 <option value="none">休み</option>
+                <option value="a">メニューA</option>
+                <option value="b">メニューB</option>
                 <option value="upper">上半身</option>
                 <option value="lower">下半身</option>
                 <option value="full">全身</option>
                 <option value="cardio">有酸素のみ</option>
               </select>
+              <small class="help"></small><small class="goal">目標：週3回（健康維持の最低ラインは週2回）</small>
             </label>
-            <label class="field"><span>たんぱく質 (g・目安でOK)</span><input name="protein" type="number" inputmode="numeric" step="5" min="0" max="500" placeholder="例: 110" /></label>
+            <label class="field"><span>有酸素運動 (分)</span><input name="cardio" type="number" inputmode="numeric" step="5" min="0" max="600" /><small class="help">早歩き・自転車・ジョギングなど、少し息が弾む運動</small><small class="goal">目標：週150分（1日約20分）</small></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>歩数</span><input name="steps" type="number" inputmode="numeric" step="100" min="0" max="100000" /><small class="help"></small><small class="goal">目標：1日8,000歩以上</small></label>
+            <label class="field"><span>たんぱく質 (g・目安でOK)</span><input name="protein" type="number" inputmode="numeric" step="5" min="0" max="500" placeholder="例: 100" /><small class="help"></small><small class="goal">目標：体重×1.6g（今なら約100g）</small></label>
           </div>
           <fieldset class="chips" id="habitChips"><legend>今日できたこと</legend></fieldset>
 
           <h2>肌と調子</h2>
-          <fieldset class="scale" id="skinScale"><legend>肌の調子（1 悪い 〜 5 良い）</legend></fieldset>
+          <fieldset class="scale" id="skinScale"><legend>肌の調子（朝、洗顔後に鏡で）</legend></fieldset>
+          <p class="scale-desc" id="skinDesc"></p>
+          <details class="rubric">
+            <summary>肌の点数のつけ方</summary>
+            <dl>
+              <dt>5</dt><dd>新しいニキビ・赤みが無い。つっぱりもテカリもほぼ無い</dd>
+              <dt>4</dt><dd>小さく気になる所が1つ程度。ほかは良い</dd>
+              <dt>3</dt><dd>ニキビ1〜2個、または赤み・乾燥・テカリのどれかが目立つ</dd>
+              <dt>2</dt><dd>ニキビ3個以上、または赤み・カミソリ負けが広い。ヒリヒリする</dd>
+              <dt>1</dt><dd>炎症が広い・痛い・皮がむける（続くなら皮膚科へ）</dd>
+            </dl>
+          </details>
           <fieldset class="chips" id="skinTags"><legend>気になったところ</legend></fieldset>
-          <fieldset class="scale" id="energyScale"><legend>体調・気分（1 〜 5）</legend></fieldset>
+          <fieldset class="scale" id="energyScale"><legend>体調・気分（その日の終わりに）</legend></fieldset>
+          <p class="scale-desc" id="energyDesc"></p>
+          <details class="rubric">
+            <summary>体調・気分の点数のつけ方</summary>
+            <dl>
+              <dt>5</dt><dd>すっきり起きられ、日中の眠気もなく、やる気がある</dd>
+              <dt>4</dt><dd>ほぼ良い。少し眠い時間があった</dd>
+              <dt>3</dt><dd>普通。だるさや眠気がときどきあった</dd>
+              <dt>2</dt><dd>疲れが抜けない、集中できない</dd>
+              <dt>1</dt><dd>体調不良（熱・頭痛など）、何もしたくない</dd>
+            </dl>
+          </details>
           <label class="field"><span>メモ</span><textarea name="note" rows="3" placeholder="例: 散髪した / 飲み会 / 電気シェーバーに変えた"></textarea></label>
           <p class="save-status" id="saveStatus" aria-live="polite"></p>
         </form>
@@ -126,8 +172,7 @@
           <h3>体重・体組成</h3>
           <ul>
             <li><strong>朝起きてトイレの後、食べる・飲む前</strong>に、下着だけで測る。体組成計も同じタイミングで（昼や入浴後は水分で体脂肪率が数%動く）。</li>
-            <li>毎日 ±1kg は水分で動く。<strong>見るのは「トレンド体重」</strong>（日々の値をならした線）。</li>
-            <li>ウエストは週1回、朝、へその高さで、息を軽く吐いた状態で測る。</li>
+            <li>毎日 ±1kg は水分で動く。<strong>見るのは「ならした体重」</strong>（日々のブレをならした値）。</li>
           </ul>
           <h3>顔の写真（肌を見る用・毎日）</h3>
           <ol>
@@ -160,7 +205,7 @@
             </div>
           </div>
           <div class="chart" id="weightChart"></div>
-          <p class="legend"><span class="lg-dot"></span>朝の実測 <span class="lg-dot hollow"></span>朝以外 <span class="lg-line"></span>トレンド <span class="lg-target"></span>目標</p>
+          <p class="legend"><span class="lg-dot"></span>朝の実測 <span class="lg-dot hollow"></span>朝以外 <span class="lg-line"></span>ならした体重 <span class="lg-target"></span>目標</p>
         </div>
 
         <div class="card">
@@ -249,6 +294,10 @@
           <div class="field-row">
             <label class="field"><span>睡眠の目標 (時間)</span><input name="sleepTarget" type="number" inputmode="decimal" step="0.5" min="4" max="12" /></label>
             <label class="field"><span>週の筋トレ目標 (回)</span><input name="trainingTarget" type="number" inputmode="numeric" step="1" min="0" max="14" /></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>1日の歩数目標</span><input name="stepsTarget" type="number" inputmode="numeric" step="500" min="1000" max="30000" /></label>
+            <label class="field"><span>週の有酸素運動の目標 (分)</span><input name="cardioTarget" type="number" inputmode="numeric" step="10" min="0" max="1000" /></label>
           </div>
         </form>
 

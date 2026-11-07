@@ -2,8 +2,8 @@
 // 後片付けは自分のプレフィックスを持つものだけに限定する（docs/decisions/0003）。
 // 記録と写真は IndexedDB にあり、このキャッシュとは無関係（版数を上げてもデータは消えない）。
 const CACHE_PREFIX = "glow-log-";
-const CACHE_NAME = `${CACHE_PREFIX}v8`;
-const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg", "../../assets/favicon.svg"];
+const CACHE_NAME = `${CACHE_PREFIX}v9`;
+const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg", "./icon-180.png", "./icon-512.png", "../../assets/favicon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));

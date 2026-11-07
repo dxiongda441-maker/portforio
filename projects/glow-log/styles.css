@@ -93,14 +93,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .brand { align-items: center; display: flex; gap: 10px; }
 .brand-mark {
-  align-items: center;
-  background: var(--accent);
   border-radius: 10px;
-  color: var(--accent-ink);
-  display: inline-flex;
-  font-weight: 800;
+  display: block;
+  flex: none;
   height: 38px;
-  justify-content: center;
   width: 38px;
 }
 .brand-name { font-size: 18px; font-weight: 800; letter-spacing: 0.02em; margin: 0; }

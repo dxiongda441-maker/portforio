@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
+    <meta name="description" content="仕事・副業・趣味・学びの大事な習慣を、毎日○△×で記録する記録帳PWA。手書き日記の転記もひと月の表からすぐ。記録は端末の中だけに保存。" />
+    <meta name="theme-color" content="#28466e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Maru Log" />
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
+    <title>Maru Log — ○△×の毎日記録帳</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/projects/maru-log/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="オルタ Portfolio" />
+    <meta property="og:title" content="Maru Log — ○△×の毎日記録帳" />
+    <meta property="og:description" content="仕事・副業・趣味・学びの大事な習慣を、毎日○△×で記録する記録帳PWA。記録は端末の中だけに保存。" />
+    <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/projects/maru-log/" />
+    <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/maru-log.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="800" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Maru Log — ○△×の毎日記録帳" />
+    <meta name="twitter:description" content="仕事・副業・趣味・学びの大事な習慣を、毎日○△×で記録する記録帳PWA。" />
+    <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/maru-log.jpg" />
+  </head>
+  <body>
+    <a class="portfolio-back" href="../../"><span aria-hidden="true">←</span> オルタのポートフォリオへ戻る</a>
+
+    <header class="app-header">
+      <div class="brand">
+        <img class="brand-mark" src="./icon.svg" alt="" width="38" height="38" />
+        <div>
+          <p class="brand-name">Maru Log</p>
+          <p class="brand-sub">仕事・副業・趣味・学びの ○△× 記録帳</p>
+        </div>
+      </div>
+      <span class="privacy-badge" title="記録はこの端末のブラウザ内（IndexedDB）にだけ保存します。サーバーには送りません。">端末内だけに保存</span>
+    </header>
+
+    <nav class="tabs" aria-label="メインメニュー">
+      <button class="tab" type="button" data-view="today" aria-current="page">今日</button>
+      <button class="tab" type="button" data-view="month">月の表</button>
+      <button class="tab" type="button" data-view="review">振り返り</button>
+      <button class="tab" type="button" data-view="settings">設定</button>
+    </nav>
+
+    <main class="main">
+      <!-- 今日 -->
+      <section id="view-today" class="view" aria-label="その日の記録">
+        <div class="date-nav">
+          <button type="button" class="icon-btn" id="prevDay" aria-label="前の日">‹</button>
+          <input type="date" id="datePicker" aria-label="記録する日" />
+          <button type="button" class="icon-btn" id="nextDay" aria-label="次の日">›</button>
+          <button type="button" class="ghost-btn" id="goToday">今日へ</button>
+        </div>
+
+        <div class="day-score card" id="dayScore"></div>
+
+        <div id="markList"></div>
+
+        <form id="memoForm" class="card" autocomplete="off">
+          <h2>ひとことメモ</h2>
+          <p class="hint">手書き日記の要点だけを書き写す欄。空欄でも大丈夫です。</p>
+          <div id="memoFields"></div>
+        </form>
+        <p class="save-status" id="saveStatus" aria-live="polite"></p>
+      </section>
+
+      <!-- 月の表 -->
+      <section id="view-month" class="view" aria-label="月の表" hidden>
+        <div class="date-nav">
+          <button type="button" class="icon-btn" id="prevMonth" aria-label="前の月">‹</button>
+          <p class="month-title" id="monthTitle"></p>
+          <button type="button" class="icon-btn" id="nextMonth" aria-label="次の月">›</button>
+          <button type="button" class="ghost-btn" id="goThisMonth">今月へ</button>
+        </div>
+        <p class="hint">マスをタップするたびに <b class="m-o">○</b> → <b class="m-t">△</b> → <b class="m-x">×</b> → 空欄 と切り替わります。手書き日記をまとめて書き写すときに。日付を押すとその日の画面へ。</p>
+        <div class="grid-wrap card" id="gridWrap"></div>
+      </section>
+
+      <!-- 振り返り -->
+      <section id="view-review" class="view" aria-label="振り返り" hidden>
+        <div class="segmented" role="group" aria-label="期間">
+          <button type="button" data-range="7">7日</button>
+          <button type="button" data-range="30">30日</button>
+          <button type="button" data-range="90">90日</button>
+        </div>
+        <div class="summary-cards" id="reviewSummary"></div>
+        <div class="card">
+          <h2>項目ごとの結果</h2>
+          <p class="hint">棒は左から ○・△・×・未記入 の割合。「連続」は今日（未記入なら昨日）までで × と未記入を挟まずに続いた日数。</p>
+          <div id="itemStats"></div>
+        </div>
+        <div class="card">
+          <h2>気づき</h2>
+          <ul class="insights" id="insights"></ul>
+        </div>
+        <div class="card">
+          <h2>メモの振り返り</h2>
+          <div class="field-row">
+            <label class="field"><span>分野</span><select id="memoFilter"></select></label>
+            <label class="field"><span>言葉で探す</span><input id="memoSearch" type="search" placeholder="例：英語、投稿" /></label>
+          </div>
+          <ol class="memo-list" id="memoList"></ol>
+        </div>
+        <div class="card">
+          <h2>振り返りの文章</h2>
+          <p class="hint">期間の結果を文章にまとめたもの。週報・手帳への転記や、AI への相談に。<strong>コピーするだけで、どこにも送りません。</strong></p>
+          <textarea id="reviewText" rows="10" readonly></textarea>
+          <button type="button" class="primary-btn" id="copyReview">コピーする</button>
+        </div>
+      </section>
+
+      <!-- 設定 -->
+      <section id="view-settings" class="view" aria-label="設定" hidden>
+        <div class="card">
+          <h2>記録する項目</h2>
+          <p class="hint">○△× の基準を書いておくと、日によって甘くなったり辛くなったりしません（例：英語 ○＝30分以上 △＝10分 ×＝なし）。項目を「休止」にすると、過去の記録は残したまま今日の画面から外れます。</p>
+          <div id="itemEditor"></div>
+          <button type="button" class="ghost-btn wide" id="addItem">＋ 項目を足す</button>
+        </div>
+
+        <div class="card">
+          <h2>バックアップ</h2>
+          <p class="hint">記録はこの端末のブラウザの中だけにあります。機種変更・ブラウザのデータ削除で消えるので、<strong>週に1回は書き出し</strong>を。iPhone はホーム画面に追加すると消えにくくなります。</p>
+          <p class="storage-info" id="storageInfo"></p>
+          <div class="btn-row">
+            <button type="button" class="primary-btn" id="exportJson">全データを書き出す（JSON）</button>
+            <button type="button" class="ghost-btn" id="exportCsv">表計算用（CSV）</button>
+          </div>
+          <label class="file-btn">書き出したファイルを読み込む<input type="file" id="importJson" accept="application/json,.json" /></label>
+          <p class="hint">読み込みは上書きではなく合流です。同じ日付は、ファイルに入っているマスとメモだけを置き換えます。</p>
+        </div>
+
+        <div class="card danger-zone">
+          <h2>すべて削除</h2>
+          <p class="hint">この端末の記録と項目設定を消します。元に戻せません。</p>
+          <button type="button" class="danger-btn" id="wipeAll">すべて削除する</button>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

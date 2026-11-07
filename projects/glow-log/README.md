@@ -58,9 +58,13 @@
 entries（1日1件、key = "YYYY-MM-DD"）
   weight, timing(morning|evening|after-bath|other), waist, sleep,
   training(none|upper|lower|full|cardio), protein,
-  habits[], skin(1-5), skinTags[], energy(1-5), note, updatedAt
+  habits[], skin(1-5), skinTags[], energy(1-5), note, updatedAt,
+  bodyFat(%), muscleMass(kg), visceralFat, bmr(kcal)   ← 体組成計の値（任意）
 photos（1枚1件、同じ日・同じ種類は上書き）
   date, slot(face-front|face-side|body-front|body-side), blob(JPEG 長辺1440px), width, height
+meta["labs"]（血液検査。1回の検査＝1件）
+  [{ id, date, place, note, items: [{ name, value, unit, low, high }] }]
+  基準範囲は検査機関ごとに違うので、結果票の値を項目ごとに持つ。前回比較は項目名（括弧と空白を除く）で突き合わせる
 meta["profile"]
   height, targetWeight, goal(lean-bulk|maintain|cut), proteinPerKg, sleepTarget, trainingTarget
 ```
@@ -70,6 +74,8 @@ meta["profile"]
 - **トレンド体重**：`trend += (1 − 0.9^経過日数) × (実測 − trend)`
 - **週あたりの変化**：直近28日の回帰直線の傾き×7。朝の記録が4件以上あれば朝だけで計算（条件をそろえる）
 - **BMI・標準体重**：トレンド体重から。標準体重は BMI22
+- **体組成**：除脂肪量＝体重×(1−体脂肪率)、FFMI＝除脂肪量÷身長²。食事の目安＝基礎代謝×1.55（週3回運動）を維持量とし、方針ごとに増減
+- **血液検査**：結果票の基準範囲の外に ↑↓。最新の検査から1年以上たつと健診を案内
 - **評価ルール**（`buildInsights()`）：測定タイミングのばらつき／BMI 区分／方針ごとのペース（増量は週 +0.1〜0.3kg 前後を適正）／目標体重までの週数／睡眠の平均／たんぱく質（体重×g/kg）／筋トレ回数／日焼け止め／肌スコアの週比較／ヒゲ・ニキビの頻度／写真の空き日数／連続記録
 
 ### 5. プライバシーと消失対策
@@ -77,6 +83,7 @@ meta["profile"]
 - 外部通信なし（CSP で禁止）。写真をサーバーに送らない
 - `navigator.storage.persist()` を要求。iPhone は**ホーム画面に追加**すると消えにくい
 - 設定 → 「全データを書き出す」で写真込みの JSON、「CSV」で数値だけ。週1回の書き出しを案内
+- 読み込みは**項目単位のマージ**。ファイルに値がある項目だけ上書きし、端末側にしかない値（睡眠など）は残す。血液検査は `id` が同じものだけ置き換える
 
 ### 6. 今後の候補（未実装）
 

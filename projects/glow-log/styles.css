@@ -307,6 +307,34 @@ legend { color: var(--muted); font-size: 12px; font-weight: 700; margin-bottom: 
 }
 .seg button[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow); color: var(--accent); }
 
+/* 体組成（折りたたみ） */
+.sub-fields { border: 1px dashed var(--line); border-radius: 10px; margin-bottom: 12px; padding: 10px 12px 0; }
+.sub-fields summary { color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 700; padding-bottom: 10px; }
+.sub-fields[open] summary { margin-bottom: 4px; }
+
+/* 血液検査 */
+.lab-record { border-top: 1px solid var(--line); padding: 10px 0; }
+.lab-record:first-child { border-top: 0; padding-top: 0; }
+.lab-record summary { cursor: pointer; font-size: 14px; }
+.badge { border-radius: 999px; font-size: 11px; font-weight: 800; padding: 2px 8px; white-space: nowrap; }
+.badge.good { background: var(--good-soft); color: var(--good); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.table-wrap { margin-top: 8px; overflow-x: auto; }
+.lab-table { border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; width: 100%; }
+.lab-table th, .lab-table td { border-bottom: 1px solid var(--line); padding: 6px 4px; text-align: right; white-space: nowrap; }
+.lab-table .unit { color: var(--muted); display: block; font-size: 10px; }
+.lab-table thead th { color: var(--muted); font-size: 11px; font-weight: 700; }
+.lab-table th[scope="row"], .lab-table thead th:first-child { font-weight: 700; text-align: left; }
+.lab-table tr.flag-high td:nth-child(2), .lab-table tr.flag-low td:nth-child(2) { color: var(--warn); font-weight: 800; }
+.lab-table tr.flag-high, .lab-table tr.flag-low { background: var(--warn-soft); }
+.lab-add { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
+.lab-add summary { cursor: pointer; font-weight: 800; margin-bottom: 10px; }
+.lab-rows { display: grid; gap: 6px; margin-top: 10px; }
+.lab-row { display: grid; gap: 4px; grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) 36px; }
+.lab-row input { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; font-size: 13px; min-height: 38px; min-width: 0; padding: 4px 6px; }
+.icon-btn.small { font-size: 16px; height: 38px; width: 36px; }
+.link-btn.dark { color: var(--muted); padding: 4px 0; }
+
 /* 写真スロット */
 .slot-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 760px) { .slot-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

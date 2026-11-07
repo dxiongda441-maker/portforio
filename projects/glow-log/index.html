@@ -79,6 +79,17 @@
             <label class="field"><span>ウエスト (cm・任意)</span><input name="waist" type="number" inputmode="decimal" step="0.5" min="30" max="200" placeholder="へその高さ" /></label>
             <label class="field"><span>睡眠 (時間)</span><input name="sleep" type="number" inputmode="decimal" step="0.25" min="0" max="24" placeholder="7" /></label>
           </div>
+          <details class="sub-fields" id="bodyCompBox">
+            <summary>体組成計の値（任意）</summary>
+            <div class="field-row">
+              <label class="field"><span>体脂肪率 (%)</span><input name="bodyFat" type="number" inputmode="decimal" step="0.1" min="2" max="60" /></label>
+              <label class="field"><span>筋肉量 (kg)</span><input name="muscleMass" type="number" inputmode="decimal" step="0.1" min="10" max="150" /></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span>内臓脂肪レベル</span><input name="visceralFat" type="number" inputmode="decimal" step="0.5" min="1" max="30" /></label>
+              <label class="field"><span>基礎代謝 (kcal)</span><input name="bmr" type="number" inputmode="numeric" step="10" min="600" max="4000" /></label>
+            </div>
+          </details>
 
           <h2>トレーニングと食事</h2>
           <div class="field-row">
@@ -157,6 +168,26 @@
           <h2>評価と改善点</h2>
           <p class="hint">記録から自動で判定しています。医療的な診断ではありません。</p>
           <ul class="insights" id="insightList"></ul>
+        </div>
+
+        <div class="card">
+          <h2>血液検査・健康診断</h2>
+          <p class="hint">基準範囲の外の値に印が付き、前回の値と並べて見られます。判断は医師の説明を優先してください。</p>
+          <div id="labList"></div>
+          <details class="lab-add">
+            <summary>検査結果を追加する</summary>
+            <div class="field-row">
+              <label class="field"><span>採血日</span><input type="date" id="labDate" /></label>
+              <label class="field"><span>施設・種類（任意）</span><input type="text" id="labPlace" maxlength="40" placeholder="例: 会社の健診" /></label>
+            </div>
+            <p class="hint">基準範囲は結果票に書かれた値を入れてください（検査機関ごとに少しずつ違います）。</p>
+            <div class="btn-row">
+              <button type="button" class="ghost-btn" id="labTemplate">血算（CBC）の項目を並べる</button>
+              <button type="button" class="ghost-btn" id="labAddRow">項目を1行足す</button>
+            </div>
+            <div class="lab-rows" id="labRows"></div>
+            <div class="btn-row"><button type="button" class="primary-btn" id="labSave">保存する</button></div>
+          </details>
         </div>
 
         <div class="card">

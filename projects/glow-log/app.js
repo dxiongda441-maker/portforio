@@ -30,6 +30,19 @@
     { id: "no-late-snack", label: "寝る前に食べない" },
   ];
   const SKIN_TAGS = ["赤み", "ニキビ", "乾燥", "テカリ", "カミソリ負け", "青ヒゲ", "クマ"];
+  // 体組成計の値（任意）。家庭用の体組成計は体内の水分で数%ぶれるので、朝の同じ条件での推移で見る。
+  const BODY_FIELDS = [
+    { key: "bodyFat", label: "体脂肪率", unit: "%", min: 2, max: 60 },
+    { key: "muscleMass", label: "筋肉量", unit: "kg", min: 10, max: 150 },
+    { key: "visceralFat", label: "内臓脂肪レベル", unit: "", min: 1, max: 30 },
+    { key: "bmr", label: "基礎代謝", unit: "kcal", min: 600, max: 4000 },
+  ];
+  // 血液検査のひな形（血算＋白血球分画）。基準範囲は検査機関ごとに違うので、結果票の値で上書きする。
+  const LAB_TEMPLATE = [
+    ["白血球数", "/μL"], ["赤血球数", "×10⁴/μL"], ["ヘモグロビン", "g/dL"], ["ヘマトクリット", "%"],
+    ["MCV", "fL"], ["MCH", "pg"], ["MCHC", "g/dL"], ["血小板数", "×10⁴/μL"],
+    ["好中球", "%"], ["リンパ球", "%"], ["単球", "%"], ["好酸球", "%"], ["好塩基球", "%"],
+  ];
   const DEFAULT_PROFILE = {
     height: null,
     targetWeight: null,
@@ -43,6 +56,7 @@
     entries: new Map(),
     photos: [],
     profile: { ...DEFAULT_PROFILE },
+    labs: [],
     date: todayStr(),
     view: "today",
     range: "30",
@@ -104,11 +118,13 @@
   }
 
   async function loadAll() {
-    const [entries, photos, profile] = await Promise.all([
+    const [entries, photos, profile, labs] = await Promise.all([
       run("entries", "readonly", (s) => s.getAll()),
       run("photos", "readonly", (s) => s.getAll()),
       run("meta", "readonly", (s) => s.get("profile")),
+      run("meta", "readonly", (s) => s.get("labs")),
     ]);
+    state.labs = Array.isArray(labs) ? labs : [];
     state.entries = new Map(entries.map((e) => [e.date, e]));
     state.photos = photos;
     state.profile = { ...DEFAULT_PROFILE, ...(profile || {}) };
@@ -126,6 +142,10 @@
 
   async function saveProfile() {
     await run("meta", "readwrite", (s) => s.put(state.profile, "profile"));
+  }
+
+  async function saveLabs() {
+    await run("meta", "readwrite", (s) => s.put(state.labs, "labs"));
   }
 
   async function savePhoto(date, slot, blob, width, height) {
@@ -161,7 +181,7 @@
 
   /* ---------- 計算 ---------- */
   function isEmptyEntry(e) {
-    return !isNum(e.weight) && !isNum(e.waist) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
+    return !isNum(e.weight) && !isNum(e.waist) && !BODY_FIELDS.some((f) => isNum(e[f.key])) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
       !(e.habits && e.habits.length) && !isNum(e.skin) && !(e.skinTags && e.skinTags.length) && !isNum(e.energy) && !e.note;
   }
 
@@ -255,7 +275,28 @@
       waist: (() => { const w = [...state.entries.values()].filter((e) => isNum(e.waist) && e.date <= ref).sort((a, b) => (a.date < b.date ? -1 : 1)); return w; })(),
       days: week.length,
       streak: streak(ref),
+      body: latestBody(ref),
+      lab: [...state.labs].filter((l) => l.date <= ref).sort((a, b) => (a.date < b.date ? 1 : -1))[0] || null,
     };
+  }
+
+  // 直近60日で体組成の値がある最新の記録。除脂肪量とFFMI（除脂肪量÷身長²）も出す。
+  function latestBody(ref) {
+    const e = [...state.entries.values()]
+      .filter((x) => x.date <= ref && dayDiff(x.date, ref) <= 60 && BODY_FIELDS.some((f) => isNum(x[f.key])))
+      .sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+    if (!e) return null;
+    const h = isNum(state.profile.height) ? state.profile.height / 100 : null;
+    const w = isNum(e.weight) ? e.weight : null;
+    const lbm = w && isNum(e.bodyFat) ? w * (1 - e.bodyFat / 100) : null;
+    return { ...e, lbm, ffmi: lbm && h ? lbm / (h * h) : null };
+  }
+
+  function labFlag(item) {
+    if (!isNum(item.value)) return "";
+    if (isNum(item.high) && item.value > item.high) return "high";
+    if (isNum(item.low) && item.value < item.low) return "low";
+    return "";
   }
 
   /* ---------- 評価と改善点 ---------- */
@@ -315,6 +356,47 @@
     if (st.sleepN >= 3) {
       if (st.sleepAvg < p.sleepTarget) add("warn", `睡眠が平均 ${fmt(st.sleepAvg)}時間`, `目標 ${p.sleepTarget}時間に届いていません。睡眠不足は肌荒れ・目の充血・筋肉の回復の遅れ・食欲の乱れに直結します。`);
       else add("good", `睡眠は平均 ${fmt(st.sleepAvg)}時間`, "回復の土台はできています。");
+    }
+
+    const b = st.body;
+    if (b) {
+      const cond = b.timing && b.timing !== "morning" ? `（${fmtShort(b.date)}・${TIMING_LABEL[b.timing] || "その他"}の測定。朝の値と比べると水分の分ずれます）` : `（${fmtShort(b.date)}の測定）`;
+      if (isNum(b.ffmi)) {
+        const f = round(b.ffmi, 1); // 表示（小数1桁）と判定をそろえる
+        if (f < 18) add("info", `FFMI ${fmt(f)}：筋肉はまだ少なめ`, `除脂肪量 ${fmt(b.lbm)}kg。筋トレで増やす余地が大きい段階です。${cond}`);
+        else if (f < 20) add("info", `FFMI ${fmt(f)}：平均的`, `除脂肪量 ${fmt(b.lbm)}kg。鍛えていない〜始めたばかりの人の範囲。20前後まで上がると服の上からも体格が変わって見えます。${cond}`);
+        else if (f < 22) add("good", `FFMI ${fmt(f)}：鍛えている人の範囲`, `除脂肪量 ${fmt(b.lbm)}kg。${cond}`);
+        else add("good", `FFMI ${fmt(f)}：かなり筋肉が多い`, `除脂肪量 ${fmt(b.lbm)}kg。${cond}`);
+      }
+      if (isNum(b.bodyFat)) {
+        const bf = b.bodyFat;
+        const note = "家庭用の体組成計は体内の水分で数%ぶれます。1回の値ではなく、朝の同じ条件での推移で判断を。";
+        if (bf < 10) add("info", `体脂肪率 ${fmt(bf)}%：かなり低い`, note);
+        else if (bf < 20) add("good", `体脂肪率 ${fmt(bf)}%：標準の範囲`, `リーンバルクを始めて問題ない水準です。${note}`);
+        else if (bf < 25) add("info", `体脂肪率 ${fmt(bf)}%：やや高め`, `増量より、体重維持で筋トレする方が見た目は早く変わります。${note}`);
+        else add("warn", `体脂肪率 ${fmt(bf)}%：高め`, `ゆるやかな減量を検討しましょう。${note}`);
+      }
+      if (isNum(b.visceralFat)) {
+        if (b.visceralFat >= 10) add("warn", `内臓脂肪レベル ${fmt(b.visceralFat)}：高め`, "多くの体組成計で10以上は「やや過剰」。食事と運動の見直しを。");
+        else add("good", `内臓脂肪レベル ${fmt(b.visceralFat)}：標準`, "多くの体組成計で1〜9が標準です。");
+      }
+      if (isNum(b.bmr)) {
+        const keep = Math.round((b.bmr * 1.55) / 50) * 50;
+        const plan = { "lean-bulk": [keep + 200, keep + 300, "増量なら"], cut: [keep - 500, keep - 300, "減量なら"], maintain: [keep - 100, keep + 100, "維持なら"] }[p.goal] || [keep, keep, ""];
+        add("info", `1日の食事の目安：約${plan[0]}〜${plan[1]}kcal`, `基礎代謝 ${b.bmr}kcal × 1.55（週3回ほど運動する人の係数）≒ 維持 ${keep}kcal。${plan[2]}この範囲で始め、週あたりの体重変化を見て100〜200kcalずつ調整します。`);
+      }
+    }
+
+    if (st.lab) {
+      const out = st.lab.items.filter((it) => labFlag(it));
+      const age = dayDiff(st.lab.date, todayStr());
+      if (out.length) {
+        add("info", `血液検査（${st.lab.date}）で基準外：${out.map((it) => `${it.name}${labFlag(it) === "high" ? "↑" : "↓"}`).join("・")}`,
+          "わずかな外れは、風邪の後や採血時の体調で一時的に出ることも多いです。医師から説明があればそれを優先し、気になる症状が続くときや次の健診で再確認を。");
+      } else {
+        add("good", `血液検査（${st.lab.date}）は記録した項目がすべて基準内`, "");
+      }
+      if (age > 365) add("info", "血液検査から1年以上たっています", "年1回の健診で、血算に加えて脂質・肝機能・腎機能・血糖も見ておくと安心です（増量で食事が変わるときは特に脂質）。");
     }
 
     const proteinGoal = st.trend ? Math.round(st.trend * p.proteinPerKg) : null;
@@ -420,6 +502,8 @@
     setNum("waist", e.waist);
     setNum("sleep", e.sleep);
     setNum("protein", e.protein);
+    BODY_FIELDS.forEach((b) => setNum(b.key, e[b.key]));
+    if (BODY_FIELDS.some((b) => isNum(e[b.key]))) $("#bodyCompBox").open = true;
     f.elements.timing.value = e.timing || defaultTiming();
     f.elements.training.value = e.training || "";
     f.elements.note.value = e.note || "";
@@ -454,6 +538,7 @@
       sleep: num("sleep", 0, 24),
       training: f.elements.training.value,
       protein: num("protein", 0, 500),
+      ...Object.fromEntries(BODY_FIELDS.map((b) => [b.key, num(b.key, b.min, b.max)])),
       habits: $$('#habitChips input:checked').map((i) => i.value),
       skin: radio("skin"),
       skinTags: $$('#skinTags input:checked').map((i) => i.value),
@@ -597,6 +682,12 @@
       ["肌の調子 平均（前週）", isNum(st.skinAvg) ? `${fmt(st.skinAvg)}（${fmt(st.skinPrev)}）` : "—"],
       ["体調・気分 平均", isNum(st.energyAvg) ? fmt(st.energyAvg) : "—"],
     ];
+    const b = st.body;
+    if (b) {
+      rows.push([`体組成（${fmtShort(b.date)}）体脂肪率 ／ 筋肉量`, `${isNum(b.bodyFat) ? `${fmt(b.bodyFat)}%` : "—"} ／ ${isNum(b.muscleMass) ? `${fmt(b.muscleMass)}kg` : "—"}`]);
+      rows.push(["除脂肪量 ／ FFMI", `${isNum(b.lbm) ? `${fmt(b.lbm)}kg` : "—"} ／ ${isNum(b.ffmi) ? fmt(b.ffmi) : "—"}`]);
+      rows.push(["内臓脂肪レベル ／ 基礎代謝", `${isNum(b.visceralFat) ? fmt(b.visceralFat) : "—"} ／ ${isNum(b.bmr) ? `${b.bmr}kcal` : "—"}`]);
+    }
     rows.forEach(([k, v]) => list.append(el("dt", { text: k }), el("dd", { text: v })));
   }
 
@@ -614,6 +705,14 @@
     lines.push("");
     lines.push(`身長: ${isNum(p.height) ? `${p.height}cm` : "未設定"} / 方針: ${goalLabel} / 目標体重: ${isNum(p.targetWeight) ? `${p.targetWeight}kg` : "未設定"}`);
     lines.push(`トレンド体重: ${fmt(st.trend)}kg / BMI: ${fmt(st.bmi)} / 週あたり: ${st.rate ? `${signed(st.rate.perWeek, 2)}kg` : "不明"}`);
+    if (st.body) {
+      const b = st.body;
+      lines.push(`体組成（${b.date}・${TIMING_LABEL[b.timing] || "-"}）: 体脂肪率 ${fmt(b.bodyFat)}% / 筋肉量 ${fmt(b.muscleMass)}kg / 内臓脂肪 ${fmt(b.visceralFat)} / 基礎代謝 ${isNum(b.bmr) ? b.bmr : "-"}kcal / FFMI ${fmt(b.ffmi)}`);
+    }
+    if (st.lab) {
+      const out = st.lab.items.filter((it) => labFlag(it));
+      lines.push(`血液検査（${st.lab.date}）: ${out.length ? `基準外 ${out.map((it) => `${it.name} ${it.value}${it.unit || ""}（基準 ${isNum(it.low) ? it.low : ""}〜${isNum(it.high) ? it.high : ""}）`).join("、")}` : "記録した項目はすべて基準内"}`);
+    }
     lines.push("");
     lines.push("日付 | 体重(測定) | トレンド | 睡眠h | たんぱく質g | 筋トレ | 肌1-5 | 気になる所 | 体調 | できたこと | メモ");
     const series = weightSeries();
@@ -645,7 +744,80 @@
     renderChart(st.series);
     renderStats(st);
     renderInsights(st);
+    renderLabs();
     $("#consultText").value = consultText(st);
+  }
+
+  /* ---------- 血液検査 ---------- */
+  const normName = (n) => String(n || "").replace(/[（(].*?[)）]/g, "").replace(/\s/g, "");
+
+  function renderLabs() {
+    const box = $("#labList");
+    box.replaceChildren();
+    const labs = [...state.labs].sort((a, b) => (a.date < b.date ? 1 : -1));
+    if (!labs.length) { box.append(el("p", { class: "empty", text: "まだ記録がありません。下の「検査結果を追加する」から入れられます。" })); return; }
+    labs.forEach((lab, idx) => {
+      const prev = labs[idx + 1];
+      const table = el("table", { class: "lab-table" });
+      table.append(el("thead", {}, [el("tr", {}, [el("th", { text: "項目" }), el("th", { text: "結果" }), el("th", { text: "基準範囲" }), el("th", { text: "前回" })])]));
+      const tbody = el("tbody");
+      lab.items.forEach((it) => {
+        const flag = labFlag(it);
+        const before = prev && prev.items.find((x) => normName(x.name) === normName(it.name));
+        const range = isNum(it.low) || isNum(it.high) ? `${isNum(it.low) ? it.low : ""}〜${isNum(it.high) ? it.high : ""}` : "—";
+        tbody.append(el("tr", { class: flag ? `flag-${flag}` : "" }, [
+          el("th", { scope: "row", text: it.name }),
+          el("td", { text: `${isNum(it.value) ? it.value : "—"}${flag === "high" ? " ↑" : flag === "low" ? " ↓" : ""}` }),
+          el("td", {}, [document.createTextNode(range), it.unit ? el("small", { class: "unit", text: it.unit }) : null]),
+          el("td", { text: before && isNum(before.value) ? String(before.value) : "—" }),
+        ]));
+      });
+      table.append(tbody);
+      const del = el("button", { type: "button", class: "link-btn dark", text: "この記録を削除" });
+      del.addEventListener("click", async () => {
+        if (!window.confirm(`${lab.date} の検査記録を削除しますか？`)) return;
+        state.labs = state.labs.filter((x) => x.id !== lab.id);
+        await saveLabs();
+        renderTrends();
+      });
+      const out = lab.items.filter((it) => labFlag(it)).length;
+      const det = el("details", { class: "lab-record" }, [
+        el("summary", {}, [el("strong", { text: lab.date.replace(/-/g, "/") }), document.createTextNode(`　${lab.place || ""}　`), el("span", { class: out ? "badge warn" : "badge good", text: out ? `基準外 ${out}` : "すべて基準内" })]),
+        el("div", { class: "table-wrap" }, [table]),
+        lab.note ? el("p", { class: "hint", text: lab.note }) : null,
+        del,
+      ]);
+      if (idx === 0) det.open = true;
+      box.append(det);
+    });
+  }
+
+  function addLabRow(name = "", unit = "", value = "", low = "", high = "") {
+    const row = el("div", { class: "lab-row" });
+    [["name", "項目名", "text", name], ["value", "結果", "number", value], ["unit", "単位", "text", unit], ["low", "下限", "number", low], ["high", "上限", "number", high]].forEach(([k, ph, type, v]) => {
+      row.append(el("input", { class: `lab-${k}`, type, placeholder: ph, "aria-label": ph, value: v, step: type === "number" ? "any" : null, inputmode: type === "number" ? "decimal" : null }));
+    });
+    const rm = el("button", { type: "button", class: "icon-btn small", "aria-label": "この行を消す", text: "×" });
+    rm.addEventListener("click", () => row.remove());
+    row.append(rm);
+    $("#labRows").append(row);
+  }
+
+  async function saveLabFromForm() {
+    const date = $("#labDate").value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { toast("採血日を入れてください"); return; }
+    const n = (v) => (v === "" || !isNum(Number(v)) ? null : Number(v));
+    const items = $$("#labRows .lab-row").map((r) => ({
+      name: $(".lab-name", r).value.trim(), value: n($(".lab-value", r).value), unit: $(".lab-unit", r).value.trim(),
+      low: n($(".lab-low", r).value), high: n($(".lab-high", r).value),
+    })).filter((it) => it.name && isNum(it.value));
+    if (!items.length) { toast("結果が入った項目がありません"); return; }
+    state.labs.push({ id: `lab-${date}-${Date.now()}`, date, place: $("#labPlace").value.trim(), items });
+    await saveLabs();
+    $("#labRows").replaceChildren();
+    $("#labPlace").value = "";
+    toast("検査結果を保存しました");
+    renderTrends();
   }
 
   /* ---------- 写真一覧 ---------- */
@@ -812,20 +984,20 @@
     for (const p of state.photos) {
       photos.push({ date: p.date, slot: p.slot, width: p.width, height: p.height, createdAt: p.createdAt, dataUrl: await blobToDataUrl(p.blob) });
     }
-    const data = { app: "glow-log", version: 1, exportedAt: new Date().toISOString(), profile: state.profile, entries: [...state.entries.values()], photos };
+    const data = { app: "glow-log", version: 1, exportedAt: new Date().toISOString(), profile: state.profile, labs: state.labs, entries: [...state.entries.values()], photos };
     download(`glow-log-${todayStr()}.json`, new Blob([JSON.stringify(data)], { type: "application/json" }));
   }
 
   function exportCsv() {
     const series = weightSeries();
-    const header = ["date", "weight", "timing", "trend", "waist", "sleep", "protein", "training", "skin", "skin_tags", "energy", "habits", "note"];
+    const header = ["date", "weight", "timing", "trend", "waist", "sleep", "protein", "training", "skin", "skin_tags", "energy", "habits", "body_fat", "muscle_mass", "visceral_fat", "bmr", "note"];
     const q = (v) => {
       const s = v === null || v === undefined ? "" : String(v);
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const rows = [...state.entries.values()].sort((a, b) => (a.date < b.date ? -1 : 1)).map((e) => {
       const t = series.find((s) => s.date === e.date);
-      return [e.date, e.weight, e.timing, t ? round(t.trend, 2) : "", e.waist, e.sleep, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.note].map(q).join(",");
+      return [e.date, e.weight, e.timing, t ? round(t.trend, 2) : "", e.waist, e.sleep, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.bodyFat, e.muscleMass, e.visceralFat, e.bmr, e.note].map(q).join(",");
     });
     download(`glow-log-${todayStr()}.csv`, new Blob(["﻿" + [header.join(","), ...rows].join("\n")], { type: "text/csv" }));
   }
@@ -834,15 +1006,31 @@
     let data;
     try { data = JSON.parse(await file.text()); } catch (err) { toast("JSONとして読めませんでした"); return; }
     if (!data || data.app !== "glow-log" || !Array.isArray(data.entries)) { toast("Glow Log の書き出しファイルではありません"); return; }
-    if (!window.confirm(`記録 ${data.entries.length}日分・写真 ${(data.photos || []).length}枚を読み込みます。同じ日付の記録・写真は上書きされます。`)) return;
+    const labs = Array.isArray(data.labs) ? data.labs : [];
+    if (!window.confirm(`記録 ${data.entries.length}日分・写真 ${(data.photos || []).length}枚・血液検査 ${labs.length}件を読み込みます。同じ日付の記録は、ファイルに値がある項目だけ上書きします。`)) return;
+    const hasValue = (v) => v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && !v.length);
     for (const e of data.entries) {
-      if (e && /^\d{4}-\d{2}-\d{2}$/.test(e.date)) await putEntry(e);
+      if (!e || !/^\d{4}-\d{2}-\d{2}$/.test(e.date)) continue;
+      const merged = { ...(state.entries.get(e.date) || {}) };
+      Object.entries(e).forEach(([k, v]) => { if (hasValue(v)) merged[k] = v; });
+      merged.date = e.date;
+      await putEntry(merged);
     }
+    for (const l of labs) {
+      if (!l || !/^\d{4}-\d{2}-\d{2}$/.test(l.date) || !Array.isArray(l.items)) continue;
+      const id = l.id || `lab-${l.date}-${Date.now()}`;
+      state.labs = state.labs.filter((x) => x.id !== id).concat([{ ...l, id }]);
+    }
+    if (labs.length) await saveLabs();
     for (const p of data.photos || []) {
       if (!p || !SLOTS.some((s) => s.id === p.slot) || !/^\d{4}-\d{2}-\d{2}$/.test(p.date) || !/^data:image\//.test(p.dataUrl || "")) continue;
       await savePhoto(p.date, p.slot, dataUrlToBlob(p.dataUrl), p.width, p.height);
     }
-    if (data.profile) { state.profile = { ...DEFAULT_PROFILE, ...data.profile }; await saveProfile(); }
+    if (data.profile) {
+      const incoming = Object.fromEntries(Object.entries(data.profile).filter(([, v]) => hasValue(v)));
+      state.profile = { ...DEFAULT_PROFILE, ...state.profile, ...incoming };
+      await saveProfile();
+    }
     toast("読み込みました");
     render();
   }
@@ -856,6 +1044,7 @@
     state.entries.clear();
     state.photos = [];
     state.profile = { ...DEFAULT_PROFILE };
+    state.labs = [];
     toast("すべて削除しました");
     render();
   }
@@ -1032,6 +1221,9 @@
     $("#exportCsv").addEventListener("click", exportCsv);
     $("#importJson").addEventListener("change", (e) => { const f = e.target.files[0]; if (f) importJson(f); e.target.value = ""; });
     $("#wipeAll").addEventListener("click", wipeAll);
+    $("#labTemplate").addEventListener("click", () => LAB_TEMPLATE.forEach(([name, unit]) => addLabRow(name, unit)));
+    $("#labAddRow").addEventListener("click", () => addLabRow());
+    $("#labSave").addEventListener("click", saveLabFromForm);
 
     $("#camClose").addEventListener("click", closeCamera);
     $("#camShoot").addEventListener("click", shoot);

@@ -66,6 +66,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://dxiongda441-maker.github.io/portforio/projects/glow-log/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://dxiongda441-maker.github.io/portforio/projects/maru-log/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

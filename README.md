@@ -103,6 +103,7 @@ GitHub Pagesへ公開されます。手動の操作は不要です。
 | 100円が冒険に出た!? | AIアニメ制作ケーススタディ | `projects/money-anime/` |
 | 年末ファミリートランプ | 家族向けトランプゲーム集（10種） | `projects/family-cards/` |
 | 琥珀 KOHAKU COFFEE | カフェのランディングページ | `projects/cafe-lp/` |
+| Maru Log | ○△× の習慣記録帳PWA（端末内保存） | `projects/maru-log/` |
 
 ## 設計上の判断
 

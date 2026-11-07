@@ -25,7 +25,7 @@
 
 ## PWA 作品を編集するときの必須手順 ⚠️
 
-`projects/` 配下の 6 件（`reading-shelf` `wabisabi` `levellog` `quote` `country-quiz` `family-cards`）は
+`projects/` 配下の 7 件（`reading-shelf` `wabisabi` `levellog` `quote` `country-quiz` `family-cards` `maru-log`）は
 Service Worker でキャッシュしている。**ファイルを直しただけでは利用者に反映されない。**
 
 各 SW の冒頭が 2 段構成になっている。

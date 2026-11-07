@@ -377,7 +377,7 @@ legend { color: var(--muted); font-size: 12px; font-weight: 700; margin-bottom: 
 /* ガイド */
 .guide summary { cursor: pointer; font-weight: 800; }
 .guide h3 { font-size: 14px; margin: 14px 0 4px; }
-.guide ul { margin: 0; padding-left: 1.2em; }
+.guide ul, .guide ol { margin: 0; padding-left: 1.4em; }
 .guide li { margin: 4px 0; }
 
 /* グラフ */

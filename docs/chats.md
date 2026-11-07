@@ -8,7 +8,7 @@
 
 | 日付 | チャット名 | 分類 | 成果物の場所 | 状態 |
 | --- | --- | --- | --- | --- |
-| 2026-11-07 | 記録帳（○△×）の PWA | 作品（記録アプリ） | `projects/maru-log/`・`docs/decisions/0011-*` | 🌱 ブランチ `claude/diary-log-pwa-fh9mrs` |
+| 2026-11-07 | 記録帳（○△×）の PWA | 作品（記録アプリ） | `projects/maru-log/`・`docs/decisions/0011-*` | ✅ main に反映済み（2026-11-07） |
 | 2026-10-31 | ポートフォリオの見直し（副業向けへ） | サイト全体 | `service/`・`samples/`・`index.html`・`_headers` | 🌱 ブランチ `claude/determined-newton-224ltn` |
 | 2026-10-09 | 副業計画（カフェ向けInstagram運用） | 計画・営業文 | 非公開リポジトリ `tsumiage-private` の `archive/portforio/side-business/`（見本だけ `samples/cafe/` に公開） | 🔒 2026-10-31 に非公開側へ退避 |
 | 2026-09-25 | 家族向けトランプゲームアプリ | 作品（ゲーム） | `projects/family-cards/` | ✅ 取り込み済み（2026-10-09、PWA 対応の最終コミットも含む） |

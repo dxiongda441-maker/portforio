@@ -97,7 +97,7 @@
             </div>
           </details>
 
-          <h2>睡眠と心拍</h2>
+          <h2>睡眠・心拍・血圧</h2>
           <p class="hint">スマートウォッチ・リングの値をそのまま入れます。</p>
           <div class="field-row">
             <label class="field"><span>寝た時刻</span><input name="bedTime" type="time" /><small class="goal">目標：毎日ほぼ同じ時刻（±1時間）</small></label>
@@ -106,6 +106,11 @@
           <div class="field-row">
             <label class="field"><span>睡眠時間 (時間)</span><input name="sleep" type="number" inputmode="decimal" step="0.05" min="0" max="24" placeholder="7" /><small class="help">実際に眠っていた時間（布団にいた時間ではなく）</small><small class="goal">目標：7〜9時間</small></label>
             <label class="field"><span>安静時心拍数 (拍/分)</span><input name="restingHr" type="number" inputmode="numeric" step="1" min="25" max="140" /><small class="help">寝ている間・起きてすぐの心拍。低いほど心肺が強い傾向</small><small class="goal">目標：60前後以下。いつもより+5以上なら疲れのサイン</small></label>
+          </div>
+
+          <div class="field-row">
+            <label class="field"><span>血圧・上 (mmHg)</span><input name="bpSys" type="number" inputmode="numeric" step="1" min="70" max="220" /><small class="help">その日の平均。リング・時計の値は推定なので目安。正確には上腕で測る血圧計で</small><small class="goal">目標：120未満</small></label>
+            <label class="field"><span>血圧・下 (mmHg)</span><input name="bpDia" type="number" inputmode="numeric" step="1" min="40" max="140" /><small class="goal">目標：80未満</small></label>
           </div>
 
           <h2>運動と食事</h2>

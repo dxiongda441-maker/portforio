@@ -2,7 +2,7 @@
 // 後片付けは自分のプレフィックスを持つものだけに限定する（docs/decisions/0003）。
 // 記録と写真は IndexedDB にあり、このキャッシュとは無関係（版数を上げてもデータは消えない）。
 const CACHE_PREFIX = "glow-log-";
-const CACHE_NAME = `${CACHE_PREFIX}v7`;
+const CACHE_NAME = `${CACHE_PREFIX}v8`;
 const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg", "../../assets/favicon.svg"];
 
 self.addEventListener("install", (event) => {

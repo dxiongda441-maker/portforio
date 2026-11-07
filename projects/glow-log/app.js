@@ -183,7 +183,7 @@
 
   /* ---------- 計算 ---------- */
   function isEmptyEntry(e) {
-    return !isNum(e.weight) && !isNum(e.waist) && !isNum(e.restingHr) && !isNum(e.steps) && !isNum(e.cardio) && !isNum(e.walkSpeed) && !isNum(e.walkKm) && !e.bedTime && !e.wakeTime && !BODY_FIELDS.some((f) => isNum(e[f.key])) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
+    return !isNum(e.weight) && !isNum(e.waist) && !isNum(e.restingHr) && !isNum(e.bpSys) && !isNum(e.bpDia) && !isNum(e.steps) && !isNum(e.cardio) && !isNum(e.walkSpeed) && !isNum(e.walkKm) && !e.bedTime && !e.wakeTime && !BODY_FIELDS.some((f) => isNum(e[f.key])) && !isNum(e.sleep) && !isNum(e.protein) && !e.training &&
       !(e.habits && e.habits.length) && !isNum(e.skin) && !(e.skinTags && e.skinTags.length) && !isNum(e.energy) && !e.note;
   }
 
@@ -283,6 +283,9 @@
       walkSpeedAvg: avg(pick(week, "walkSpeed")),
       cardioN: pick(week, "cardio").length,
       rhrAvg: avg(pick(week, "restingHr")),
+      bpSysAvg: avg(pick(week, "bpSys")),
+      bpDiaAvg: avg(pick(week, "bpDia")),
+      bpN: pick(week, "bpSys").length,
       rhrN: pick(week, "restingHr").length,
       rhrLatest: (() => { const e = week.find((x) => isNum(x.restingHr)); return e ? e.restingHr : null; })(),
       rhrBase: avg(pick(lastNDays(addDays(ref, -7), 21), "restingHr")),
@@ -383,6 +386,14 @@
     if (isNum(st.walkSpeedAvg)) {
       if (st.walkSpeedAvg >= 5) add("good", `歩く速さは平均 時速${fmt(st.walkSpeedAvg)}km`, "早歩き（中くらいの強さの有酸素運動）に入る速さです。");
       else add("info", `歩く速さは平均 時速${fmt(st.walkSpeedAvg)}km`, "時速5km（1分あたり約85m）を超えると有酸素運動として数えられます。通勤の一部だけでも速めに。");
+    }
+    if (st.bpN >= 1) {
+      const sys = Math.round(st.bpSysAvg);
+      const dia = isNum(st.bpDiaAvg) ? Math.round(st.bpDiaAvg) : null;
+      const note = "リング・時計の血圧は推定値です。気になる値が続くときは、上腕式の血圧計で朝に測って確かめてください。";
+      if (sys >= 130 || (dia !== null && dia >= 80)) add("warn", `血圧が高め（平均 ${sys}/${dia ?? "—"}）`, `若いうちから120/80未満を保つほど、将来の脳や心臓の病気が少なくなります。塩分・睡眠・お酒を見直しを。${note}`);
+      else if (sys >= 120) add("info", `血圧はやや高め（平均 ${sys}/${dia ?? "—"}）`, `正常の範囲ですが、120未満が理想です。${note}`);
+      else add("good", `血圧は理想的（平均 ${sys}/${dia ?? "—"}）`, `120/80未満を保てています。${note}`);
     }
     if (isNum(st.rhrLatest) && isNum(st.rhrBase) && st.rhrLatest - st.rhrBase >= 5) {
       add("warn", `安静時心拍がいつもより高め（${st.rhrLatest} ／ 普段 ${Math.round(st.rhrBase)}）`, "睡眠不足・疲れ・飲酒・体調不良のサインのことが多いです。筋トレは軽めにして、早めに寝ましょう。");
@@ -539,6 +550,8 @@
     f.elements.bedTime.value = e.bedTime || "";
     f.elements.wakeTime.value = e.wakeTime || "";
     setNum("restingHr", e.restingHr);
+    setNum("bpSys", e.bpSys);
+    setNum("bpDia", e.bpDia);
     setNum("steps", e.steps);
     setNum("cardio", e.cardio);
     setNum("walkSpeed", e.walkSpeed);
@@ -616,6 +629,8 @@
       bedTime: /^\d{2}:\d{2}$/.test(f.elements.bedTime.value) ? f.elements.bedTime.value : "",
       wakeTime: /^\d{2}:\d{2}$/.test(f.elements.wakeTime.value) ? f.elements.wakeTime.value : "",
       restingHr: num("restingHr", 25, 140),
+      bpSys: num("bpSys", 70, 220),
+      bpDia: num("bpDia", 40, 140),
       steps: num("steps", 0, 100000),
       cardio: num("cardio", 0, 600),
       walkSpeed: num("walkSpeed", 1, 10),
@@ -758,6 +773,7 @@
       ["BMI（体重÷身長²）／ 標準体重", isNum(st.bmi) ? `${fmt(st.bmi)} ／ ${fmt(st.stdWeight)} kg` : "—"],
       ["睡眠 平均 ／ 目標", `${isNum(st.sleepAvg) ? fmt(st.sleepAvg) : "—"} ／ ${p.sleepTarget}〜9 時間`],
       ["安静時心拍 平均", isNum(st.rhrAvg) ? `${Math.round(st.rhrAvg)} 拍/分` : "—"],
+      ["血圧 平均 ／ 目標", `${isNum(st.bpSysAvg) ? `${Math.round(st.bpSysAvg)}/${isNum(st.bpDiaAvg) ? Math.round(st.bpDiaAvg) : "—"}` : "—"} ／ 120/80未満`],
       ["歩数 平均 ／ 目標", `${isNum(st.stepsAvg) ? Math.round(st.stepsAvg).toLocaleString() : "—"} ／ ${p.stepsTarget.toLocaleString()} 歩`],
       ["有酸素運動（早歩き含む）／ 目標", `約${st.cardioEst} ／ ${p.cardioTarget} 分`],
       ["歩く速さ 平均", isNum(st.walkSpeedAvg) ? `時速 ${fmt(st.walkSpeedAvg)} km` : "—"],
@@ -799,7 +815,7 @@
       lines.push(`血液検査（${st.lab.date}）: ${out.length ? `基準外 ${out.map((it) => `${it.name} ${it.value}${it.unit || ""}（基準 ${isNum(it.low) ? it.low : ""}〜${isNum(it.high) ? it.high : ""}）`).join("、")}` : "記録した項目はすべて基準内"}`);
     }
     lines.push("");
-    lines.push("日付 | 体重(時刻・タイミング) | ならした体重 | 睡眠h | 安静時心拍 | 歩数 | 有酸素分 | 歩行(速さ 距離) | たんぱく質g | 筋トレ | 肌1-5 | 気になる所 | 体調 | できたこと | メモ");
+    lines.push("日付 | 体重(時刻・タイミング) | ならした体重 | 睡眠h | 安静時心拍 | 血圧 | 歩数 | 有酸素分 | 歩行(速さ 距離) | たんぱく質g | 筋トレ | 肌1-5 | 気になる所 | 体調 | できたこと | メモ");
     const series = weightSeries();
     for (let i = 13; i >= 0; i -= 1) {
       const d = addDays(todayStr(), -i);
@@ -812,6 +828,7 @@
         tr ? fmt(tr.trend) : "-",
         isNum(e.sleep) ? e.sleep : "-",
         isNum(e.restingHr) ? e.restingHr : "-",
+        isNum(e.bpSys) ? `${e.bpSys}/${isNum(e.bpDia) ? e.bpDia : "-"}` : "-",
         isNum(e.steps) ? e.steps : "-",
         isNum(e.cardio) ? e.cardio : "-",
         isNum(e.walkSpeed) ? `${e.walkSpeed}km/h${isNum(e.walkKm) ? ` ${e.walkKm}km` : ""}` : "-",
@@ -1081,14 +1098,14 @@
 
   function exportCsv() {
     const series = weightSeries();
-    const header = ["date", "weight", "time", "timing", "trend", "bed_time", "wake_time", "sleep", "resting_hr", "steps", "cardio_min", "walk_speed_kmh", "walk_km", "protein", "training", "skin", "skin_tags", "energy", "habits", "body_fat", "muscle_mass", "visceral_fat", "bmr", "note"];
+    const header = ["date", "weight", "time", "timing", "trend", "bed_time", "wake_time", "sleep", "resting_hr", "bp_sys", "bp_dia", "steps", "cardio_min", "walk_speed_kmh", "walk_km", "protein", "training", "skin", "skin_tags", "energy", "habits", "body_fat", "muscle_mass", "visceral_fat", "bmr", "note"];
     const q = (v) => {
       const s = v === null || v === undefined ? "" : String(v);
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const rows = [...state.entries.values()].sort((a, b) => (a.date < b.date ? -1 : 1)).map((e) => {
       const t = series.find((s) => s.date === e.date);
-      return [e.date, e.weight, e.time, e.timing, t ? round(t.trend, 2) : "", e.bedTime, e.wakeTime, e.sleep, e.restingHr, e.steps, e.cardio, e.walkSpeed, e.walkKm, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.bodyFat, e.muscleMass, e.visceralFat, e.bmr, e.note].map(q).join(",");
+      return [e.date, e.weight, e.time, e.timing, t ? round(t.trend, 2) : "", e.bedTime, e.wakeTime, e.sleep, e.restingHr, e.bpSys, e.bpDia, e.steps, e.cardio, e.walkSpeed, e.walkKm, e.protein, e.training, e.skin, (e.skinTags || []).join("/"), e.energy, (e.habits || []).join("/"), e.bodyFat, e.muscleMass, e.visceralFat, e.bmr, e.note].map(q).join(",");
     });
     download(`glow-log-${todayStr()}.csv`, new Blob(["﻿" + [header.join(","), ...rows].join("\n")], { type: "text/csv" }));
   }

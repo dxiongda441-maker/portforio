@@ -147,11 +147,11 @@ git show 76ace1e:main.js
   さらに RPG 演出を足してある：ストーリーは `data/story.js`（`SQ.story`。章ごとの舞台・会話・ボスの絵文字・入手アイテム、プロローグ・エンディング）、
   レベル（累計 EXP から計算）と「つよさ」画面（`#/status`。能力値・成長グラフ・章ごとの記録）、`#/prologue` `#/tower` `#/ending`。
   成長の記録はセーブデータの `log`（直近400戦）・`levels`・`qs`（章ごとの解答数）・`grad` に入り、`sanitize()` で検査する。
-  エンジンの不具合を直すときは**両方の `app.js` を直す**こと（共通化はしていない）。経緯は `docs/decisions/0012`。
+  エンジンの不具合を直すときは**3作品（security-quest / psychology-quest / stats-quest）の `app.js` をすべて直す**こと（共通化はしていない）。経緯は `docs/decisions/0012`。
   検査は `node tools/check-learning-game.js psychology-quest`。
 - `stats-quest` は `security-quest` と同じエンジン・同じデータ形式の統計学版（全18章）。`app.js` はコピーで、分野固有の部分
   （`STORAGE_KEY = "stats-quest-v1"`・`SAVE_PREFIX = "ST1."`・称号・文言・参考リンク）だけ書き換えている。
-  **エンジンの不具合を直すときは2作品の `app.js` を両方直すこと。** 検査は `node tools/check-learning-game.js stats-quest`。経緯は `docs/decisions/0013`。
+  **エンジンの不具合を直すときは3作品（security-quest / psychology-quest / stats-quest）の `app.js` をすべて直すこと。** 検査は `node tools/check-learning-game.js stats-quest`。経緯は `docs/decisions/0013`。
 
 ### 全作品ページに入っている共通要素
 

@@ -104,6 +104,10 @@ GitHub Pagesへ公開されます。手動の操作は不要です。
 | 年末ファミリートランプ | 家族向けトランプゲーム集（10種） | `projects/family-cards/` |
 | 琥珀 KOHAKU COFFEE | カフェのランディングページ | `projects/cafe-lp/` |
 | Maru Log | ○△× の習慣記録帳PWA（端末内保存） | `projects/maru-log/` |
+| Glow Log | 体重・写真・肌の自分磨き記録PWA（端末内保存） | `projects/glow-log/` |
+| セキュリティ・クエスト | 情報セキュリティの学習RPG（18章） | `projects/security-quest/` |
+| 心理学クエスト | 心理学の学習RPG（18章） | `projects/psychology-quest/` |
+| 統計クエスト | 統計学の学習RPG（18章） | `projects/stats-quest/` |
 
 ## 設計上の判断
 

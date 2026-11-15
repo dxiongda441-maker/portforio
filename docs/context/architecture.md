@@ -28,6 +28,7 @@ tools/fetch-backgrounds.sh  背景写真をローカルに取り込むスクリ�
 tools/check-learning-game.js  学習ゲームの問題データ検査（`node tools/check-learning-game.js <slug>`・依存なし）
 tools/check.sh              ルールの機械チェック（読むだけ・書き換えない）
 tools/screenshot.sh         ヘッドレス Chromium で撮影（出力はリポジトリ外）
+tools/set-site-url.sh       公開URLを一括で書き換える（移転時に1回。PWA の版数も上げる）
 .github/workflows/deploy.yml  Pages デプロイ
 ```
 

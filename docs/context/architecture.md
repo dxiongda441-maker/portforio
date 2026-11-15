@@ -1,6 +1,6 @@
 # 構成の実態
 
-> 最終確認: 2026-11-07 / 確認者: Claude
+> 最終確認: 2026-11-15 / 確認者: Claude
 > ここは「今どうなっているか」を書く場所。「なぜそうしたか」は `docs/decisions/` に書く。
 
 ## 全体像
@@ -94,7 +94,7 @@ git show 76ace1e:main.js
 
 ## projects/ — 各作品
 
-13 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
+15 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
 
 基本構成は `index.html` + `app.js` + `styles.css`。うち 8 件は
 `manifest.webmanifest`(または `manifest.json`) + `sw.js`(または `service-worker.js`) を持つ **PWA**。
@@ -115,6 +115,7 @@ git show 76ace1e:main.js
 | `glow-log` | Glow Log（自分磨き記録） | PWA・IndexedDB・CSP で外部通信禁止 | `glow-log-` |
 | `maru-log` | Maru Log（○△× 記録帳） | PWA・IndexedDB・CSP で外部通信禁止 | `maru-log-` |
 | `psychology-quest` | 心理学クエスト | 静的 | — |
+| `stats-quest` | 統計クエスト | 静的 | — |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
@@ -147,6 +148,9 @@ git show 76ace1e:main.js
   成長の記録はセーブデータの `log`（直近400戦）・`levels`・`qs`（章ごとの解答数）・`grad` に入り、`sanitize()` で検査する。
   エンジンの不具合を直すときは**両方の `app.js` を直す**こと（共通化はしていない）。経緯は `docs/decisions/0012`。
   検査は `node tools/check-learning-game.js psychology-quest`。
+- `stats-quest` は `security-quest` と同じエンジン・同じデータ形式の統計学版（全18章）。`app.js` はコピーで、分野固有の部分
+  （`STORAGE_KEY = "stats-quest-v1"`・`SAVE_PREFIX = "ST1."`・称号・文言・参考リンク）だけ書き換えている。
+  **エンジンの不具合を直すときは2作品の `app.js` を両方直すこと。** 検査は `node tools/check-learning-game.js stats-quest`。経緯は `docs/decisions/0013`。
 
 ### 全作品ページに入っている共通要素
 

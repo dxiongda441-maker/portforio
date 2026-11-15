@@ -20,6 +20,12 @@ tags: [moc, index]
 - **発信** — [[…]]
 -->
 
+## 読んだもの（第2の脳）
+
+- [[40_Wiki/index]] — 読んだ記事・本から作った Wiki の索引
+- [[40_Wiki/log]] — いつ何を取り込んだか
+- 原本は `30_Sources/`（Web Clipper の保存先）
+
 ## 決定ログ
 
 `10_Decisions/` に 1 決定 1 ファイルで置く。ファイル名は `YYYY-MM-DD-短い説明.md`。

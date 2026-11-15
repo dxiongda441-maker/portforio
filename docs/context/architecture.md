@@ -114,6 +114,7 @@ git show 76ace1e:main.js
 | `cafe-lp` | 琥珀 KOHAKU COFFEE | 静的（HTML+CSSのみ） | — |
 | `glow-log` | Glow Log（自分磨き記録） | PWA・IndexedDB・CSP で外部通信禁止 | `glow-log-` |
 | `maru-log` | Maru Log（○△× 記録帳） | PWA・IndexedDB・CSP で外部通信禁止 | `maru-log-` |
+| `psychology-quest` | 心理学クエスト | 静的 | — |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
@@ -139,6 +140,13 @@ git show 76ace1e:main.js
   - `logic: {...}` に載せた純粋関数（大富豪の役判定、ポーカーの役評価など）は `GAMES` 経由で
     ブラウザのコンソールから直接呼べる。ルールを直したらここで確かめる。
   - 効果音は音声ファイルを持たず、`core.js` の `Sound` が Web Audio で合成する（`docs/decisions/0005`）。
+- `psychology-quest` は security-quest と同じエンジン・同じデータ形式の心理学版（`/learning-game` で作成）。
+  `app.js` は分野固有の部分（`STORAGE_KEY = "psychology-quest-v1"`、`SAVE_PREFIX = "PQ1."`、称号、導入文、遊び方、修了証の参考リンク）だけが違う。
+  さらに RPG 演出を足してある：ストーリーは `data/story.js`（`SQ.story`。章ごとの舞台・会話・ボスの絵文字・入手アイテム、プロローグ・エンディング）、
+  レベル（累計 EXP から計算）と「つよさ」画面（`#/status`。能力値・成長グラフ・章ごとの記録）、`#/prologue` `#/tower` `#/ending`。
+  成長の記録はセーブデータの `log`（直近400戦）・`levels`・`qs`（章ごとの解答数）・`grad` に入り、`sanitize()` で検査する。
+  エンジンの不具合を直すときは**両方の `app.js` を直す**こと（共通化はしていない）。経緯は `docs/decisions/0012`。
+  検査は `node tools/check-learning-game.js psychology-quest`。
 
 ### 全作品ページに入っている共通要素
 

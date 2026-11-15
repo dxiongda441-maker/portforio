@@ -176,7 +176,7 @@
       else if (value === true) node.setAttribute(key, "");
       else node.setAttribute(key, value);
     }
-    for (const child of children.flat()) {
+    for (const child of children.flat(Infinity)) {
       if (child == null || child === false) continue;
       node.append(child instanceof Node ? child : document.createTextNode(String(child)));
     }
@@ -746,16 +746,18 @@
 
     fb.className = `feedback ${ok ? "is-ok" : "is-ng"}`;
     fb.append(
-      el("p", { class: "verdict" }, ok ? "正解！ 会心の一撃。" : "不正解… ダメージを受けた。"),
-      !ok ? correctAnswerView(q) : null,
-      el("div", { class: "explain" }, el("p", { class: "label" }, "解説"), el("p", {}, rich(q.exp))),
-      bossDown && !last ? el("p", { class: "bossdown" }, `${battle.bossName}を撃破！ 残りの問題は追撃（★の評価に影響）。`) : null,
-      defeated ? el("p", { class: "defeat" }, "ライフが尽きた… 講義を見直して再挑戦しよう。") : null,
-      el(
-        "div",
-        { class: "submit-row" },
-        el("button", { type: "button", class: "btn btn-primary next", onclick: () => advance(defeated) }, defeated || last ? "結果を見る" : "次の問題へ →")
-      )
+      ...[
+        el("p", { class: "verdict" }, ok ? "正解！ 会心の一撃。" : "不正解… ダメージを受けた。"),
+        !ok ? correctAnswerView(q) : null,
+        el("div", { class: "explain" }, el("p", { class: "label" }, "解説"), el("p", {}, rich(q.exp))),
+        bossDown && !last ? el("p", { class: "bossdown" }, `${battle.bossName}を撃破！ 残りの問題は追撃（★の評価に影響）。`) : null,
+        defeated ? el("p", { class: "defeat" }, "ライフが尽きた… 講義を見直して再挑戦しよう。") : null,
+        el(
+          "div",
+          { class: "submit-row" },
+          el("button", { type: "button", class: "btn btn-primary next", onclick: () => advance(defeated) }, defeated || last ? "結果を見る" : "次の問題へ →")
+        )
+      ].filter(Boolean)
     );
 
     // 上部の HP・ライフ表示も更新する

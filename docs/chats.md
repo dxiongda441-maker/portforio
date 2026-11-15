@@ -46,12 +46,16 @@
 `claude/cafe-lp-creation-5z5gz9`・`claude/claude-md-self-improvement-7mceld`・`claude/family-card-game-app-fnnysi`。
 中身は main か取り込み済みブランチに入っている。
 
-2026-11-15 に確認して、同じく中身がすべて main に入っていたもの（削除してよい候補。**未承認**）:
+2026-11-15 に本人が削除を承認（下の3グループすべて。Claude のセッションからは今回も削除が通らなかったので、GitHub の Branches 画面で消す）。
+
+中身がすべて main に入っていたもの:
 `claude/continue-work-in-progress-zdkhoh`・`claude/organize-file-directory-yq7io2`・
 `claude/softbank-employment-path-uwalcp`・`claude/security-quest`・`claude/self-improvement-tracker`。
 台帳の1行だけが違うもの（内容はこの表に反映済み）: `claude/diary-log-pwa-fh9mrs`・`claude/zen-meitner-pkl4ix`。
 2026-11-15 に main へ入ったので不要になったもの: `claude/psychology-quest`・`claude/learning-game-statistics-f1ahwf`・
 `claude/second-brain-llm-wiki`・`claude/determined-newton-224ltn`。
+
+残すブランチ: `main`・`claude/ip-character-blueprint`（Codex 待ち）・`claude/personal-business-guidance-p3145p`（Scout。main に無い内容が1コミットあるので、削除は本人に再確認中）・作業中のチャットのブランチ。
 
 ## ほかのリポジトリのチャット
 

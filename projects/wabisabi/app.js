@@ -98,6 +98,11 @@ const storage = {
 
 const $ = (id) => document.getElementById(id);
 
+// 利用者が入力した文字列を innerHTML に入れる前に必ず通す
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
 function formatDateTime(iso) {
   return new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
@@ -122,10 +127,10 @@ function renderThemeOptions() {
   const themes = storage.getThemes();
   const selectedTheme = $("themeSelect").value || dailyTheme(themes).id;
   $("themeSelect").innerHTML = themes
-    .map((theme) => `<option value="${theme.id}">${theme.name}</option>`)
+    .map((theme) => `<option value="${esc(theme.id)}">${esc(theme.name)}</option>`)
     .join("");
   $("filterTheme").innerHTML = `<option value="all">すべてのテーマ</option>${themes
-    .map((theme) => `<option value="${theme.id}">${theme.name}</option>`)
+    .map((theme) => `<option value="${esc(theme.id)}">${esc(theme.name)}</option>`)
     .join("")}`;
   $("studioRecordSelect").innerHTML = "";
   if (themes.some((theme) => theme.id === selectedTheme)) {
@@ -138,7 +143,7 @@ function renderPrompt() {
   const themes = storage.getThemes();
   const theme = themes.find((item) => item.id === $("themeSelect").value) || themes[0];
   $("dailyPrompt").textContent = theme.prompt;
-  $("talkTemplate").innerHTML = theme.template.map((line) => `<li>${line}</li>`).join("");
+  $("talkTemplate").innerHTML = theme.template.map((line) => `<li>${esc(line)}</li>`).join("");
 }
 
 function renderThemes() {
@@ -147,9 +152,9 @@ function renderThemes() {
     .map(
       (theme) => `
         <div class="theme-row">
-          <strong>${theme.name}</strong>
-          <span>${theme.prompt}</span>
-          <button class="danger delete-theme" data-id="${theme.id}">削除</button>
+          <strong>${esc(theme.name)}</strong>
+          <span>${esc(theme.prompt)}</span>
+          <button class="danger delete-theme" data-id="${esc(theme.id)}">削除</button>
         </div>
       `
     )
@@ -197,7 +202,7 @@ function renderStudioSelector(selectedId) {
     return;
   }
   $("studioRecordSelect").innerHTML = records
-    .map((record) => `<option value="${record.id}">${formatDateTime(record.createdAt)} / ${record.title || "無題"}</option>`)
+    .map((record) => `<option value="${esc(record.id)}">${esc(formatDateTime(record.createdAt))} / ${esc(record.title || "無題")}</option>`)
     .join("");
   $("studioRecordSelect").value = selectedId || records[0].id;
   loadStudioRecord();

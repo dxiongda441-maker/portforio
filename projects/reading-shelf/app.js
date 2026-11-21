@@ -172,7 +172,7 @@ function renderBooks() {
   list.innerHTML = visibleBooks
     .map((book) => {
       const cover = book.cover
-        ? `<img src="${book.cover}" alt="${escapeHtml(book.title)}の表紙" />`
+        ? `<img src="${escapeHtml(book.cover)}" alt="${escapeHtml(book.title)}の表紙" />`
         : `<span>${escapeHtml(book.title.slice(0, 1) || "R")}</span>`;
       const learnings = book.learnings.slice(0, 3).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("");
       const todos = book.todos.length ? book.todos.map((item) => `・${escapeHtml(item)}`).join("<br>") : "未登録";

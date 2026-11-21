@@ -2,7 +2,7 @@
 // 後片付けは自分のプレフィックスを持つものだけに限定する（docs/decisions/0003）。
 // ファイルを直したら CACHE_NAME の版数を上げ、ファイルを増やしたら ASSETS にも足すこと。
 const CACHE_PREFIX = "family-cards-";
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 const ASSETS = [
   "./",
   "./index.html",

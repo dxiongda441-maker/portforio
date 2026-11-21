@@ -1,7 +1,7 @@
 // GitHub Pages では全アプリが同一オリジンのため Cache Storage を共有する。
 // 後片付けは自分のプレフィックスを持つものだけに限定する。
 const CACHE_PREFIX = "level-log-";
-const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const CACHE_NAME = `${CACHE_PREFIX}v3`;
 const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", (event) => {

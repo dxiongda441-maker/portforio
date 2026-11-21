@@ -1,7 +1,7 @@
 // GitHub Pages では全アプリが同一オリジンのため Cache Storage を共有する。
 // 後片付けは自分のプレフィックスを持つものだけに限定する。
 const CACHE_PREFIX = "one-day-one-quote-";
-const CACHE_NAME = `${CACHE_PREFIX}v9`;
+const CACHE_NAME = `${CACHE_PREFIX}v10`;
 const ASSETS = [
   "./",
   "./index.html",

@@ -1,6 +1,6 @@
 # 構成の実態
 
-> 最終確認: 2026-11-15 / 確認者: Claude
+> 最終確認: 2026-11-24 / 確認者: Claude
 > ここは「今どうなっているか」を書く場所。「なぜそうしたか」は `docs/decisions/` に書く。
 
 ## 全体像
@@ -95,9 +95,9 @@ git show 76ace1e:main.js
 
 ## projects/ — 各作品
 
-15 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
+16 ディレクトリあり、`index.html` の作品カードのリンク先と 1:1 で一致している（リンク切れなし）。
 
-基本構成は `index.html` + `app.js` + `styles.css`。うち 8 件は
+基本構成は `index.html` + `app.js` + `styles.css`。うち 9 件は
 `manifest.webmanifest`(または `manifest.json`) + `sw.js`(または `service-worker.js`) を持つ **PWA**。
 
 | slug | 表示名 | 構成 | `CACHE_PREFIX` |
@@ -117,6 +117,7 @@ git show 76ace1e:main.js
 | `maru-log` | Maru Log（○△× 記録帳） | PWA・IndexedDB・CSP で外部通信禁止 | `maru-log-` |
 | `psychology-quest` | 心理学クエスト | 静的 | — |
 | `stats-quest` | 統計クエスト | 静的 | — |
+| `sleep-diary` | ねむり日誌（睡眠日誌） | PWA・IndexedDB・CSP で外部通信禁止 | `sleep-diary-` |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
@@ -126,6 +127,7 @@ git show 76ace1e:main.js
 - `cafe-lp` は架空のカフェの LP。`index.html` + `styles.css` のみで JS なし。LP の型との対応は同フォルダの `README.md`。
 - `glow-log` は体重・写真・肌の記録 PWA。写真を含む全データを IndexedDB（DB名 `glow-log`）に置き、外部へ送らない。設計図は同フォルダの `README.md`、経緯は `docs/decisions/0010`。
 - `maru-log` は仕事・副業・趣味・学びの習慣を毎日 ○△× で付ける記録帳 PWA。記録は IndexedDB（DB名 `maru-log`）だけに置き外部へ送らない。項目は設定で増減でき、初期値は `app.js` の `DEFAULT_ITEMS`。経緯は `docs/decisions/0011`。
+- `sleep-diary` は CBT-I の睡眠日誌を2週間つけるセルフケア PWA。睡眠の発信でリストを集める無料の入口（`docs/decisions/0015`）。記録は IndexedDB（DB名 `sleep-diary`）だけ。メール登録の導線は `app.js` の `SIGNUP_URL`（空なら「準備中」）。計算と目安の規則は同フォルダの `README.md`。
 - `money-anime` はアプリではなくケーススタディ（`index.html` + `cover.jpg` のみ）。
 - `security-quest` は `app.js`（エンジン）＋ `data/acts.js` ＋ `data/ch01.js`〜`ch18.js`（章ごとのデータ）。
   CSP を `<meta>` で設定しており、外部スクリプト・外部通信は不可。問題の追加は各章の `quiz` 配列の**末尾**に

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
+    <meta name="description" content="不眠の認知行動療法（CBT-I）で使われる睡眠日誌を、2週間つけて振り返るセルフケアPWA。睡眠効率・寝つき・起床時刻のばらつきを計算し、眠る時間の目安を出す。記録は端末の中だけに保存。" />
+    <meta name="theme-color" content="#1f3350" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="ねむり日誌" />
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
+    <title>ねむり日誌 — 2週間の睡眠日誌</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="canonical" href="https://dxiongda441-maker.github.io/portforio/projects/sleep-diary/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="オルタ Portfolio" />
+    <meta property="og:title" content="ねむり日誌 — 2週間の睡眠日誌" />
+    <meta property="og:description" content="不眠の認知行動療法で使われる睡眠日誌を2週間つけて、睡眠効率と眠る時間の目安を知るセルフケアPWA。記録は端末の中だけに保存。" />
+    <meta property="og:url" content="https://dxiongda441-maker.github.io/portforio/projects/sleep-diary/" />
+    <meta property="og:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/sleep-diary.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="800" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ねむり日誌 — 2週間の睡眠日誌" />
+    <meta name="twitter:description" content="睡眠日誌を2週間つけて、睡眠効率と眠る時間の目安を知るセルフケアPWA。" />
+    <meta name="twitter:image" content="https://dxiongda441-maker.github.io/portforio/assets/portfolio/sleep-diary.jpg" />
+  </head>
+  <body>
+    <a class="portfolio-back" href="../../"><span aria-hidden="true">←</span> オルタのポートフォリオへ戻る</a>
+
+    <header class="app-header">
+      <div class="brand">
+        <img class="brand-mark" src="./icon.svg" alt="" width="38" height="38" />
+        <div>
+          <p class="brand-name">ねむり日誌</p>
+          <p class="brand-sub">研究にもとづく 2週間の睡眠日誌</p>
+        </div>
+      </div>
+      <span class="privacy-badge" title="記録はこの端末のブラウザ内（IndexedDB）にだけ保存します。サーバーには送りません。">端末内だけに保存</span>
+    </header>
+
+    <!-- はじめに（初回だけ） -->
+    <main class="main" id="view-start" hidden>
+      <section class="card intro">
+        <h1>2週間、朝に1分だけ記録してください</h1>
+        <p>不眠の認知行動療法（CBT-I）では、まず<strong>睡眠日誌</strong>をつけて「実際に眠れている時間」と「床にいる時間」のずれを知ります。CBT-I は欧米の診療ガイドラインで慢性不眠の<strong>最初に試す治療</strong>とされている方法です。</p>
+        <ol class="steps">
+          <li><b>毎朝</b>、昨夜の寝た時刻・起きた時刻などを入れる（1分）</li>
+          <li><b>1週間</b>たつと、睡眠効率と「眠る時間の目安」が出る</li>
+          <li><b>2週間</b>で、自分の眠りの傾向をまとめたレポートが完成</li>
+        </ol>
+        <p class="hint">このアプリは医療機器ではなく、診断や治療はしません。眠りの習慣を見直すためのセルフケアの道具です。</p>
+      </section>
+
+      <form class="card" id="safetyForm" autocomplete="off">
+        <h2>はじめる前の確認</h2>
+        <p class="hint">当てはまるものにチェックしてください。1つでも当てはまる場合、記録と振り返りは使えますが、<strong>眠る時間を縮める提案は出しません</strong>（その前に医師への相談が必要なため）。</p>
+        <div id="safetyList" class="check-list"></div>
+        <label class="field">
+          <span>毎朝そろえたい起床時刻</span>
+          <input type="time" id="startWake" value="06:30" required />
+        </label>
+        <button type="submit" class="primary-btn wide">記録をはじめる</button>
+      </form>
+    </main>
+
+    <nav class="tabs" aria-label="メインメニュー" id="tabs" hidden>
+      <button class="tab" type="button" data-view="record" aria-current="page">記録</button>
+      <button class="tab" type="button" data-view="review">振り返り</button>
+      <button class="tab" type="button" data-view="learn">眠りのコツ</button>
+      <button class="tab" type="button" data-view="settings">設定</button>
+    </nav>
+
+    <main class="main" id="app" hidden>
+      <!-- 記録 -->
+      <section id="view-record" class="view" aria-label="睡眠日誌の記録">
+        <div class="card progress-card" id="progressCard"></div>
+
+        <div class="date-nav">
+          <button type="button" class="icon-btn" id="prevDay" aria-label="前の日">‹</button>
+          <label class="date-label"><span>起きた日</span><input type="date" id="datePicker" aria-label="起きた日" /></label>
+          <button type="button" class="icon-btn" id="nextDay" aria-label="次の日">›</button>
+          <button type="button" class="ghost-btn" id="goToday">今朝へ</button>
+        </div>
+
+        <form class="card" id="nightForm" autocomplete="off" novalidate>
+          <h2 id="formTitle">昨夜の眠り</h2>
+          <p class="hint">だいたいで大丈夫です。時計を見て確かめる必要はありません（見ると眠れなくなるので、夜中は見ないのがおすすめ）。</p>
+
+          <div class="time-grid">
+            <label class="field"><span>① 床に入った</span><input type="time" name="bed" required /></label>
+            <label class="field"><span>② 眠ろうとした（消灯）</span><input type="time" name="lightsOff" required /></label>
+            <label class="field"><span>③ 寝つくまで（分）</span><input type="number" name="sol" min="0" max="600" step="5" inputmode="numeric" required /></label>
+            <label class="field"><span>④ 夜中に目が覚めた（回）</span><input type="number" name="wakeups" min="0" max="30" step="1" inputmode="numeric" required /></label>
+            <label class="field"><span>⑤ 夜中に起きていた合計（分）</span><input type="number" name="waso" min="0" max="600" step="5" inputmode="numeric" required /></label>
+            <label class="field"><span>⑥ 最後に目が覚めた</span><input type="time" name="finalWake" required /></label>
+            <label class="field"><span>⑦ 床から出た</span><input type="time" name="outOfBed" required /></label>
+          </div>
+
+          <fieldset class="field">
+            <legend>⑧ 眠りの満足度</legend>
+            <div class="rating" id="qualityGroup"></div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend>昨日あったこと（あてはまるものだけ）</legend>
+            <div class="chips" id="tagGroup"></div>
+          </fieldset>
+
+          <label class="field"><span>メモ（任意）</span><input type="text" name="note" maxlength="200" placeholder="例：仕事の考えごとで寝つけなかった" /></label>
+
+          <div class="calc" id="calcPreview" aria-live="polite"></div>
+
+          <div class="btn-row">
+            <button type="submit" class="primary-btn">保存する</button>
+            <button type="button" class="ghost-btn" id="deleteNight" hidden>この日の記録を消す</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 振り返り -->
+      <section id="view-review" class="view" aria-label="振り返り" hidden>
+        <div class="segmented" role="group" aria-label="期間">
+          <button type="button" data-range="7">7日</button>
+          <button type="button" data-range="14">14日</button>
+          <button type="button" data-range="28">28日</button>
+        </div>
+        <div class="summary-cards" id="summaryCards"></div>
+
+        <div class="card">
+          <h2>夜ごとの眠り</h2>
+          <p class="hint">薄い帯＝床にいた時間、濃い帯＝眠っていた時間のおよその位置（夜中に起きていた分は差し引いて右の％に反映）。右の数字は睡眠効率。</p>
+          <div id="timeline" class="timeline"></div>
+        </div>
+
+        <div class="card">
+          <h2>気づき</h2>
+          <ul class="insights" id="insights"></ul>
+        </div>
+
+        <div class="card plan-card" id="planCard"></div>
+
+        <div class="card" id="finishCard" hidden></div>
+
+        <div class="card">
+          <h2>レポートの文章</h2>
+          <p class="hint">医師に相談するときや、自分の手帳に。<strong>コピーするだけで、どこにも送りません。</strong></p>
+          <textarea id="reportText" rows="10" readonly></textarea>
+          <button type="button" class="primary-btn" id="copyReport">コピーする</button>
+        </div>
+      </section>
+
+      <!-- 眠りのコツ -->
+      <section id="view-learn" class="view" aria-label="眠りのコツ" hidden>
+        <div class="card">
+          <h2>研究で効果が確かめられている5つの習慣</h2>
+          <p class="hint">CBT-I の中心になる「刺激制御法」と「睡眠制限法」から、自分で始められる部分だけを抜き出しました。</p>
+          <ol class="rules">
+            <li><b>毎朝、同じ時刻に起きる。</b>休日も平日との差を1時間以内に。寝る時刻より、起きる時刻をそろえるほうが体内時計が整います。</li>
+            <li><b>眠くなってから床に入る。</b>「疲れた」ではなく「まぶたが重い」が合図です。</li>
+            <li><b>20分ほど眠れなければ、いったん床を出る。</b>暗めの部屋で静かに過ごし、眠くなったら戻ります。時計は見なくて大丈夫。体感で十分です。</li>
+            <li><b>床は眠るためだけに使う。</b>スマホ・仕事・考えごとは床の外で。「床＝眠れない場所」という結びつきをほどきます。</li>
+            <li><b>床にいる時間を、実際に眠れている時間に近づける。</b>長く床にいるほど眠りは浅く途切れやすくなります。振り返りタブの「眠る時間の目安」がこれです。</li>
+          </ol>
+        </div>
+
+        <div class="card caution">
+          <h2>気をつけること</h2>
+          <ul>
+            <li>眠る時間を縮めた最初の1〜2週間は、<strong>日中に眠くなることがあります</strong>。運転や危険な作業の前に眠気があるときは、無理をせず目安を15分ずつ戻してください。</li>
+            <li>このアプリでは、安全のため眠る時間の目安を<strong>6時間より短くしません</strong>。医療機関で行う睡眠制限法では、医師の管理のもとでさらに短くすることがあります。</li>
+            <li>3か月以上不眠が続いて日中に支障がある、いびきや呼吸の停止を指摘された、気分の落ち込みが強い——こうした場合は睡眠外来や心療内科に相談してください。</li>
+            <li>睡眠薬を使っている人は、自己判断でやめたり減らしたりせず、処方した医師に相談してください。</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>もとになった研究</h2>
+          <ul class="refs">
+            <li>Trauer JM, et al. (2015). Cognitive behavioral therapy for chronic insomnia: a systematic review and meta-analysis. <i>Annals of Internal Medicine</i>, 163(3), 191–204.</li>
+            <li>Qaseem A, et al. (2016). Management of chronic insomnia disorder in adults: a clinical practice guideline from the American College of Physicians. <i>Annals of Internal Medicine</i>, 165(2), 125–133.</li>
+            <li>Carney CE, et al. (2012). The consensus sleep diary: standardizing prospective sleep self-monitoring. <i>Sleep</i>, 35(2), 287–302.</li>
+            <li>Spielman AJ, Saskin P, Thorpy MJ. (1987). Treatment of chronic insomnia by restriction of time in bed. <i>Sleep</i>, 10(1), 45–56.</li>
+            <li>Bootzin RR. (1972). Stimulus control treatment for insomnia. <i>Proceedings of the American Psychological Association</i>, 7, 395–396.</li>
+          </ul>
+          <p class="hint">記録の項目は Carney らの「コンセンサス睡眠日誌」の中心項目にそろえています。</p>
+        </div>
+      </section>
+
+      <!-- 設定 -->
+      <section id="view-settings" class="view" aria-label="設定" hidden>
+        <div class="card">
+          <h2>起床時刻</h2>
+          <p class="hint">毎朝そろえる起床時刻。眠る時間の目安は、ここから逆算して「床に入る時刻」を出します。</p>
+          <label class="field"><span>起床時刻</span><input type="time" id="wakeTarget" /></label>
+        </div>
+
+        <div class="card">
+          <h2>はじめる前の確認</h2>
+          <p class="hint" id="safetyStatus"></p>
+          <button type="button" class="ghost-btn" id="redoSafety">確認をやり直す</button>
+          <button type="button" class="ghost-btn" id="resetPlan">眠る時間の目安をリセット</button>
+        </div>
+
+        <div class="card">
+          <h2>バックアップ</h2>
+          <p class="hint">記録はこの端末のブラウザの中だけにあります。機種変更・ブラウザのデータ削除で消えるので、ときどき書き出してください。iPhone はホーム画面に追加すると消えにくくなります。</p>
+          <div class="btn-row">
+            <button type="button" class="primary-btn" id="exportJson">全データを書き出す（JSON）</button>
+            <button type="button" class="ghost-btn" id="exportCsv">表計算用（CSV）</button>
+          </div>
+          <label class="file-btn">書き出したファイルを読み込む<input type="file" id="importJson" accept="application/json,.json" /></label>
+          <p class="hint">読み込みは合流です。同じ日付の記録は、ファイルの内容で置き換えます。</p>
+        </div>
+
+        <div class="card danger-zone">
+          <h2>すべて削除</h2>
+          <p class="hint">この端末の記録と設定を消します。元に戻せません。</p>
+          <button type="button" class="danger-btn" id="wipeAll">すべて削除する</button>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

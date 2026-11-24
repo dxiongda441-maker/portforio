@@ -108,6 +108,7 @@ GitHub Pagesへ公開されます。手動の操作は不要です。
 | セキュリティ・クエスト | 情報セキュリティの学習RPG（18章） | `projects/security-quest/` |
 | 心理学クエスト | 心理学の学習RPG（18章） | `projects/psychology-quest/` |
 | 統計クエスト | 統計学の学習RPG（18章） | `projects/stats-quest/` |
+| ねむり日誌 | 睡眠日誌（CBT-I）のセルフケアPWA（端末内保存） | `projects/sleep-diary/` |
 
 ## 設計上の判断
 

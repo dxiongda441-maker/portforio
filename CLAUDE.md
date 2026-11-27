@@ -17,6 +17,7 @@
 | この記憶の仕組み自体の使い方 | `docs/memory-guide.md` |
 | Obsidian Vault との連携 | `docs/obsidian/SETUP.md` |
 | どのチャットで何を作ったか・未取り込みのブランチ | `docs/chats.md` |
+| AI 共通の前提ファイル（D:\AI-Share） | `docs/ai-share/README.md` |
 
 > **全部読まないこと。** 必要な 1〜2 ファイルだけ開く。無関係なファイルを読むとコンテキストを浪費して精度が落ちる。
 

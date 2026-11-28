@@ -43,6 +43,26 @@
     ["MCV", "fL"], ["MCH", "pg"], ["MCHC", "g/dL"], ["血小板数", "×10⁴/μL"],
     ["好中球", "%"], ["リンパ球", "%"], ["単球", "%"], ["好酸球", "%"], ["好塩基球", "%"],
   ];
+  // お手本と比べる：画像の種類（自分の写真の SLOTS と対応させる）と、変えられる項目だけのチェック
+  const MODEL_KINDS = [...SLOTS.map((s) => ({ id: s.id, label: s.label })), { id: "style", label: "全身・服" }, { id: "other", label: "その他" }];
+  const MODEL_CHECKS = [
+    { id: "hair-cut", label: "髪型（長さ・分け目）" },
+    { id: "hair-color", label: "髪色" },
+    { id: "brows", label: "眉" },
+    { id: "beard", label: "ひげ・剃り跡" },
+    { id: "skin", label: "肌（赤み・ニキビ・毛穴）" },
+    { id: "eyes", label: "目元（白目・クマ）" },
+    { id: "upper-body", label: "体（肩・胸・腕）" },
+    { id: "leanness", label: "体の絞れ具合" },
+    { id: "style", label: "服・アクセサリー" },
+    { id: "pose", label: "表情・姿勢" },
+  ];
+  const MARKS = [
+    { v: "near", label: "○ 近い" },
+    { v: "some", label: "△ 少し差" },
+    { v: "far", label: "× 差が大きい" },
+  ];
+  const newModel = () => ({ name: "", notes: "", checks: {}, images: [] });
   const DEFAULT_PROFILE = {
     height: null,
     targetWeight: null,
@@ -65,6 +85,9 @@
     photoFilter: "all",
     cmpMode: "side",
     urls: new Map(),
+    model: newModel(),
+    modelUrls: new Map(),
+    mc: { model: null, mine: null, mode: "side", flip: false, opacity: 50, scale: 100, x: 0, y: 0 },
   };
   let db = null;
 
@@ -120,13 +143,15 @@
   }
 
   async function loadAll() {
-    const [entries, photos, profile, labs] = await Promise.all([
+    const [entries, photos, profile, labs, model] = await Promise.all([
       run("entries", "readonly", (s) => s.getAll()),
       run("photos", "readonly", (s) => s.getAll()),
       run("meta", "readonly", (s) => s.get("profile")),
       run("meta", "readonly", (s) => s.get("labs")),
+      run("meta", "readonly", (s) => s.get("model")),
     ]);
     state.labs = Array.isArray(labs) ? labs : [];
+    state.model = { ...newModel(), ...(model || {}) };
     state.entries = new Map(entries.map((e) => [e.date, e]));
     state.photos = photos;
     state.profile = { ...DEFAULT_PROFILE, ...(profile || {}) };
@@ -148,6 +173,10 @@
 
   async function saveLabs() {
     await run("meta", "readwrite", (s) => s.put(state.labs, "labs"));
+  }
+
+  async function saveModel() {
+    await run("meta", "readwrite", (s) => s.put(state.model, "model"));
   }
 
   async function savePhoto(date, slot, blob, width, height) {
@@ -524,6 +553,7 @@
     if (state.view === "trends") renderTrends();
     if (state.view === "photos") renderPhotos();
     if (state.view === "compare") renderCompare();
+    if (state.view === "model") renderModel();
     if (state.view === "settings") renderSettings();
   }
 
@@ -1011,6 +1041,288 @@
     }
   }
 
+  /* ---------- お手本と比べる ---------- */
+  const kindLabel = (id) => (MODEL_KINDS.find((k) => k.id === id) || {}).label || "その他";
+  const slotLabel = (id) => (SLOTS.find((s) => s.id === id) || {}).label || "";
+
+  function modelUrl(img) {
+    if (!state.modelUrls.has(img.id)) state.modelUrls.set(img.id, URL.createObjectURL(img.blob));
+    return state.modelUrls.get(img.id);
+  }
+
+  function clearModelUrls() {
+    state.modelUrls.forEach((u) => URL.revokeObjectURL(u));
+    state.modelUrls.clear();
+  }
+
+  async function addModelImage(blob, width, height) {
+    const img = { id: `m${Date.now()}${Math.random().toString(36).slice(2, 6)}`, kind: "face-front", blob, width, height, createdAt: Date.now() };
+    state.model.images.push(img);
+    state.mc.model = img.id;
+    await saveModel();
+    requestPersist();
+  }
+
+  async function removeModelImage(id) {
+    state.model.images = state.model.images.filter((i) => i.id !== id);
+    const url = state.modelUrls.get(id);
+    if (url) { URL.revokeObjectURL(url); state.modelUrls.delete(id); }
+    if (state.mc.model === id) state.mc.model = null;
+    await saveModel();
+  }
+
+  function renderModel() {
+    const f = $("#modelForm");
+    if (document.activeElement !== f.elements.name) f.elements.name.value = state.model.name || "";
+    if (document.activeElement !== f.elements.notes) f.elements.notes.value = state.model.notes || "";
+    renderModelGrid();
+    renderModelCompare();
+    renderChecks();
+    $("#modelConsult").value = modelConsultText();
+  }
+
+  function renderModelGrid() {
+    const grid = $("#modelGrid");
+    grid.replaceChildren();
+    if (!state.model.images.length) {
+      grid.append(el("p", { class: "empty", text: "まだ画像がありません。" }));
+      return;
+    }
+    state.model.images.forEach((img, i) => {
+      const sel = el("select", { "aria-label": `${i + 1}枚目の種類` }, MODEL_KINDS.map((k) => el("option", { value: k.id, text: k.label })));
+      sel.value = img.kind;
+      sel.addEventListener("change", async () => { img.kind = sel.value; await saveModel(); renderModelCompare(); $("#modelConsult").value = modelConsultText(); });
+      const del = el("button", { type: "button", class: "link-btn dark", text: "削除" });
+      del.addEventListener("click", async () => {
+        if (!window.confirm("このお手本の画像を削除しますか？")) return;
+        await removeModelImage(img.id);
+        renderModel();
+      });
+      grid.append(el("figure", { class: "model-item" }, [
+        el("img", { src: modelUrl(img), alt: `お手本の画像 ${i + 1}`, loading: "lazy", decoding: "async" }),
+        el("figcaption", {}, [sel, del]),
+      ]));
+    });
+  }
+
+  // 自分の写真は新しい順。お手本の種類と同じ種類の最新を初期値にする
+  function pickDefaultMine(kind) {
+    const sorted = [...state.photos].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt));
+    return (sorted.find((p) => p.slot === kind) || (kind === "style" ? sorted.find((p) => p.slot === "body-front") : null) || sorted[0] || null);
+  }
+
+  function renderModelCompare() {
+    const imgs = state.model.images;
+    const mSel = $("#mcModel");
+    const pSel = $("#mcMine");
+    if (!imgs.some((i) => i.id === state.mc.model)) state.mc.model = imgs.length ? imgs[imgs.length - 1].id : null;
+    mSel.replaceChildren(...imgs.map((img, i) => el("option", { value: img.id, text: `${i + 1}. ${kindLabel(img.kind)}` })));
+    mSel.value = state.mc.model || "";
+    const model = imgs.find((i) => i.id === state.mc.model) || null;
+
+    const photos = [...state.photos].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    if (!photos.some((p) => p.id === state.mc.mine)) {
+      const def = pickDefaultMine(model ? model.kind : "face-front");
+      state.mc.mine = def ? def.id : null;
+    }
+    pSel.replaceChildren(...photos.map((p) => el("option", { value: String(p.id), text: `${fmtShort(p.date)} ${slotLabel(p.slot)}` })));
+    pSel.value = state.mc.mine === null ? "" : String(state.mc.mine);
+    const mine = photos.find((p) => p.id === state.mc.mine) || null;
+
+    $$("[data-mc]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mc === state.mc.mode)));
+    $("#mcFlip").checked = state.mc.flip;
+    const stage = $("#mcStage");
+    stage.replaceChildren();
+    stage.className = "mc-stage";
+    $("#mcAdjust").hidden = true;
+    $("#mcSave").disabled = !(model && mine);
+    if (!model || !mine) {
+      stage.append(el("p", { class: "empty", text: !model ? "お手本の画像を選ぶと、ここに自分の写真と並びます。" : "自分の写真がまだありません。「今日」タブで撮ってください。" }));
+      return;
+    }
+    const mineImg = el("img", { src: photoUrl(mine), alt: `自分の写真 ${fmtDate(mine.date)}`, class: state.mc.flip ? "flip" : "" });
+    const modelImg = el("img", { src: modelUrl(model), alt: "お手本の画像" });
+    if (state.mc.mode === "side") {
+      stage.append(
+        el("figure", {}, [modelImg, el("figcaption", { text: `お手本（${kindLabel(model.kind)}）` })]),
+        el("figure", {}, [mineImg, el("figcaption", { text: `自分 ${fmtDate(mine.date)}` })]),
+      );
+      return;
+    }
+    stage.classList.add("overlay-mode");
+    modelImg.classList.add("mc-top");
+    stage.append(mineImg, modelImg);
+    $("#mcAdjust").hidden = false;
+    applyOverlay();
+  }
+
+  function applyOverlay() {
+    const top = $("#mcStage .mc-top");
+    if (!top) return;
+    const { opacity, scale, x, y } = state.mc;
+    top.style.opacity = String(opacity / 100);
+    top.style.transform = `translate(calc(-50% + ${x}%), calc(-50% + ${y}%)) scale(${scale / 100})`;
+  }
+
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  // Claude に1枚で送れるように、左にお手本・右に自分を同じ高さで並べた JPEG を作る
+  async function saveSideBySide() {
+    const model = state.model.images.find((i) => i.id === state.mc.model);
+    const mine = state.photos.find((p) => p.id === state.mc.mine);
+    if (!model || !mine) return;
+    const [a, b] = await Promise.all([loadImage(modelUrl(model)), loadImage(photoUrl(mine))]);
+    const H = 1000, gap = 16, band = 56;
+    const wa = Math.round((a.naturalWidth / a.naturalHeight) * H);
+    const wb = Math.round((b.naturalWidth / b.naturalHeight) * H);
+    const canvas = document.createElement("canvas");
+    canvas.width = wa + gap + wb;
+    canvas.height = H + band;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#1e1c19";
+    ctx.font = "bold 28px system-ui, sans-serif";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`お手本（${kindLabel(model.kind)}）`, 12, band / 2);
+    ctx.fillText(`自分 ${fmtDate(mine.date)}`, wa + gap + 12, band / 2);
+    ctx.drawImage(a, 0, band, wa, H);
+    ctx.save();
+    if (state.mc.flip) { ctx.translate(wa + gap + wb, 0); ctx.scale(-1, 1); ctx.drawImage(b, 0, band, wb, H); } else ctx.drawImage(b, wa + gap, band, wb, H);
+    ctx.restore();
+    const blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg", 0.9));
+    if (!blob) { toast("画像を作れませんでした"); return; }
+    download(`otehon-hikaku-${todayStr()}.jpg`, blob);
+    toast("保存しました。この画像を Claude に添付してください");
+  }
+
+  function renderChecks() {
+    const list = $("#checkList");
+    if (!list.children.length) {
+      MODEL_CHECKS.forEach((c) => {
+        list.append(el("fieldset", { class: "check-item chips" }, [
+          el("legend", { text: c.label }),
+          ...MARKS.map((m) => el("label", { class: "chip" }, [el("input", { type: "radio", name: `chk-${c.id}`, value: m.v }), el("span", { text: m.label })])),
+          el("input", { type: "text", name: `memo-${c.id}`, class: "check-memo", maxlength: "80", placeholder: "メモ（例: 横と襟足がまだ短い）", "aria-label": `${c.label}のメモ` }),
+        ]));
+      });
+    }
+    const f = $("#modelChecks");
+    MODEL_CHECKS.forEach((c) => {
+      const v = state.model.checks[c.id] || {};
+      $$(`input[name="chk-${c.id}"]`, f).forEach((r) => { r.checked = r.value === v.mark; });
+      const memo = f.elements[`memo-${c.id}`];
+      if (document.activeElement !== memo) memo.value = v.memo || "";
+    });
+  }
+
+  function onChecksInput() {
+    const f = $("#modelChecks");
+    const checks = {};
+    MODEL_CHECKS.forEach((c) => {
+      const r = $(`input[name="chk-${c.id}"]:checked`, f);
+      const memo = f.elements[`memo-${c.id}`].value.trim();
+      if (r || memo) checks[c.id] = { mark: r ? r.value : null, memo };
+    });
+    state.model.checks = checks;
+    $("#modelConsult").value = modelConsultText();
+    clearTimeout(onChecksInput.t);
+    onChecksInput.t = setTimeout(() => saveModel(), 400);
+  }
+
+  function onModelFormInput() {
+    const f = $("#modelForm");
+    state.model.name = f.elements.name.value.trim();
+    state.model.notes = f.elements.notes.value;
+    $("#modelConsult").value = modelConsultText();
+    clearTimeout(onModelFormInput.t);
+    onModelFormInput.t = setTimeout(() => saveModel().then(() => toast("お手本を保存しました")), 600);
+  }
+
+  function modelConsultText() {
+    const m = state.model;
+    const st = computeStats();
+    const p = state.profile;
+    const lastSkin = [...state.entries.values()].filter((e) => isNum(e.skin)).sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+    const model = m.images.find((i) => i.id === state.mc.model);
+    const mine = state.photos.find((x) => x.id === state.mc.mine);
+    const lines = [];
+    lines.push(`${m.name ? `「${m.name}」` : "お手本の人物"}に外見を近づけたいです。添付の画像（左：お手本、右：自分）と下のメモをもとに、差が大きくて効果の高い順に改善点を3つ挙げてください。それぞれ、具体的なやり方・効果が出るまでの期間の目安・お金がかかるかどうかを添えてください。`);
+    lines.push("");
+    lines.push("決まり：");
+    lines.push("- 変えられるもの（髪・眉・ひげ・肌・体・服・表情・姿勢）だけを比べる。顔立ちや骨格は比べない");
+    lines.push("- お手本が広告写真なら、メイクと照明の差は数えない");
+    lines.push("- 写真から分からないことは、分からないと書く");
+    lines.push("");
+    lines.push(`【お手本】${m.name || "（名前なし）"}`);
+    lines.push(m.notes && m.notes.trim() ? m.notes.trim() : "（メモなし）");
+    lines.push("");
+    lines.push("【自分の今】");
+    lines.push(`身長: ${isNum(p.height) ? `${p.height}cm` : "未設定"} / ならした体重: ${fmt(st.trend)}kg${st.body ? ` / 体脂肪率: ${fmt(st.body.bodyFat)}%（${st.body.date}）` : ""}`);
+    if (lastSkin) lines.push(`肌の点数（${lastSkin.date}）: ${lastSkin.skin}/5${(lastSkin.skinTags || []).length ? ` / 気になる所: ${lastSkin.skinTags.join("・")}` : ""}`);
+    const checked = MODEL_CHECKS.filter((c) => m.checks[c.id]);
+    if (checked.length) {
+      lines.push("");
+      lines.push("【自分でつけたチェック】");
+      checked.forEach((c) => {
+        const v = m.checks[c.id];
+        const mark = (MARKS.find((x) => x.v === v.mark) || {}).label || "未評価";
+        lines.push(`- ${c.label}: ${mark}${v.memo ? `（${v.memo}）` : ""}`);
+      });
+    }
+    if (model && mine) {
+      lines.push("");
+      lines.push(`【比べた画像】お手本: ${kindLabel(model.kind)} / 自分: ${mine.date} ${slotLabel(mine.slot)}`);
+    }
+    return lines.join("\n");
+  }
+
+  /* 動画から1枚を切り出す */
+  let frameUrl = null;
+  function openFramePicker(file) {
+    frameUrl = URL.createObjectURL(file);
+    const v = $("#fpVideo");
+    v.src = frameUrl;
+    $("#framePicker").hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeFramePicker() {
+    const v = $("#fpVideo");
+    v.pause();
+    v.removeAttribute("src");
+    v.load();
+    if (frameUrl) { URL.revokeObjectURL(frameUrl); frameUrl = null; }
+    $("#framePicker").hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  async function grabFrame() {
+    const v = $("#fpVideo");
+    const vw = v.videoWidth;
+    const vh = v.videoHeight;
+    if (!vw || !vh) { toast("動画を読み込めませんでした"); return; }
+    v.pause();
+    const scale = Math.min(1, PHOTO_MAX / Math.max(vw, vh));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(vw * scale);
+    canvas.height = Math.round(vh * scale);
+    canvas.getContext("2d").drawImage(v, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg", PHOTO_QUALITY));
+    if (!blob) { toast("切り出せませんでした"); return; }
+    await addModelImage(blob, canvas.width, canvas.height);
+    closeFramePicker();
+    toast("お手本の画像に追加しました");
+    renderModel();
+  }
+
   /* ---------- 設定 ---------- */
   function renderSettings() {
     const f = $("#profileForm");
@@ -1092,7 +1404,12 @@
     for (const p of state.photos) {
       photos.push({ date: p.date, slot: p.slot, width: p.width, height: p.height, createdAt: p.createdAt, dataUrl: await blobToDataUrl(p.blob) });
     }
-    const data = { app: "glow-log", version: 1, exportedAt: new Date().toISOString(), profile: state.profile, labs: state.labs, entries: [...state.entries.values()], photos };
+    const modelImages = [];
+    for (const i of state.model.images) {
+      modelImages.push({ id: i.id, kind: i.kind, width: i.width, height: i.height, createdAt: i.createdAt, dataUrl: await blobToDataUrl(i.blob) });
+    }
+    const model = { name: state.model.name, notes: state.model.notes, checks: state.model.checks, images: modelImages };
+    const data = { app: "glow-log", version: 1, exportedAt: new Date().toISOString(), profile: state.profile, labs: state.labs, entries: [...state.entries.values()], photos, model };
     download(`glow-log-${todayStr()}.json`, new Blob([JSON.stringify(data)], { type: "application/json" }));
   }
 
@@ -1115,7 +1432,9 @@
     try { data = JSON.parse(await file.text()); } catch (err) { toast("JSONとして読めませんでした"); return; }
     if (!data || data.app !== "glow-log" || !Array.isArray(data.entries)) { toast("Glow Log の書き出しファイルではありません"); return; }
     const labs = Array.isArray(data.labs) ? data.labs : [];
-    if (!window.confirm(`記録 ${data.entries.length}日分・写真 ${(data.photos || []).length}枚・血液検査 ${labs.length}件を読み込みます。同じ日付の記録は、ファイルに値がある項目だけ上書きします。`)) return;
+    const inModel = data.model && typeof data.model === "object" ? data.model : null;
+    const inModelImages = inModel && Array.isArray(inModel.images) ? inModel.images : [];
+    if (!window.confirm(`記録 ${data.entries.length}日分・写真 ${(data.photos || []).length}枚・血液検査 ${labs.length}件${inModelImages.length ? `・お手本の画像 ${inModelImages.length}枚` : ""}を読み込みます。同じ日付の記録は、ファイルに値がある項目だけ上書きします。`)) return;
     const hasValue = (v) => v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && !v.length);
     for (const e of data.entries) {
       if (!e || !/^\d{4}-\d{2}-\d{2}$/.test(e.date)) continue;
@@ -1139,6 +1458,18 @@
       state.profile = { ...DEFAULT_PROFILE, ...state.profile, ...incoming };
       await saveProfile();
     }
+    if (inModel) {
+      // お手本も項目単位でマージ。画像は id が端末側に無いものだけ足す
+      const m = state.model;
+      if (typeof inModel.name === "string" && inModel.name) m.name = inModel.name;
+      if (typeof inModel.notes === "string" && inModel.notes) m.notes = inModel.notes;
+      if (inModel.checks && typeof inModel.checks === "object") m.checks = { ...m.checks, ...inModel.checks };
+      for (const i of inModelImages) {
+        if (!i || !i.id || m.images.some((x) => x.id === i.id) || !/^data:image\//.test(i.dataUrl || "")) continue;
+        m.images.push({ id: String(i.id), kind: MODEL_KINDS.some((k) => k.id === i.kind) ? i.kind : "other", blob: dataUrlToBlob(i.dataUrl), width: i.width, height: i.height, createdAt: i.createdAt || Date.now() });
+      }
+      await saveModel();
+    }
     toast("読み込みました");
     render();
   }
@@ -1153,6 +1484,10 @@
     state.photos = [];
     state.profile = { ...DEFAULT_PROFILE };
     state.labs = [];
+    clearModelUrls();
+    state.model = newModel();
+    state.mc.model = null;
+    state.mc.mine = null;
     toast("すべて削除しました");
     render();
   }
@@ -1322,6 +1657,56 @@
     $("#cmpB").addEventListener("change", renderCompare);
     $$("[data-cmp]").forEach((b) => b.addEventListener("click", () => { state.cmpMode = b.dataset.cmp; renderCompare(); }));
 
+    $("#modelForm").addEventListener("input", onModelFormInput);
+    $("#modelForm").addEventListener("submit", (e) => e.preventDefault());
+    $("#modelChecks").addEventListener("input", onChecksInput);
+    $("#modelChecks").addEventListener("change", onChecksInput);
+    $("#modelChecks").addEventListener("submit", (e) => e.preventDefault());
+    $("#modelNotesFile").addEventListener("change", async (e) => {
+      const f = e.target.files[0];
+      e.target.value = "";
+      if (!f) return;
+      if (f.size > 200 * 1024) { toast("メモのファイルが大きすぎます（200KBまで）"); return; }
+      $("#modelForm").elements.notes.value = (await f.text()).trim();
+      onModelFormInput();
+    });
+    $("#modelImageFile").addEventListener("change", async (e) => {
+      const files = [...e.target.files];
+      e.target.value = "";
+      let added = 0;
+      for (const f of files) {
+        try { const { blob, width, height } = await fileToJpeg(f); await addModelImage(blob, width, height); added += 1; } catch (err) { /* 読めない画像は飛ばす */ }
+      }
+      toast(added ? `お手本の画像を${added}枚追加しました` : "この画像は読み込めませんでした");
+      renderModel();
+    });
+    $("#modelVideoFile").addEventListener("change", (e) => {
+      const f = e.target.files[0];
+      e.target.value = "";
+      if (f) openFramePicker(f);
+    });
+    $("#fpClose").addEventListener("click", closeFramePicker);
+    $("#fpGrab").addEventListener("click", grabFrame);
+    $("#mcModel").addEventListener("change", (e) => {
+      state.mc.model = e.target.value;
+      const img = state.model.images.find((i) => i.id === state.mc.model);
+      const def = img ? pickDefaultMine(img.kind) : null;
+      if (def) state.mc.mine = def.id;
+      renderModelCompare();
+      $("#modelConsult").value = modelConsultText();
+    });
+    $("#mcMine").addEventListener("change", (e) => { state.mc.mine = Number(e.target.value); renderModelCompare(); $("#modelConsult").value = modelConsultText(); });
+    $$("[data-mc]").forEach((b) => b.addEventListener("click", () => { state.mc.mode = b.dataset.mc; renderModelCompare(); }));
+    $("#mcFlip").addEventListener("change", (e) => { state.mc.flip = e.target.checked; renderModelCompare(); });
+    [["#mcOpacity", "opacity"], ["#mcScale", "scale"], ["#mcX", "x"], ["#mcY", "y"]].forEach(([sel, key]) => {
+      $(sel).addEventListener("input", (e) => { state.mc[key] = Number(e.target.value); applyOverlay(); });
+    });
+    $("#mcSave").addEventListener("click", () => saveSideBySide().catch(() => toast("画像を作れませんでした")));
+    $("#copyModelConsult").addEventListener("click", async () => {
+      const text = $("#modelConsult").value;
+      try { await navigator.clipboard.writeText(text); toast("コピーしました"); } catch (err) { $("#modelConsult").select(); toast("選択しました。長押しでコピーしてください"); }
+    });
+
     $("#profileForm").addEventListener("input", onProfileInput);
     $("#profileForm").addEventListener("change", onProfileInput);
     $("#profileForm").addEventListener("submit", (e) => e.preventDefault());
@@ -1368,6 +1753,7 @@
       if (e.key !== "Escape") return;
       if (!$("#camera").hidden) closeCamera();
       if (!$("#lightbox").hidden) closeLightbox();
+      if (!$("#framePicker").hidden) closeFramePicker();
     });
     document.addEventListener("visibilitychange", () => {
       // 日付をまたいでアプリを開き直したとき、「今日」を更新する

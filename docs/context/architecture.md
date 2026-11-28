@@ -121,7 +121,7 @@ git show 76ace1e:main.js
 - `contracts` は `data.js` にデータを分離。
 - 各作品フォルダに `README.md`（概要・ファイルの役割・編集時の注意）がある。どのチャットで作ったかは `docs/chats.md`。
 - `cafe-lp` は架空のカフェの LP。`index.html` + `styles.css` のみで JS なし。LP の型との対応は同フォルダの `README.md`。
-- `glow-log` は体重・写真・肌の記録 PWA。写真を含む全データを IndexedDB（DB名 `glow-log`）に置き、外部へ送らない。設計図は同フォルダの `README.md`、経緯は `docs/decisions/0010`。
+- `glow-log` は体重・写真・肌の記録 PWA。写真を含む全データを IndexedDB（DB名 `glow-log`）に置き、外部へ送らない。設計図は同フォルダの `README.md`、経緯は `docs/decisions/0010`。「お手本」タブ（目標の人物と並べて比べる）は `0012`。
 - `maru-log` は仕事・副業・趣味・学びの習慣を毎日 ○△× で付ける記録帳 PWA。記録は IndexedDB（DB名 `maru-log`）だけに置き外部へ送らない。項目は設定で増減でき、初期値は `app.js` の `DEFAULT_ITEMS`。経緯は `docs/decisions/0011`。
 - `money-anime` はアプリではなくケーススタディ（`index.html` + `cover.jpg` のみ）。
 - `security-quest` は `app.js`（エンジン）＋ `data/acts.js` ＋ `data/ch01.js`〜`ch18.js`（章ごとのデータ）。

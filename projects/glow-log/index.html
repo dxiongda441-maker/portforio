@@ -47,6 +47,7 @@
       <button class="tab" type="button" data-view="trends">推移と評価</button>
       <button class="tab" type="button" data-view="photos">写真</button>
       <button class="tab" type="button" data-view="compare">比較</button>
+      <button class="tab" type="button" data-view="model">お手本</button>
       <button class="tab" type="button" data-view="settings">設定</button>
     </nav>
 
@@ -264,6 +265,66 @@
         </div>
       </section>
 
+      <!-- お手本 -->
+      <section id="view-model" class="view" aria-label="お手本と比べる" hidden>
+        <form class="card" id="modelForm" autocomplete="off">
+          <h2>お手本</h2>
+          <p class="hint">近づきたい人の特徴をメモしておきます。調べたプロフィール（.md / .txt）を読み込むか、貼り付けてください。</p>
+          <label class="field"><span>名前</span><input name="name" type="text" maxlength="40" placeholder="例: 平野紫耀" /></label>
+          <label class="field model-notes"><span>特徴のメモ</span><textarea name="notes" rows="6" placeholder="例: 身長171cm。黒髪のセンター分け。眉はまっすぐで太め。広告写真はメイクあり"></textarea></label>
+          <div class="btn-row">
+            <label class="ghost-btn file-btn">メモをファイルから読み込む<input type="file" id="modelNotesFile" accept=".md,.txt,text/plain,text/markdown" hidden /></label>
+          </div>
+        </form>
+
+        <div class="card">
+          <h2>お手本の画像</h2>
+          <p class="hint">インスタやネットの画像は、スクリーンショットか保存したものを選びます。動画は止めた場面を1枚にできます。<strong>画像はこの端末の中だけに置き、どこにも送りません。</strong>他の人に配らないでください。</p>
+          <div class="btn-row">
+            <label class="primary-btn file-btn">画像を選ぶ<input type="file" id="modelImageFile" accept="image/*" multiple hidden /></label>
+            <label class="ghost-btn file-btn">動画から切り出す<input type="file" id="modelVideoFile" accept="video/*" hidden /></label>
+          </div>
+          <div class="model-grid" id="modelGrid"></div>
+        </div>
+
+        <div class="card">
+          <h2>並べて比べる</h2>
+          <div class="field-row">
+            <label class="field"><span>お手本の画像</span><select id="mcModel"></select></label>
+            <label class="field"><span>自分の写真</span><select id="mcMine"></select></label>
+          </div>
+          <div class="card-head">
+            <div class="seg" role="group" aria-label="比べ方">
+              <button type="button" data-mc="side" aria-pressed="true">並べる</button>
+              <button type="button" data-mc="overlay" aria-pressed="false">重ねる</button>
+            </div>
+            <label class="check-inline"><input type="checkbox" id="mcFlip" /> 自分の写真を左右反転</label>
+          </div>
+          <div id="mcStage" class="mc-stage"></div>
+          <div class="mc-adjust" id="mcAdjust" hidden>
+            <label>お手本の濃さ<input type="range" id="mcOpacity" min="0" max="100" value="50" /></label>
+            <label>大きさ<input type="range" id="mcScale" min="40" max="250" value="100" /></label>
+            <label>左右<input type="range" id="mcX" min="-50" max="50" value="0" /></label>
+            <label>上下<input type="range" id="mcY" min="-50" max="50" value="0" /></label>
+            <p class="hint">目の位置が重なるように、大きさと位置を合わせます。</p>
+          </div>
+          <div class="btn-row"><button type="button" class="ghost-btn" id="mcSave">並べた画像を保存（Claude に送る用）</button></div>
+        </div>
+
+        <form class="card" id="modelChecks" autocomplete="off">
+          <h2>項目ごとのチェック</h2>
+          <p class="hint">変えられるところだけを比べます。顔立ちや骨格は比べません。お手本が広告写真なら、メイクと照明の差は数えません。</p>
+          <div class="check-list" id="checkList"></div>
+        </form>
+
+        <div class="card">
+          <h2>Claude に改善点を聞く</h2>
+          <p class="hint">お手本のメモ・自分の記録・チェックを文章にまとめます。コピーして、上で保存した「並べた画像」と一緒に Claude に送ってください（画像は自動では送られません）。</p>
+          <textarea id="modelConsult" class="consult" rows="8" readonly></textarea>
+          <div class="btn-row"><button type="button" class="primary-btn" id="copyModelConsult">コピーする</button></div>
+        </div>
+      </section>
+
       <!-- 設定 -->
       <section id="view-settings" class="view" aria-label="設定" hidden>
         <form class="card" id="profileForm" autocomplete="off">
@@ -346,6 +407,16 @@
       </div>
       <img id="lbImg" alt="" />
       <div class="btn-row center"><button type="button" class="danger-btn" id="lbDelete">この写真を削除</button></div>
+    </div>
+
+    <!-- 動画から1枚を切り出す -->
+    <div class="overlay frame-picker" id="framePicker" role="dialog" aria-modal="true" aria-labelledby="fpTitle" hidden>
+      <div class="cam-top">
+        <p id="fpTitle" class="cam-title">使いたい場面で止める</p>
+        <button type="button" class="icon-btn light" id="fpClose" aria-label="閉じる">×</button>
+      </div>
+      <video id="fpVideo" controls playsinline muted></video>
+      <div class="btn-row center"><button type="button" class="primary-btn" id="fpGrab">この場面を使う</button></div>
     </div>
 
     <input type="file" id="fileInput" accept="image/*" hidden />

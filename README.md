@@ -108,6 +108,7 @@ GitHub Pagesへ公開されます。手動の操作は不要です。
 | セキュリティ・クエスト | 情報セキュリティの学習RPG（18章） | `projects/security-quest/` |
 | 心理学クエスト | 心理学の学習RPG（18章） | `projects/psychology-quest/` |
 | 統計クエスト | 統計学の学習RPG（18章） | `projects/stats-quest/` |
+| 3年目の分かれ道 | 若手の「実績がない」を解くキャリア・シミュレーション（12週） | `projects/sannen-quest/` |
 
 ## 設計上の判断
 

@@ -1,6 +1,6 @@
 # 構成の実態
 
-> 最終確認: 2026-11-15 / 確認者: Claude
+> 最終確認: 2026-11-28 / 確認者: Claude
 > ここは「今どうなっているか」を書く場所。「なぜそうしたか」は `docs/decisions/` に書く。
 
 ## 全体像
@@ -117,6 +117,7 @@ git show 76ace1e:main.js
 | `maru-log` | Maru Log（○△× 記録帳） | PWA・IndexedDB・CSP で外部通信禁止 | `maru-log-` |
 | `psychology-quest` | 心理学クエスト | 静的 | — |
 | `stats-quest` | 統計クエスト | 静的 | — |
+| `sannen-quest` | 3年目の分かれ道 | 静的・CSP で外部通信禁止 | — |
 
 - `country-quiz` が最大規模。`assets/flags/` に SVG 国旗 195 個、`data/countries.json` を同梱。
   データ仕様は `projects/country-quiz/DATA_FORMAT.md` に独立して記載。
@@ -152,6 +153,10 @@ git show 76ace1e:main.js
 - `stats-quest` は `security-quest` と同じエンジン・同じデータ形式の統計学版（全18章）。`app.js` はコピーで、分野固有の部分
   （`STORAGE_KEY = "stats-quest-v1"`・`SAVE_PREFIX = "ST1."`・称号・文言・参考リンク）だけ書き換えている。
   **エンジンの不具合を直すときは3作品（security-quest / psychology-quest / stats-quest）の `app.js` をすべて直すこと。** 検査は `node tools/check-learning-game.js stats-quest`。経緯は `docs/decisions/0013`。
+- `sannen-quest` は入社3年目の12週間を過ごす選択型シミュレーション（学習ゲームのエンジンとは別物）。`app.js` 1本に、
+  出来事（`EVENTS`、1週1件）・行動（`ACTIONS`）・実績の書き方の選択肢（`SEEDS`）・エンディング判定（`judge()`）が入っている。
+  判定は「★3（工夫＋Before→After の数字）の実績の件数」が中心。保存は localStorage の `sannen-quest-v1`（進行中のゲームと、実績メーカーで作った文）。
+  DOM はすべて `textContent` で組み立て、`innerHTML` は使わない。経緯は `docs/decisions/0015`。
 
 ### 全作品ページに入っている共通要素
 
